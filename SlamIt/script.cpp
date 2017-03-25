@@ -3,11 +3,25 @@
 #include <sstream>
 #include <iomanip>
 #include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
+#include "../../GTAVManualTransmission/Gears/Util/Util.hpp"
+#include "../../GTAVManualTransmission/Gears/Util/simpleini/SimpleIni.h"
+#include "controls.h"
+#include "presets.h"
+#include "settings.h"
 
-enum ControlType {
-	Button = 0,
-	SIZE_OF_ARRAY
+const std::vector<std::string> menuMainOptions = {
+	"Car options",
+	"Save car",
+	"Save preset",
+	"Load preset",
+	"Auto apply cars",
+	"Disable mod"
 };
+
+const std::string settingsFolder = "./VStancer/";
+const std::string settingsFile = settingsFolder+"Settings.ini";
+const std::string savedCarsFile = settingsFolder+"SavedCars.xml";
+const std::string presetsFile = settingsFolder +"Presets.xml";
 
 Vehicle vehicle;
 Vehicle prevVehicle;
@@ -15,80 +29,51 @@ VehicleExtensions ext;
 Player player;
 Ped playerPed;
 
-int controls[SIZE_OF_ARRAY];
-bool controlCurr[SIZE_OF_ARRAY];
-bool controlPrev[SIZE_OF_ARRAY];
+std::vector<Preset> presets;
+std::vector<Preset> saved;
 
-int slamLevel = 0;
-int prevNotification = 0;
+Controls controls;
+Settings settings(settingsFile);
 
-void readSettings() {
-	char kbKeyBuffer[24];
-	GetPrivateProfileStringA("MAIN", "SwitchSlam", "DOWN", kbKeyBuffer, 24, "./SlamIt.ini");
-	controls[Button] = str2key(kbKeyBuffer);
-}
+void ultraSlam(Vehicle handle, float camberFront, float camberRear, double distanceFront, double distanceRear) {
+	auto numWheels = ext.GetNumWheels(handle);
+	if (numWheels < 4)
+		return;
 
-bool isKeyPressed(int key) {
-	if (IsKeyDown(key))
-		return true;
-	return false;
-}
+	auto wheelPtr = ext.GetWheelsPtr(handle);  // pointer to wheel pointers
 
-bool isKeyJustPressed(int key, ControlType control) {
-	if (IsKeyDown(key))
-		controlCurr[control] = true;
-	else
-		controlCurr[control] = false;
+	auto offsetCamber = 0x008;
+	auto offsetinvCamber = 0x010;
+	auto offsetDistance = 0x02C;
+	auto offsetHeight = 0x038;
 
-	// raising edge
-	if (controlCurr[control] == true && controlPrev[control] == false) {
-		controlPrev[control] = controlCurr[control];
-		return true;
-	}
-
-	controlPrev[control] = controlCurr[control];
-	return false;
-}
-
-void showText(float x, float y, float scale, const char * text) {
-	UI::SET_TEXT_FONT(0);
-	UI::SET_TEXT_SCALE(scale, scale);
-	UI::SET_TEXT_COLOUR(255, 255, 255, 255);
-	UI::SET_TEXT_WRAP(0.0, 1.0);
-	UI::SET_TEXT_CENTRE(0);
-	UI::SET_TEXT_DROPSHADOW(0, 0, 0, 0, 0);
-	UI::SET_TEXT_EDGE(1, 0, 0, 0, 205);
-	UI::BEGIN_TEXT_COMMAND_DISPLAY_TEXT("STRING");
-	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(const_cast<char *>(text));
-	UI::END_TEXT_COMMAND_DISPLAY_TEXT(x, y);
-}
-
-void showNotification(const char * message) {
-	if (prevNotification)
-		UI::_REMOVE_NOTIFICATION(prevNotification);
-	UI::_SET_NOTIFICATION_TEXT_ENTRY("STRING");
-	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(const_cast<char *>(message));
-	prevNotification = UI::_DRAW_NOTIFICATION(false, false);
-}
-
-void slam(Vehicle vehicle, int slamLevel) {
-	if (ENTITY::DOES_ENTITY_EXIST(vehicle)){
-		switch (slamLevel) {
-		case (2) :
-			ext.SetWheelsHealth(vehicle, 0.0f);
-			break;
-		case (1) :
-			ext.SetWheelsHealth(vehicle, 400.0f);
-			break;
-		default:
-		case (0) :
-			ext.SetWheelsHealth(vehicle, 1000.0f);
-			break;
+	for (auto i = 0; i < numWheels; i++) {
+		float camber;
+		double distance;
+		if (i == 0 || i ==  1) {
+			camber = camberFront;
+			distance = distanceFront;
+		} else {
+			camber = camberRear;
+			distance = distanceRear;
 		}
+
+		float flip = i % 2 == 0 ? 1.0f : -1.0f; // cuz the wheels on the other side
+		auto wheelAddr = *reinterpret_cast<uint64_t *>(wheelPtr + 0x008 * i);
+		*reinterpret_cast<float *>(wheelAddr + offsetCamber) = camber * flip;
+		*reinterpret_cast<float *>(wheelAddr + offsetinvCamber) = -camber * flip;
+		*reinterpret_cast<double *>(wheelAddr + offsetDistance) = -distance * flip;
 	}
 }
 
-void update() {
+void update_menu() {
+	
+}
+
+void update_game() {
+	if (!settings.EnableMod())
+		return;
+
 	player = PLAYER::PLAYER_ID();
 	playerPed = PLAYER::PLAYER_PED_ID();
 
@@ -105,30 +90,31 @@ void update() {
 	if (!ENTITY::DOES_ENTITY_EXIST(vehicle))
 		return;
 
+	auto model = ENTITY::GET_ENTITY_MODEL(vehicle);
+	if (!VEHICLE::IS_THIS_MODEL_A_CAR(model) && !VEHICLE::IS_THIS_MODEL_A_QUADBIKE(model))
+		return;
+
 	if (prevVehicle != vehicle) {
 		ext.ClearAddress();
 		ext.GetAddress(vehicle);
-		slamLevel = 0;
 	}
 	prevVehicle = vehicle;
 
-	if (isKeyJustPressed(controls[Button], Button)) {
-		readSettings();
-		std::stringstream message;
-		slamLevel++;
-		if (slamLevel > 2) {
-			slamLevel = 0;
-		}
-		slam(vehicle, slamLevel);
-		message << "Slam level: " << slamLevel;
-		showNotification(message.str().c_str());
-	}
+	// do your slamming magic here, ikt
+}
+
+void init() {
+	settings.ReadSettings(&controls);
+	// Depending on how crappy the XML is this shit might crash and burn.
+	presets = settings.ReadPresets(presetsFile);
+	saved = settings.ReadPresets(savedCarsFile);
 }
 
 void main() {
-	readSettings();
+	init();
 	while (true) {
-		update();
+		update_menu();
+		update_game();
 		WAIT(0);
 	}
 }
