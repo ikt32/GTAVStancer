@@ -29,6 +29,10 @@ int menulevel = 0;
 int infocount;
 int Delay = GetTickCount();
 
+char * Menu::getActualMenu() {
+	return actualmenu;
+}
+
 int Menu::getKeyPressed(int key) {
 	return GetAsyncKeyState(key);
 }

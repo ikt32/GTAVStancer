@@ -18,6 +18,7 @@ extern rgba optionsrect;
 
 class Menu {
 public:
+	static char* getActualMenu();
 	static int getKeyPressed(int key);
 	static char* StringToChar(std::string string);
 	static bool currentMenu(char* menuname);

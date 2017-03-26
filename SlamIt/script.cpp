@@ -178,30 +178,32 @@ void update_menu() {
 	if (Menu::currentMenu("suspensionmenu")) {
 		Menu::Title("Suspension menu");
 
-		Menu::FloatOption(  "Front Camber",	  &frontCamber,   -2.0f, 2.0f, 0.01f);
+		Menu::FloatOption( "Front Camber",	  &frontCamber,   -2.0f, 2.0f, 0.01f);
 		Menu::FloatOption( "Front Distance", &frontDistance,  -2.0f, 2.0f,  0.01f);
-		Menu::FloatOption(  "Front Height",   &frontHeight,   -2.0f, 2.0f, 0.01f);
+		Menu::FloatOption( "Front Height",   &frontHeight,   -2.0f, 2.0f, 0.01f);
 							 											   
-		Menu::FloatOption(  "Rear Camber",    &rearCamber,    -2.0f, 2.0f, 0.01f); 
-		Menu::FloatOption( "Rear Distance",  &rearDistance,   -2.0f, 2.0f,  0.01f);
-		Menu::FloatOption(  "Rear Height",    &rearHeight,    -2.0f, 2.0f, 0.01f); 
+		Menu::FloatOption( "Rear  Camber",    &rearCamber,    -2.0f, 2.0f, 0.01f); 
+		Menu::FloatOption( "Rear  Distance",  &rearDistance,   -2.0f, 2.0f,  0.01f);
+		Menu::FloatOption( "Rear  Height",    &rearHeight,    -2.0f, 2.0f, 0.01f); 
 	}
 
+	// Unique name (1 per car model)
 	if (Menu::currentMenu("presetmenu")) {
 		Menu::Title("Load preset");
 		for (auto preset : presets) {
 			std::string label = preset.Name();
 			char * label_ = (char *)label.c_str();
-			Menu::Option(label_);
+			Menu::MenuOption(label_, label_);
 		}
 	}
 
+	// Unique name + plate
 	if (Menu::currentMenu("carsmenu")) {
 		Menu::Title("Car overview");
 		for (auto preset : saved) {
 			std::string label = preset.Name() + " " + preset.Plate();
 			char * label_ = (char *)label.c_str();
-			Menu::Option(label_);
+			Menu::MenuOption(label_, label_);
 		}
 	}
 
@@ -247,7 +249,7 @@ void update_menu() {
 			Menu::Option((char*)rh.c_str());
 		}
 	}
-
+	showText(0.2, 0.2, 1.0, Menu::getActualMenu());
 	Menu::endMenu();
 }
 
