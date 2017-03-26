@@ -3,6 +3,8 @@
 #include <string>
 #include <windows.h>
 
+class Controls;
+
 struct rgba {
 	int r, g, b, a;
 };
@@ -47,5 +49,5 @@ public:
 	static void SaveMenuTheme(LPCWSTR file);
 
 	static void endMenu();
-	static void checkKeys();
+	static void checkKeys(Controls* controls, void(*onMain)(void), void(*onExit)(void));
 };

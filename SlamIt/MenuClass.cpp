@@ -5,6 +5,7 @@
 #include <string>
 #include "../../ScriptHookV_SDK/inc/natives.h"
 #include "../../ScriptHookV_SDK/inc/enums.h"
+#include "controls.h"
 
 float menux = 0.2f;
 rgba titleText = { 0, 0, 0, 255 };
@@ -490,6 +491,7 @@ void Menu::endMenu() {
 		CONTROLS::DISABLE_CONTROL_ACTION(2, ControlNextCamera, true);
 
 		CONTROLS::DISABLE_CONTROL_ACTION(2, ControlPhone, true);
+
 		CONTROLS::DISABLE_CONTROL_ACTION(2, ControlVehicleCinCam, true);
 
 		CONTROLS::DISABLE_CONTROL_ACTION(2, ControlSelectCharacterMichael, true);
@@ -507,8 +509,10 @@ void Menu::endMenu() {
 
 		CONTROLS::DISABLE_CONTROL_ACTION(2, ControlRadioWheelLeftRight, true);
 		CONTROLS::DISABLE_CONTROL_ACTION(2, ControlVehicleNextRadio, true);
+		CONTROLS::DISABLE_CONTROL_ACTION(2, ControlVehiclePrevRadio, true);
 		CONTROLS::DISABLE_CONTROL_ACTION(2, ControlVehicleDuck, true);
 		CONTROLS::DISABLE_CONTROL_ACTION(2, ControlVehicleSelectNextWeapon, true);
+		CONTROLS::DISABLE_CONTROL_ACTION(2, ControlVehicleSelectPrevWeapon, true);
 
 
 		if (currentoption > optioncount) currentoption = optioncount;
@@ -516,25 +520,35 @@ void Menu::endMenu() {
 	}
 }
 
-void Menu::checkKeys() {
+void Menu::checkKeys(Controls* controls, void (*onMain)(void), void (*onExit)(void)) {
 	optionpress = false;
-	if (GetTickCount() - Delay > 150) {
-		if (getKeyPressed(VK_MULTIPLY) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendLb) &&
-			CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendRb)) {
-			if (menulevel == 0) changeMenu("mainmenu");
-			else if (menulevel == 1) backMenu();
-			Delay = GetTickCount();
-		}
-		if (getKeyPressed(VK_NUMPAD0) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendCancel)) {
-			if (menulevel > 0)
+	if (GetTickCount() - Delay > 66) {
+		//if (getKeyPressed(VK_MULTIPLY) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendLb) &&
+		//	CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendRb)) {
+		if (controls->IsKeyJustPressed(Controls::MenuKey)) {
+			if (menulevel == 0) {
+				changeMenu("mainmenu");
+				onMain();
+			}
+			else if (menulevel == 1) {
 				backMenu();
+			}
 			Delay = GetTickCount();
 		}
-		if (getKeyPressed(VK_NUMPAD5) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendAccept)) {
+		//if (getKeyPressed(VK_NUMPAD0) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendCancel)) {
+		if (controls->IsKeyJustPressed(Controls::MenuCancel) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendCancel)) {
+			if (menulevel > 0) {
+				backMenu();
+			}
+			Delay = GetTickCount();
+		}
+		//if (getKeyPressed(VK_NUMPAD5) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendAccept)) {
+		if (controls->IsKeyJustPressed(Controls::MenuSelect) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendAccept)) {
 			optionpress = true;
 			Delay = GetTickCount();
 		}
-		if (getKeyPressed(VK_NUMPAD2) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendDown)) {
+		//if (getKeyPressed(VK_NUMPAD2) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendDown)) {
+		if (controls->IsKeyJustPressed(Controls::MenuDown) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendDown)) {
 			if (currentoption < optioncount)
 				currentoption++;
 			else
@@ -542,7 +556,8 @@ void Menu::checkKeys() {
 			Delay = GetTickCount();
 			downpress = true;
 		}
-		if (getKeyPressed(VK_NUMPAD8) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendUp)) {
+		//if (getKeyPressed(VK_NUMPAD8) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendUp)) {
+		if (controls->IsKeyJustPressed(Controls::MenuUp) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendUp)) {
 			if (currentoption > 1)
 				currentoption--;
 			else
@@ -550,11 +565,13 @@ void Menu::checkKeys() {
 			Delay = GetTickCount();
 			uppress = true;
 		}
-		if (getKeyPressed(VK_NUMPAD4) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlPhoneLeft)) {
+		//if (getKeyPressed(VK_NUMPAD4) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlPhoneLeft)) {
+		if (controls->IsKeyJustPressed(Controls::MenuLeft) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlPhoneLeft)) {
 			leftpress = true;
 			Delay = GetTickCount();
 		}
-		if (getKeyPressed(VK_NUMPAD6) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlPhoneRight)) {
+		//if (getKeyPressed(VK_NUMPAD6) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlPhoneRight)) {
+		if (controls->IsKeyJustPressed(Controls::MenuRight) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlPhoneRight)) {
 			rightpress = true;
 			Delay = GetTickCount();
 		}
