@@ -7,13 +7,13 @@ class Preset
 public:
 	struct WheelInfo {
 		float Camber;
-		double Distance;
-		float height;
+		float Distance;
+		float Height;
 	}; 
 	
 	Preset(WheelInfo front, WheelInfo rear, const std::string &name, const std::string &plate);
 	~Preset();
-
+	static std::string ReservedPlate();
 	/*
 	 * If this is NOT a preset then it's a saved cahr.
 	 */
@@ -26,7 +26,7 @@ public:
 	std::string Name();
 
 private:
-	const std::string reservedPlate = "_GENERICPRESET_";
+	const static std::string reservedPlate;
 	std::string name;
 	std::string plate;
 };
