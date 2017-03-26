@@ -69,10 +69,3 @@ std::vector<Preset> Settings::ReadPresets(const std::string &fileName) {
 	
 	return presets;
 }
-
-bool Settings::AutoApply() {
-	return autoApply;
-}
-bool Settings::EnableMod() {
-	return enableMod;
-}

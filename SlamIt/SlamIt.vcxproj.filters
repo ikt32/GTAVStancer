@@ -19,6 +19,8 @@
     <ClCompile Include="settings.cpp" />
     <ClCompile Include="controls.cpp" />
     <ClCompile Include="presets.cpp" />
+    <ClCompile Include="menu.cpp" />
+    <ClCompile Include="MenuClass.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="script.h" />
@@ -53,6 +55,8 @@
     <ClInclude Include="settings.h" />
     <ClInclude Include="controls.h" />
     <ClInclude Include="presets.h" />
+    <ClInclude Include="menu.h" />
+    <ClInclude Include="MenuClass.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">
