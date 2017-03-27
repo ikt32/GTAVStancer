@@ -21,21 +21,10 @@ class Menu {
 public:
 	Menu();
 	~Menu();
-	char* getActualMenu();
-	int getKeyPressed(int key);
-	char* StringToChar(std::string string);
-	bool currentMenu(char* menuname);
-	void changeMenu(char* menuname);
-	void backMenu();
-	
-	void drawText(char* text, int font, float x, float y, float scalex, float scaley, rgba rgba, bool center);
-	void drawNotification(char* msg);
-	void drawRect(float x, float y, float width, float height, rgba rgba);
-	void drawSprite(char* Streamedtexture, char* textureName, float x, float y, float width, float height, float rotation, rgba rgba);
-	
+
 	void Title(char* title);
 	bool Option(char* option);
-	bool OptionPlus(char *option, std::vector<std::string> extra);
+	bool OptionPlus(char *option, std::vector<std::string> &extra);
 	bool MenuOption(char* option, char* menu);
 	bool IntOption(char* option, int *var, int min, int max, int step = 1);
 	bool FloatOption(char* option, float *var, float min, float max, float step = 0.1);
@@ -47,15 +36,19 @@ public:
 	bool CharArray(char* option, char* display[], int *PlaceHolderInt);
 	void TeleportOption(char* option, float x, float y, float z);
 
+	bool CurrentMenu(char* menuname);
+
 	void IniWriteInt(LPCWSTR file, LPCWSTR section, LPCWSTR key, int value);
 	int IniReadInt(LPCWSTR file, LPCWSTR section, LPCWSTR key);
 
 	void LoadMenuTheme(LPCWSTR file);
 	void SaveMenuTheme(LPCWSTR file);
 
-	void endMenu();
-	void checkKeys(Controls* controls, void(*onMain)(void), void(*onExit)(void));
+	void EndMenu();
+	void CheckKeys(Controls* controls, void(*onMain)(void), void(*onExit)(void));
 private:
+	int optionsFont = 6;
+	int titleFont = 7;
 	float menux = 0.2f;
 	rgba titleText = { 0, 0, 0, 255 };
 	rgba titleRect = { 255, 200, 0, 255 };
@@ -76,5 +69,13 @@ private:
 	int lastoption[100];
 	int menulevel = 0;
 	int infocount = 0;
-	int Delay = GetTickCount();
+	int delay = GetTickCount();
+
+	void drawText(char* text, int font, float x, float y, float scalex, float scaley, rgba rgba, bool center);
+	void drawRect(float x, float y, float width, float height, rgba rgba);
+	void drawSprite(char* Streamedtexture, char* textureName, float x, float y, float width, float height, float rotation, rgba rgba);
+	void changeMenu(char* menuname);
+	void backMenu();
+	char* stringToChar(std::string string);
+
 };

@@ -161,9 +161,9 @@ void savePreset(bool asPreset) {
 }
 
 void update_menu() {
-	menu.checkKeys(&controls, init, nullptr);
+	menu.CheckKeys(&controls, init, nullptr);
 
-	if (menu.currentMenu("mainmenu")) {
+	if (menu.CurrentMenu("mainmenu")) {
 		menu.Title("Slam It v2"); // TODO: Less sucky names
 
 		menu.MenuOption("Suspension menu", "suspensionmenu");
@@ -175,7 +175,7 @@ void update_menu() {
 		if (menu.BoolOption("Enable mod",		&settings.enableMod)) { settings.SaveSettings(); }
 	}
 
-	if (menu.currentMenu("suspensionmenu")) {
+	if (menu.CurrentMenu("suspensionmenu")) {
 		menu.Title("Suspension menu");
 
 		menu.FloatOption( "Front Camber",	  &frontCamber,   -2.0f, 2.0f, 0.01f);
@@ -188,7 +188,7 @@ void update_menu() {
 	}
 
 	// Unique name (1 per car model)
-	if (menu.currentMenu("presetmenu")) {
+	if (menu.CurrentMenu("presetmenu")) {
 		menu.Title("Load preset");
 		for (auto preset : presets) {
 			std::string label = preset.Name();
@@ -215,7 +215,7 @@ void update_menu() {
 	}
 
 	// Unique name + plate
-	if (menu.currentMenu("carsmenu")) {
+	if (menu.CurrentMenu("carsmenu")) {
 		menu.Title("Car overview");
 		for (auto preset : saved) {
 			std::string label = preset.Name() + " " + preset.Plate();
@@ -240,7 +240,7 @@ void update_menu() {
 			}
 		}
 	}
-	menu.endMenu();
+	menu.EndMenu();
 }
 
 
