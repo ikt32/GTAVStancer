@@ -28,6 +28,7 @@
 
 //MenuScreen mainMenu("Main menu", menuMainOptions);
 
+Menu menu;
 bool displayMenu = false;
 
 const std::string settingsFolder = "./VStancer/";
@@ -117,7 +118,7 @@ void ultraSlam(Vehicle handle, float camberFront, float camberRear, float distan
 
 void init() {
 	settings.ReadSettings(&controls);
-	Menu::LoadMenuTheme(menuStyleLocation);
+	menu.LoadMenuTheme(menuStyleLocation);
 
 	// Depending on how crappy the XML is this shit might crash and burn.
 	try {
@@ -160,97 +161,86 @@ void savePreset(bool asPreset) {
 }
 
 void update_menu() {
-	Menu::checkKeys(&controls, init, nullptr);
+	menu.checkKeys(&controls, init, nullptr);
 
-	// Has to look for mainmenu otherwise the code fails due to me setting menu to mainmenu on Keypress
-	if (Menu::currentMenu("mainmenu")) {
-		Menu::Title("Slam It v2"); // TODO: Less sucky names
+	if (menu.currentMenu("mainmenu")) {
+		menu.Title("Slam It v2"); // TODO: Less sucky names
 
-		Menu::MenuOption("Suspension menu", "suspensionmenu");
-		Menu::MenuOption("Load a preset", "presetmenu");
-		Menu::MenuOption("List car configs", "carsmenu");
-		if (Menu::Option("Save as car")) { savePreset(false); }
-		if (Menu::Option("Save as preset")) { savePreset(true); }
-		if (Menu::BoolOption("Auto apply cars", &settings.autoApply)) { settings.SaveSettings(); }
-		if (Menu::BoolOption("Enable mod",		&settings.enableMod)) { settings.SaveSettings(); }
+		menu.MenuOption("Suspension menu", "suspensionmenu");
+		menu.MenuOption("Load a preset", "presetmenu");
+		menu.MenuOption("List car configs", "carsmenu");
+		if (menu.Option("Save as car")) { savePreset(false); }
+		if (menu.Option("Save as preset")) { savePreset(true); }
+		if (menu.BoolOption("Auto apply cars", &settings.autoApply)) { settings.SaveSettings(); }
+		if (menu.BoolOption("Enable mod",		&settings.enableMod)) { settings.SaveSettings(); }
 	}
 
-	if (Menu::currentMenu("suspensionmenu")) {
-		Menu::Title("Suspension menu");
+	if (menu.currentMenu("suspensionmenu")) {
+		menu.Title("Suspension menu");
 
-		Menu::FloatOption( "Front Camber",	  &frontCamber,   -2.0f, 2.0f, 0.01f);
-		Menu::FloatOption( "Front Distance", &frontDistance,  -2.0f, 2.0f,  0.01f);
-		Menu::FloatOption( "Front Height",   &frontHeight,   -2.0f, 2.0f, 0.01f);
+		menu.FloatOption( "Front Camber",	  &frontCamber,   -2.0f, 2.0f, 0.01f);
+		menu.FloatOption( "Front Distance", &frontDistance,  -2.0f, 2.0f,  0.01f);
+		menu.FloatOption( "Front Height",   &frontHeight,   -2.0f, 2.0f, 0.01f);
 							 											   
-		Menu::FloatOption( "Rear  Camber",    &rearCamber,    -2.0f, 2.0f, 0.01f); 
-		Menu::FloatOption( "Rear  Distance",  &rearDistance,   -2.0f, 2.0f,  0.01f);
-		Menu::FloatOption( "Rear  Height",    &rearHeight,    -2.0f, 2.0f, 0.01f); 
+		menu.FloatOption( "Rear  Camber",    &rearCamber,    -2.0f, 2.0f, 0.01f); 
+		menu.FloatOption( "Rear  Distance",  &rearDistance,   -2.0f, 2.0f,  0.01f);
+		menu.FloatOption( "Rear  Height",    &rearHeight,    -2.0f, 2.0f, 0.01f); 
 	}
 
 	// Unique name (1 per car model)
-	if (Menu::currentMenu("presetmenu")) {
-		Menu::Title("Load preset");
+	if (menu.currentMenu("presetmenu")) {
+		menu.Title("Load preset");
 		for (auto preset : presets) {
 			std::string label = preset.Name();
 			char * label_ = (char *)label.c_str();
-			Menu::MenuOption(label_, label_);
+			std::vector<std::string> info;
+			info.push_back("Front Camber    " + std::to_string(preset.Front.Camber));
+			info.push_back("Front Distance  " + std::to_string(preset.Front.Distance));
+			info.push_back("Front Height    " + std::to_string(preset.Front.Height));
+			info.push_back("Rear  Camber    " + std::to_string(preset.Rear.Camber));
+			info.push_back("Rear  Distance  " + std::to_string(preset.Rear.Distance));
+			info.push_back("Rear  Height    " + std::to_string(preset.Rear.Height));
+			if (menu.OptionPlus(label_, info)) {
+				ultraSlam(vehicle,
+						  preset.Front.Camber,
+						  preset.Rear.Camber,
+						  preset.Front.Distance,
+						  preset.Rear.Distance,
+						  preset.Front.Height,
+						  preset.Rear.Height);
+				getStats(vehicle);
+				prevNotification = showNotification("Applied preset!", prevNotification);
+			}
 		}
 	}
 
 	// Unique name + plate
-	if (Menu::currentMenu("carsmenu")) {
-		Menu::Title("Car overview");
+	if (menu.currentMenu("carsmenu")) {
+		menu.Title("Car overview");
 		for (auto preset : saved) {
 			std::string label = preset.Name() + " " + preset.Plate();
 			char * label_ = (char *)label.c_str();
-			Menu::MenuOption(label_, label_);
+			std::vector<std::string> info;
+			info.push_back("Front Camber    " + std::to_string(preset.Front.Camber));
+			info.push_back("Front Distance  " + std::to_string(preset.Front.Distance));
+			info.push_back("Front Height    " + std::to_string(preset.Front.Height));
+			info.push_back("Rear  Camber    " + std::to_string(preset.Rear.Camber));
+			info.push_back("Rear  Distance  " + std::to_string(preset.Rear.Distance));
+			info.push_back("Rear  Height    " + std::to_string(preset.Rear.Height));
+			if (menu.OptionPlus(label_, info)) {
+				ultraSlam(vehicle,
+						  preset.Front.Camber,
+						  preset.Rear.Camber,
+						  preset.Front.Distance,
+						  preset.Rear.Distance,
+						  preset.Front.Height,
+						  preset.Rear.Height);
+				getStats(vehicle);
+				prevNotification = showNotification("Applied preset!", prevNotification);
+			}
 		}
 	}
-
-	for (auto preset : presets) {
-		std::string label = preset.Name();
-		char * label_ = (char *)label.c_str();
-		if (Menu::currentMenu(label_)) {
-			Menu::Title(label_);
-			std::string fc = "Front Camber    " + std::to_string(preset.Front.Camber);
-			std::string fd = "Front Distance  " + std::to_string(preset.Front.Distance);
-			std::string fh = "Front Height    " + std::to_string(preset.Front.Height);
-			std::string rc = "Rear  Camber    " + std::to_string(preset.Rear.Camber);
-			std::string rd = "Rear  Distance  " + std::to_string(preset.Rear.Distance);
-			std::string rh = "Rear  Height    " + std::to_string(preset.Rear.Height);
-
-			Menu::Option((char*)fc.c_str());
-			Menu::Option((char*)fd.c_str());
-			Menu::Option((char*)fh.c_str());
-			Menu::Option((char*)rc.c_str());
-			Menu::Option((char*)rd.c_str());
-			Menu::Option((char*)rh.c_str());
-
-		}
-	}
-
-	for (auto preset : saved) {
-		std::string label = preset.Name() + " " + preset.Plate();
-		char * label_ = (char *)label.c_str();
-		if (Menu::currentMenu(label_)) {
-			Menu::Title(label_);
-			std::string fc = "Front Camber    " + std::to_string(preset.Front.Camber);
-			std::string fd = "Front Distance  " + std::to_string(preset.Front.Distance);
-			std::string fh = "Front Height    " + std::to_string(preset.Front.Height);
-			std::string rc = "Rear  Camber    " + std::to_string(preset.Rear.Camber);
-			std::string rd = "Rear  Distance  " + std::to_string(preset.Rear.Distance);
-			std::string rh = "Rear  Height    " + std::to_string(preset.Rear.Height);
-
-			Menu::Option((char*)fc.c_str());
-			Menu::Option((char*)fd.c_str());
-			Menu::Option((char*)fh.c_str());
-			Menu::Option((char*)rc.c_str());
-			Menu::Option((char*)rd.c_str());
-			Menu::Option((char*)rh.c_str());
-		}
-	}
-	showText(0.2, 0.2, 1.0, Menu::getActualMenu());
-	Menu::endMenu();
+	menu.endMenu();
 }
 
 
@@ -295,6 +285,7 @@ void update_game() {
 				ultraSlam(vehicle, preset.Front.Camber, preset.Rear.Camber, preset.Front.Distance, preset.Rear.Distance, preset.Front.Height, preset.Rear.Height);
 				autoApplied = true;
 				getStats(vehicle);
+				prevNotification = showNotification("Applied preset automatically!", prevNotification);
 			}
 		}
 	}

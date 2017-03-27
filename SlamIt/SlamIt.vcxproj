@@ -129,7 +129,6 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SlamIt_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Async</ExceptionHandling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
@@ -155,7 +154,6 @@
     <ClCompile Include="controls.cpp" />
     <ClCompile Include="keyboard.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="menu.cpp" />
     <ClCompile Include="MenuClass.cpp" />
     <ClCompile Include="presets.cpp" />
     <ClCompile Include="script.cpp" />
@@ -173,7 +171,6 @@
     <ClInclude Include="..\tinyxml2\tinyxml2.h" />
     <ClInclude Include="controls.h" />
     <ClInclude Include="keyboard.h" />
-    <ClInclude Include="menu.h" />
     <ClInclude Include="MenuClass.h" />
     <ClInclude Include="presets.h" />
     <ClInclude Include="script.h" />
