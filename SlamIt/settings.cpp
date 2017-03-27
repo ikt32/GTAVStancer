@@ -148,3 +148,28 @@ bool Settings::OverwritePreset(Preset preset, const std::string &fileName) {
 	}
 	return false;
 }
+
+bool Settings::DeletePreset(Preset preset, const std::string &fileName) {
+	using namespace tinyxml2;
+	tinyxml2::XMLDocument doc;
+	XMLError err = doc.LoadFile(fileName.c_str());
+
+	if (err != XML_SUCCESS) {
+		return false;
+	}
+
+	XMLNode * pRoot = doc.FirstChildElement("preset");
+
+	std::vector<Preset> presets;
+
+	while (pRoot != nullptr) {
+		if (pRoot->FirstChildElement("vehicleName")->GetText() == preset.Name() &&
+			pRoot->FirstChildElement("plate")->GetText() == preset.Plate()) {
+			//pRoot->DeleteChild(pRoot);
+			doc.SaveFile(fileName.c_str());
+			return true;
+		}
+		pRoot = pRoot->NextSibling();
+	}
+	return false;
+}

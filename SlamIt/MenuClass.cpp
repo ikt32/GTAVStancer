@@ -4,6 +4,7 @@
 #include "../../ScriptHookV_SDK/inc/natives.h"
 #include "../../ScriptHookV_SDK/inc/enums.h"
 #include "controls.h"
+#include <functional>
 
 Menu::Menu() {}
 
@@ -89,7 +90,7 @@ void Menu::drawAdditionalInfoBox(std::vector<std::string> &extra, size_t infoLin
 	}
 }
 
-bool Menu::OptionPlus(char* option, std::vector<std::string> &extra, bool *highlighted, void(*onRight)(void), void(*onLeft)(void)) {
+bool Menu::OptionPlus(char* option, std::vector<std::string> &extra, bool *highlighted, std::function<void (void) > onRight, std::function<void(void) > onLeft) {
 	optioncount++;
 	size_t infoLines = extra.size();
 	bool thisOption = false;
@@ -98,12 +99,12 @@ bool Menu::OptionPlus(char* option, std::vector<std::string> &extra, bool *highl
 		if (highlighted != nullptr) {
 			*highlighted = true;
 		}
-		if (leftpress) {
+		if (onLeft && leftpress) {
 			onLeft();
 			leftpress = false;
 			return false;
 		}
-		if (rightpress) {
+		if (onRight && rightpress) {
 			onRight();
 			rightpress = false;
 			return false;
@@ -546,7 +547,7 @@ void Menu::EndMenu() {
 	}
 }
 
-void Menu::CheckKeys(Controls* controls, void (*onMain)(void), void (*onExit)(void)) {
+void Menu::CheckKeys(Controls* controls, std::function<void(void) > onMain, std::function<void(void) > onExit) {
 	optionpress = false;
 	if (GetTickCount() - delay > 120) {
 		//if (getKeyPressed(VK_MULTIPLY) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendLb) &&
@@ -554,11 +555,11 @@ void Menu::CheckKeys(Controls* controls, void (*onMain)(void), void (*onExit)(vo
 		if (controls->IsKeyJustPressed(Controls::MenuKey)) {
 			if (menulevel == 0) {
 				changeMenu("mainmenu");
-				onMain();
+				if (onMain) onMain();
 			}
 			else if (menulevel == 1) {
 				backMenu();
-				onExit();
+				if (onExit) onExit();
 			}
 			delay = GetTickCount();
 		}

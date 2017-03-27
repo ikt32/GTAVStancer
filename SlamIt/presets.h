@@ -25,6 +25,8 @@ public:
 	std::string Plate();
 	std::string Name();
 
+	bool Preset::operator==(const Preset &other) const;
+
 private:
 	const static std::string reservedPlate;
 	std::string name;

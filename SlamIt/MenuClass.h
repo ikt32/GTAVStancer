@@ -3,6 +3,7 @@
 #include <string>
 #include <windows.h>
 #include <vector>
+#include <functional>
 
 class Controls;
 
@@ -25,7 +26,7 @@ public:
 	void Title(char* title);
 	bool Option(char* option);
 	void drawAdditionalInfoBox(std::vector<std::string> &extra, size_t infoLines);
-	bool OptionPlus(char *option, std::vector<std::string> &extra, bool *highlighted, void(*onRight)(void), void(*onLeft)(void));
+	bool OptionPlus(char *option, std::vector<std::string> &extra, bool *highlighted, std::function<void()> onRight, std::function<void()> onLeft);
 	bool MenuOption(char* option, char* menu);
 	bool IntOption(char* option, int *var, int min, int max, int step = 1);
 	bool FloatOption(char* option, float *var, float min, float max, float step = 0.1);
@@ -46,7 +47,7 @@ public:
 	void SaveMenuTheme(LPCWSTR file);
 
 	void EndMenu();
-	void CheckKeys(Controls* controls, void(*onMain)(void), void(*onExit)(void));
+	void Menu::CheckKeys(Controls* controls, std::function<void(void) > onMain, std::function<void(void) > onExit);
 private:
 	int optionsFont = 6;
 	int titleFont = 7;

@@ -180,12 +180,28 @@ void clearmenustuff() {
 
 }
 
-void deleteCurrentPreset() {
-	
+// fuck it, hard-code time :D
+void deletePreset(Preset preset, std::vector<Preset> fromWhich) {
+	std::string fromFile;
+	std::string message = "Couldn't find " + preset.Name() + " " + preset.Plate() + " :(";
+	if (fromFile.empty()) {
+		prevNotification = showNotification((char *)message.c_str(), prevNotification);
+		return;
+	}
+	if (fromWhich == presets) {
+		fromFile = presetsFile;
+	}
+	if (fromWhich == saved) {
+		fromFile = savedCarsFile;
+	}
+	if (settings.DeletePreset(preset, fromFile)) {
+		message = "Pang! Deleted " + preset.Name() + " " + preset.Plate();
+	}
+	prevNotification = showNotification((char *)message.c_str(), prevNotification);
 }
 
 void update_menu() {
-	menu.CheckKeys(&controls, init, clearmenustuff);
+	menu.CheckKeys(&controls, std::bind(init), std::bind(clearmenustuff));
 
 	if (menu.CurrentMenu("mainmenu")) {
 		menu.Title("Slam It v2"); // TODO: Less sucky names
@@ -236,7 +252,7 @@ void update_menu() {
 			info.push_back("Rear  Camber    " + std::to_string(preset.Rear.Camber));
 			info.push_back("Rear  Distance  " + std::to_string(preset.Rear.Distance));
 			info.push_back("Rear  Height    " + std::to_string(preset.Rear.Height));
-			if (menu.OptionPlus(label_, info, nullptr, deleteCurrentPreset, nullptr)) {
+			if (menu.OptionPlus(label_, info, nullptr, std::bind(deletePreset, preset, presets), nullptr)) {
 				ultraSlam(vehicle,
 						  preset.Front.Camber,
 						  preset.Rear.Camber,
@@ -264,7 +280,7 @@ void update_menu() {
 			info.push_back("Rear  Camber    " + std::to_string(preset.Rear.Camber));
 			info.push_back("Rear  Distance  " + std::to_string(preset.Rear.Distance));
 			info.push_back("Rear  Height    " + std::to_string(preset.Rear.Height));
-			if (menu.OptionPlus(label_, info, nullptr, deleteCurrentPreset, nullptr)) {
+			if (menu.OptionPlus(label_, info, nullptr, std::bind(deletePreset, preset, saved), nullptr)) {
 				ultraSlam(vehicle,
 						  preset.Front.Camber,
 						  preset.Rear.Camber,

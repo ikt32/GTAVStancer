@@ -27,3 +27,12 @@ std::string Preset::Plate() {
 std::string Preset::Name() {
 	return name;
 }
+
+bool Preset::operator==(const Preset &other) const {
+	if (name == other.name &&
+		plate == other.plate) {
+		return true;
+	}
+	return false;
+	// Compare the values, and return a bool result.
+}
