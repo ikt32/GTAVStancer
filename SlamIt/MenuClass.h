@@ -24,7 +24,8 @@ public:
 
 	void Title(char* title);
 	bool Option(char* option);
-	bool OptionPlus(char *option, std::vector<std::string> &extra);
+	void drawAdditionalInfoBox(std::vector<std::string> &extra, size_t infoLines);
+	bool OptionPlus(char *option, std::vector<std::string> &extra, bool *highlighted, void(*onRight)(void), void(*onLeft)(void));
 	bool MenuOption(char* option, char* menu);
 	bool IntOption(char* option, int *var, int min, int max, int step = 1);
 	bool FloatOption(char* option, float *var, float min, float max, float step = 0.1);

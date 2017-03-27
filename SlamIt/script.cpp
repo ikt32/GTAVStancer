@@ -7,29 +7,8 @@
 #include "presets.h"
 #include "settings.h"
 #include "MenuClass.h"
-//#include "menu.h"
-
-//const std::vector<MenuPair> menuMainOptions = {
-//	{ "Car options",		"submenu" },
-//	{ "Load preset",		"submenu" },
-//	{ "Save car",			"option" },
-//	{ "Save preset",		"option" },
-//	{ "Auto apply cars",	"option" },
-//	{ "Disable mod",		"option" }
-//};
-//
-//const std::vector<MenuPair> carOptionsOptions = {
-//
-//};
-//
-//const std::vector<MenuPair> loadPresetOptions = {
-//
-//};
-
-//MenuScreen mainMenu("Main menu", menuMainOptions);
 
 Menu menu;
-bool displayMenu = false;
 
 const std::string settingsFolder = "./VStancer/";
 const std::string settingsFile = settingsFolder+"Settings.ini";
@@ -37,13 +16,15 @@ const std::string savedCarsFile = settingsFolder+"SavedCars.xml";
 const std::string presetsFile = settingsFolder +"Presets.xml";
 LPCWSTR menuStyleLocation = L".\\VStancer\\MenuStyle.ini";
 
+std::string cancelText = "wait no";
+
 Hash model;
 Vehicle vehicle;
 Vehicle prevVehicle;
 VehicleExtensions ext;
 Player player;
 Ped playerPed;
-//Menu menu;
+
 int prevNotification;
 
 std::vector<Preset> presets;
@@ -52,13 +33,13 @@ std::vector<Preset> saved;
 Controls controls;
 Settings settings(settingsFile);
 
-float  frontCamber;
+float frontCamber;
 float frontDistance;
-float  frontHeight;
+float frontHeight;
 
-float  rearCamber;
+float rearCamber;
 float rearDistance;
-float  rearHeight;
+float rearHeight;
 
 bool autoApplied = false;
 
@@ -66,6 +47,9 @@ auto offsetCamber = 0x008;
 auto offsetinvCamber = 0x010;
 auto offsetDistance = 0x030;
 auto offsetHeight = 0x038;
+
+std::string currentInput = "";
+bool presethighlighted = false;
 
 void getStats(Vehicle handle) {
 	auto numWheels = ext.GetNumWheels(handle);
@@ -130,14 +114,22 @@ void init() {
 	}
 }
 
-void savePreset(bool asPreset) {
+
+void savePreset(bool asPreset, std::string presetName) {
 	std::string name = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model);
-	std::string plate = VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle);
+	std::string plate;
 	struct Preset::WheelInfo front = { frontCamber, frontDistance, frontHeight};
 	struct Preset::WheelInfo rear = { rearCamber, rearDistance, rearHeight };
 
 	if (asPreset) {
-		plate = Preset::ReservedPlate();
+		// Blocking? Don't want other things to happen.
+		if (presetName.empty()) {
+			plate = Preset::ReservedPlate();
+		} else {
+			plate = presetName;
+		}
+	} else {
+		plate = VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle);
 	}
 
 	bool alreadyPresent = false;
@@ -151,17 +143,49 @@ void savePreset(bool asPreset) {
 
 	if (alreadyPresent) {
 		settings.OverwritePreset(Preset(front, rear, name, plate), asPreset ? presetsFile : savedCarsFile);
-		prevNotification = showNotification(asPreset ? "Saved preset" : "Saved car", prevNotification);
+		prevNotification = showNotification(asPreset ? "Updated preset" : "Updated car", prevNotification);
 	}
 	else {
 		settings.AppendPreset(Preset(front, rear, name, plate), asPreset ? presetsFile : savedCarsFile);
-		prevNotification = showNotification(asPreset ? "Added preset" : "Added car", prevNotification);
+		prevNotification = showNotification(asPreset ? "Saved new preset" : "Saved new car", prevNotification);
 	}
 	init();
 }
 
+// ideally this is only done when the thing is highlighted.
+std::string evaluateInput() {
+	
+	PLAYER::IS_PLAYER_CONTROL_ON(false);
+	UI::HIDE_HUD_AND_RADAR_THIS_FRAME();
+	UI::SET_PAUSE_MENU_ACTIVE(false);
+	CONTROLS::DISABLE_ALL_CONTROL_ACTIONS(1);
+	CONTROLS::IS_CONTROL_ENABLED(playerPed, false);
+
+	for (char c = ' '; c < '~'; c++) {
+		if (IsKeyJustUp(str2key(std::string(1, c)))) {
+			currentInput += c;
+		}
+		if (IsKeyJustUp(str2key("DELETE"))) {
+			currentInput.pop_back();
+		}
+		if (IsKeyJustUp(str2key("BACKSPACE"))) {
+			currentInput.clear();
+		}
+	}
+	
+	return currentInput;
+}
+void clearmenustuff() {
+	currentInput.clear();
+
+}
+
+void deleteCurrentPreset() {
+	
+}
+
 void update_menu() {
-	menu.CheckKeys(&controls, init, nullptr);
+	menu.CheckKeys(&controls, init, clearmenustuff);
 
 	if (menu.CurrentMenu("mainmenu")) {
 		menu.Title("Slam It v2"); // TODO: Less sucky names
@@ -169,10 +193,21 @@ void update_menu() {
 		menu.MenuOption("Suspension menu", "suspensionmenu");
 		menu.MenuOption("Load a preset", "presetmenu");
 		menu.MenuOption("List car configs", "carsmenu");
-		if (menu.Option("Save as car")) { savePreset(false); }
-		if (menu.Option("Save as preset")) { savePreset(true); }
+		if (menu.Option("Save as car")) {
+			savePreset(false,"");
+		}
+		std::vector<std::string> derp = { "Enter preset name", currentInput };
+		if (menu.OptionPlus("Save as preset", derp , &presethighlighted, nullptr, nullptr)) {
+			savePreset(true , derp[1]);
+			currentInput.clear();
+		}
+		if (presethighlighted) {
+			evaluateInput();
+			presethighlighted = false;
+		}
 		if (menu.BoolOption("Auto apply cars", &settings.autoApply)) { settings.SaveSettings(); }
 		if (menu.BoolOption("Enable mod",		&settings.enableMod)) { settings.SaveSettings(); }
+
 	}
 
 	if (menu.CurrentMenu("suspensionmenu")) {
@@ -191,16 +226,17 @@ void update_menu() {
 	if (menu.CurrentMenu("presetmenu")) {
 		menu.Title("Load preset");
 		for (auto preset : presets) {
-			std::string label = preset.Name();
+			std::string label = preset.Name() + " " + preset.Plate();
 			char * label_ = (char *)label.c_str();
 			std::vector<std::string> info;
+			info.push_back("Press RIGHT to delete preset");
 			info.push_back("Front Camber    " + std::to_string(preset.Front.Camber));
 			info.push_back("Front Distance  " + std::to_string(preset.Front.Distance));
 			info.push_back("Front Height    " + std::to_string(preset.Front.Height));
 			info.push_back("Rear  Camber    " + std::to_string(preset.Rear.Camber));
 			info.push_back("Rear  Distance  " + std::to_string(preset.Rear.Distance));
 			info.push_back("Rear  Height    " + std::to_string(preset.Rear.Height));
-			if (menu.OptionPlus(label_, info)) {
+			if (menu.OptionPlus(label_, info, nullptr, deleteCurrentPreset, nullptr)) {
 				ultraSlam(vehicle,
 						  preset.Front.Camber,
 						  preset.Rear.Camber,
@@ -221,13 +257,14 @@ void update_menu() {
 			std::string label = preset.Name() + " " + preset.Plate();
 			char * label_ = (char *)label.c_str();
 			std::vector<std::string> info;
+			info.push_back("Press RIGHT to delete preset");
 			info.push_back("Front Camber    " + std::to_string(preset.Front.Camber));
 			info.push_back("Front Distance  " + std::to_string(preset.Front.Distance));
 			info.push_back("Front Height    " + std::to_string(preset.Front.Height));
 			info.push_back("Rear  Camber    " + std::to_string(preset.Rear.Camber));
 			info.push_back("Rear  Distance  " + std::to_string(preset.Rear.Distance));
 			info.push_back("Rear  Height    " + std::to_string(preset.Rear.Height));
-			if (menu.OptionPlus(label_, info)) {
+			if (menu.OptionPlus(label_, info, nullptr, deleteCurrentPreset, nullptr)) {
 				ultraSlam(vehicle,
 						  preset.Front.Camber,
 						  preset.Rear.Camber,
@@ -259,8 +296,11 @@ void update_game() {
 
 	vehicle = PED::GET_VEHICLE_PED_IS_IN(playerPed, false);
 
-	if (!ENTITY::DOES_ENTITY_EXIST(vehicle))
+	if (!ENTITY::DOES_ENTITY_EXIST(vehicle)) {
+		prevVehicle = 0;
+		autoApplied = false;
 		return;
+	}
 
 	model = ENTITY::GET_ENTITY_MODEL(vehicle);
 	if (!VEHICLE::IS_THIS_MODEL_A_CAR(model) && !VEHICLE::IS_THIS_MODEL_A_QUADBIKE(model))

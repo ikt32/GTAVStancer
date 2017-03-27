@@ -82,21 +82,40 @@ bool Menu::Option(char* option) {
 	else return false;
 };
 
-bool Menu::OptionPlus(char* option, std::vector<std::string> &extra) {
+void Menu::drawAdditionalInfoBox(std::vector<std::string> &extra, size_t infoLines) {
+	for (int i = 0; i < infoLines; i++) {
+		drawText((char *)extra[i].c_str(), optionsFont, menux + 0.125f, i * 0.035f + 0.125f, 0.5f, 0.5f, options, false);
+		drawRect(										menux + 0.23f,	i * 0.035f + 0.1415f, 0.23f, 0.035f, scroller);
+	}
+}
+
+bool Menu::OptionPlus(char* option, std::vector<std::string> &extra, bool *highlighted, void(*onRight)(void), void(*onLeft)(void)) {
 	optioncount++;
 	size_t infoLines = extra.size();
 	bool thisOption = false;
-	if (currentoption == optioncount) thisOption = true;
+	if (currentoption == optioncount) {
+		thisOption = true;
+		if (highlighted != nullptr) {
+			*highlighted = true;
+		}
+		if (leftpress) {
+			onLeft();
+			leftpress = false;
+			return false;
+		}
+		if (rightpress) {
+			onRight();
+			rightpress = false;
+			return false;
+		}
+	}
 
 	if (currentoption <= 16 && optioncount <= 16) {
-		drawText(option, optionsFont,	menux - 0.1f,	(optioncount * 0.035f + 0.125f),	0.5f,	0.5f, options, false); // The menu option txt
-		drawRect(			menux,			((optioncount * 0.035f) + 0.1415f), 0.23f,	0.035f, optionsrect);  // The menu option background
+		drawText(option, optionsFont,	menux - 0.1f,	(optioncount * 0.035f + 0.125f),	0.5f,	0.5f, options, false);
+		drawRect(						menux,			((optioncount * 0.035f) + 0.1415f), 0.23f,	0.035f, optionsrect);
 		if (thisOption) {
-			drawRect(		menux,			((optioncount * 0.035f) + 0.1415f), 0.23f,	0.035f, scroller); // Highlighted line
-			drawRect(		menux + 0.23f,  (0.035f + 0.145f),					0.23f,	0.035f * infoLines, scroller); // Extra text box space
-			for (int i = 0; i < infoLines; i++) {
-				drawText((char *)extra[i].c_str(), optionsFont, menux + 0.125f, (i * 0.035f + 0.075f), 0.5f, 0.5f, options, false);
-			}
+			drawRect(menux, ((optioncount * 0.035f) + 0.1415f), 0.23f, 0.035f, scroller); // Highlighted line
+			drawAdditionalInfoBox(extra, infoLines);
 		}
 	}
 
@@ -106,10 +125,7 @@ bool Menu::OptionPlus(char* option, std::vector<std::string> &extra) {
 		drawRect(menux, ((optioncount - (currentoption - 16)) * 0.035f + 0.1415f), 0.23f, 0.035f, optionsrect);
 		if (thisOption) {
 			drawRect(menux, ((optioncount - (currentoption - 16)) * 0.035f + 0.1415f), 0.23f, 0.035f, scroller);
-			drawRect(menux + 0.23f, (0.035f + 0.145f), 0.23f, 0.035f * infoLines, scroller); // Extra text box space
-			for (int i = 0; i < infoLines; i++) {
-				drawText((char *)extra[i].c_str(), optionsFont, menux + 0.125f, (i * 0.035f + 0.075f), 0.5f, 0.5f, options, false);
-			}
+			drawAdditionalInfoBox(extra, infoLines);
 		}
 	}
 
@@ -542,12 +558,14 @@ void Menu::CheckKeys(Controls* controls, void (*onMain)(void), void (*onExit)(vo
 			}
 			else if (menulevel == 1) {
 				backMenu();
+				onExit();
 			}
 			delay = GetTickCount();
 		}
 		if (controls->IsKeyJustPressed(Controls::MenuCancel) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendCancel)) {
 			if (menulevel > 0) {
 				backMenu();
+				if (menulevel == 1) { onExit(); }
 			}
 			delay = GetTickCount();
 		}
