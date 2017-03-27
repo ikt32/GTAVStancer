@@ -197,6 +197,7 @@ void deletePreset(Preset preset, std::vector<Preset> fromWhich) {
 
 	if (settings.DeletePreset(preset, fromFile)) {
 		message = "Pang! Deleted " + preset.Name() + " " + preset.Plate();
+		init();
 	}
 	prevNotification = showNotification((char *)message.c_str(), prevNotification);
 }

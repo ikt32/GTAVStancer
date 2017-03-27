@@ -172,8 +172,7 @@ bool Settings::DeletePreset(Preset preset, const std::string &fileName) {
 	while (pRoot != nullptr) {
 		if (pRoot->FirstChildElement("vehicleName")->GetText() == preset.Name() &&
 			pRoot->FirstChildElement("plate")->GetText() == preset.Plate()) {
-			//TODO: Delete *this node...
-			//pRoot->DeleteChild(pRoot);
+			doc.DeleteNode(pRoot);
 			doc.SaveFile(fileName.c_str());
 			return true;
 		}
