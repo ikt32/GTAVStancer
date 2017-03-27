@@ -7,27 +7,9 @@
 #include "../../ScriptHookV_SDK/inc/enums.h"
 #include "controls.h"
 
-float menux = 0.2f;
-rgba titleText = { 0, 0, 0, 255 };
-rgba titleRect = { 255, 200, 0, 255 };
-rgba scroller = { 80, 80, 80, 200 };
-rgba options = { 0, 0, 0, 255 };
-rgba optionsrect = { 255, 220, 30, 60 };
+Menu::Menu() {}
 
-int optioncount;
-int currentoption;
-bool optionpress = false;
-bool leftpress = false;
-bool rightpress = false;
-bool uppress = false;
-bool downpress = false;
-
-char* currentmenu[100];
-char* actualmenu = "";
-int lastoption[100];
-int menulevel = 0;
-int infocount;
-int Delay = GetTickCount();
+Menu::~Menu() {}
 
 char * Menu::getActualMenu() {
 	return actualmenu;
@@ -115,6 +97,41 @@ bool Menu::Option(char* option) {
 	if (optionpress && currentoption == optioncount) return true;
 	else return false;
 };
+
+// add your line breaks in extra yourself
+// also infolines should be the amount of lines in your extra
+bool Menu::OptionPlus(char* option, std::vector<std::string> extra) {
+	optioncount++;
+	int infoLines = extra.size();
+	bool thisOption = false;
+	if (currentoption == optioncount) thisOption = true;
+
+	if (currentoption <= 16 && optioncount <= 16) {
+	//						x				y											
+		drawText(option, 6,	menux - 0.1f,	(optioncount * 0.035f + 0.125f),	0.5f,	0.5f, options, false); // The menu option txt
+		drawRect(			menux,			((optioncount * 0.035f) + 0.1415f), 0.23f,	0.035f, optionsrect);  // The menu option background
+		if (thisOption) {
+			drawRect(		menux,			((optioncount * 0.035f) + 0.1415f), 0.23f,	0.035f, scroller); // Highlighted line
+			
+			drawRect(		menux + 0.23f,  (0.035f + 0.142f),					0.23f,	0.035f * infoLines, scroller); // Extra text box space
+			for (int i = 0; i < infoLines; i++) {
+				drawText((char *)extra[i].c_str(), 6, menux + 0.125f, (i * 0.035f + 0.075f), 0.5f, 0.5f, options, false);
+			}
+		}
+	}
+
+	else if ((optioncount > (currentoption - 16)) && optioncount <= currentoption)
+	{
+		drawText(option, 6, menux - 0.1f, ((optioncount - (currentoption - 16)) * 0.035f + 0.125f), 0.5f, 0.5f, options, false);
+		drawRect(menux, ((optioncount - (currentoption - 16)) * 0.035f + 0.1415f), 0.23f, 0.035f, optionsrect);
+		if (thisOption) drawRect(menux, ((optioncount - (currentoption - 16)) * 0.035f + 0.1415f), 0.23f, 0.035f, scroller);
+	}
+
+	if (optionpress && currentoption == optioncount) return true;
+	else return false;
+};
+
+
 
 bool Menu::MenuOption(char* option, char* menu) {
 	Option(option);
@@ -526,7 +543,7 @@ void Menu::endMenu() {
 
 void Menu::checkKeys(Controls* controls, void (*onMain)(void), void (*onExit)(void)) {
 	optionpress = false;
-	if (GetTickCount() - Delay > 66) {
+	if (GetTickCount() - Delay > 120) {
 		//if (getKeyPressed(VK_MULTIPLY) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendLb) &&
 		//	CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendRb)) {
 		if (controls->IsKeyJustPressed(Controls::MenuKey)) {

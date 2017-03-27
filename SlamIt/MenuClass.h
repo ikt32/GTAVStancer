@@ -2,6 +2,7 @@
 
 #include <string>
 #include <windows.h>
+#include <vector>
 
 class Controls;
 
@@ -18,37 +19,62 @@ extern rgba optionsrect;
 
 class Menu {
 public:
-	static char* getActualMenu();
-	static int getKeyPressed(int key);
-	static char* StringToChar(std::string string);
-	static bool currentMenu(char* menuname);
-	static void changeMenu(char* menuname);
-	static void backMenu();
+	Menu();
+	~Menu();
+	char* getActualMenu();
+	int getKeyPressed(int key);
+	char* StringToChar(std::string string);
+	bool currentMenu(char* menuname);
+	void changeMenu(char* menuname);
+	void backMenu();
 	
-	static void drawText(char* text, int font, float x, float y, float scalex, float scaley, rgba rgba, bool center);
-	static void drawNotification(char* msg);
-	static void drawRect(float x, float y, float width, float height, rgba rgba);
-	static void drawSprite(char* Streamedtexture, char* textureName, float x, float y, float width, float height, float rotation, rgba rgba);
+	void drawText(char* text, int font, float x, float y, float scalex, float scaley, rgba rgba, bool center);
+	void drawNotification(char* msg);
+	void drawRect(float x, float y, float width, float height, rgba rgba);
+	void drawSprite(char* Streamedtexture, char* textureName, float x, float y, float width, float height, float rotation, rgba rgba);
 	
-	static void Title(char* title);
-	static bool Option(char* option);
-	static bool MenuOption(char* option, char* menu);
-	static bool IntOption(char* option, int *var, int min, int max, int step = 1);
-	static bool FloatOption(char* option, float *var, float min, float max, float step = 0.1);
-	static bool DoubleOption(char *option, double *var, double min, double max, double step);
-	static bool BoolOption(char* option, bool *b00l);
-	static bool BoolSpriteOption(char* option, bool b00l, char* category, char* spriteOn, char* spriteOff);
-	static bool IntArray(char* option, int display[], int *PlaceHolderInt);
-	static bool FloatArray(char* option, float display[], int *PlaceHolderInt);
-	static bool CharArray(char* option, char* display[], int *PlaceHolderInt);
-	static void TeleportOption(char* option, float x, float y, float z);
+	void Title(char* title);
+	bool Option(char* option);
+	bool OptionPlus(char *option, std::vector<std::string> extra);
+	bool MenuOption(char* option, char* menu);
+	bool IntOption(char* option, int *var, int min, int max, int step = 1);
+	bool FloatOption(char* option, float *var, float min, float max, float step = 0.1);
+	bool DoubleOption(char *option, double *var, double min, double max, double step);
+	bool BoolOption(char* option, bool *b00l);
+	bool BoolSpriteOption(char* option, bool b00l, char* category, char* spriteOn, char* spriteOff);
+	bool IntArray(char* option, int display[], int *PlaceHolderInt);
+	bool FloatArray(char* option, float display[], int *PlaceHolderInt);
+	bool CharArray(char* option, char* display[], int *PlaceHolderInt);
+	void TeleportOption(char* option, float x, float y, float z);
 
-	static void IniWriteInt(LPCWSTR file, LPCWSTR section, LPCWSTR key, int value);
-	static int IniReadInt(LPCWSTR file, LPCWSTR section, LPCWSTR key);
+	void IniWriteInt(LPCWSTR file, LPCWSTR section, LPCWSTR key, int value);
+	int IniReadInt(LPCWSTR file, LPCWSTR section, LPCWSTR key);
 
-	static void LoadMenuTheme(LPCWSTR file);
-	static void SaveMenuTheme(LPCWSTR file);
+	void LoadMenuTheme(LPCWSTR file);
+	void SaveMenuTheme(LPCWSTR file);
 
-	static void endMenu();
-	static void checkKeys(Controls* controls, void(*onMain)(void), void(*onExit)(void));
+	void endMenu();
+	void checkKeys(Controls* controls, void(*onMain)(void), void(*onExit)(void));
+private:
+	float menux = 0.2f;
+	rgba titleText = { 0, 0, 0, 255 };
+	rgba titleRect = { 255, 200, 0, 255 };
+	rgba scroller = { 80, 80, 80, 200 };
+	rgba options = { 0, 0, 0, 255 };
+	rgba optionsrect = { 255, 220, 30, 60 };
+
+	int optioncount = 0;
+	int currentoption = 0;
+	bool optionpress = false;
+	bool leftpress = false;
+	bool rightpress = false;
+	bool uppress = false;
+	bool downpress = false;
+
+	char* currentmenu[100];
+	char* actualmenu = "";
+	int lastoption[100];
+	int menulevel = 0;
+	int infocount = 0;
+	int Delay = GetTickCount();
 };
