@@ -184,16 +184,17 @@ void clearmenustuff() {
 void deletePreset(Preset preset, std::vector<Preset> fromWhich) {
 	std::string fromFile;
 	std::string message = "Couldn't find " + preset.Name() + " " + preset.Plate() + " :(";
-	if (fromFile.empty()) {
-		prevNotification = showNotification((char *)message.c_str(), prevNotification);
-		return;
-	}
 	if (fromWhich == presets) {
 		fromFile = presetsFile;
 	}
 	if (fromWhich == saved) {
 		fromFile = savedCarsFile;
 	}
+	if (fromFile.empty()) {
+		prevNotification = showNotification((char *)message.c_str(), prevNotification);
+		return;
+	}
+
 	if (settings.DeletePreset(preset, fromFile)) {
 		message = "Pang! Deleted " + preset.Name() + " " + preset.Plate();
 	}

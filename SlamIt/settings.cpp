@@ -56,8 +56,15 @@ std::vector<Preset> Settings::ReadPresets(const std::string &fileName) {
 	XMLNode * pRoot = doc.FirstChildElement("preset");
 
 	while (pRoot != nullptr) {
-		std::string name = pRoot->FirstChildElement("vehicleName")->GetText();
-		std::string plate = pRoot->FirstChildElement("plate")->GetText();
+		std::string name = "MISSINGNAME";
+		std::string plate = "MISSINGPLATE";
+
+		if (pRoot->FirstChildElement("vehicleName")->GetText() != nullptr) 
+			name = pRoot->FirstChildElement("vehicleName")->GetText();
+
+		if (pRoot->FirstChildElement("plate")->GetText() != nullptr) 
+			plate = pRoot->FirstChildElement("plate")->GetText();
+		
 		float camber;
 		float distance;
 		float height;
@@ -165,6 +172,7 @@ bool Settings::DeletePreset(Preset preset, const std::string &fileName) {
 	while (pRoot != nullptr) {
 		if (pRoot->FirstChildElement("vehicleName")->GetText() == preset.Name() &&
 			pRoot->FirstChildElement("plate")->GetText() == preset.Plate()) {
+			//TODO: Delete *this node...
 			//pRoot->DeleteChild(pRoot);
 			doc.SaveFile(fileName.c_str());
 			return true;
