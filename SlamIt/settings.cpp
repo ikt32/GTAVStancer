@@ -66,17 +66,17 @@ std::vector<Preset> Settings::ReadPresets(const std::string &fileName) {
 			plate = pRoot->FirstChildElement("plate")->GetText();
 		
 		float camber;
-		float distance;
+		float offset;
 		float height;
 		pRoot->FirstChildElement("front")->QueryFloatAttribute("camber", &camber);
-		pRoot->FirstChildElement("front")->QueryFloatAttribute("distance", &distance);
+		pRoot->FirstChildElement("front")->QueryFloatAttribute("offset", &offset);
 		pRoot->FirstChildElement("front")->QueryFloatAttribute("height", &height);
-		struct Preset::WheelInfo front = { camber, distance, height };
+		struct Preset::WheelInfo front = { camber, offset, height };
 
 		pRoot->FirstChildElement("rear")->QueryFloatAttribute("camber", &camber);
-		pRoot->FirstChildElement("rear")->QueryFloatAttribute("distance", &distance);
+		pRoot->FirstChildElement("rear")->QueryFloatAttribute("offset", &offset);
 		pRoot->FirstChildElement("rear")->QueryFloatAttribute("height", &height);
-		struct Preset::WheelInfo rear = { camber, distance, height };
+		struct Preset::WheelInfo rear = { camber, offset, height };
 
 		presets.push_back(Preset(front, rear, name, plate));
 		pRoot = pRoot->NextSibling();
@@ -110,13 +110,13 @@ void Settings::AppendPreset(Preset preset, const std::string &fileName) {
 	
 	XMLElement *pfront = doc.NewElement("front");
 	pfront->SetAttribute("camber", preset.Front.Camber);
-	pfront->SetAttribute("distance", preset.Front.Distance);
+	pfront->SetAttribute("offset", preset.Front.Offset);
 	pfront->SetAttribute("height", preset.Front.Height);
 	pRoot->InsertEndChild(pfront);
 
 	XMLElement *prear = doc.NewElement("rear");
 	prear->SetAttribute("camber", preset.Front.Camber);
-	prear->SetAttribute("distance", preset.Front.Distance);
+	prear->SetAttribute("offset", preset.Front.Offset);
 	prear->SetAttribute("height", preset.Front.Height);
 	pRoot->InsertEndChild(prear);
 
@@ -141,12 +141,12 @@ bool Settings::OverwritePreset(Preset preset, const std::string &fileName) {
 			pRoot->FirstChildElement("plate")->GetText() == preset.Plate()) {
 			XMLElement *pfront = pRoot->FirstChildElement("front");
 			pfront->SetAttribute("camber", preset.Front.Camber);
-			pfront->SetAttribute("distance", preset.Front.Distance);
+			pfront->SetAttribute("offset", preset.Front.Offset);
 			pfront->SetAttribute("height", preset.Front.Height);
 
 			XMLElement *prear = pRoot->FirstChildElement("rear");
 			prear->SetAttribute("camber", preset.Front.Camber);
-			prear->SetAttribute("distance", preset.Front.Distance);
+			prear->SetAttribute("offset", preset.Front.Offset);
 			prear->SetAttribute("height", preset.Front.Height);
 			doc.SaveFile(fileName.c_str());
 			return true;

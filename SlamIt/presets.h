@@ -7,7 +7,7 @@ class Preset
 public:
 	struct WheelInfo {
 		float Camber;
-		float Distance;
+		float Offset;
 		float Height;
 	}; 
 	

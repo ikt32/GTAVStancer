@@ -34,18 +34,18 @@ Controls controls;
 Settings settings(settingsFile);
 
 float frontCamber;
-float frontDistance;
+float frontOffset;
 float frontHeight;
 
 float rearCamber;
-float rearDistance;
+float rearOffset;
 float rearHeight;
 
 bool autoApplied = false;
 
 auto offsetCamber = 0x008;
-auto offsetinvCamber = 0x010;
-auto offsetDistance = 0x030;
+auto offsetCamberInv = 0x010;
+auto offsetOffset = 0x030;
 auto offsetHeight = 0x038;
 
 std::string currentInput = "";
@@ -59,17 +59,17 @@ void getStats(Vehicle handle) {
 	auto wheelPtr = ext.GetWheelsPtr(handle);  // pointer to wheel pointers
 	auto wheelAddr0 =	*reinterpret_cast< uint64_t *     >(wheelPtr + 0x008 * 0);
 	frontCamber =		*reinterpret_cast< const float *  >(wheelAddr0 + offsetCamber);
-	frontDistance =	   -*reinterpret_cast< const float * >(wheelAddr0 + offsetDistance);
+	frontOffset =	   -*reinterpret_cast< const float * >(wheelAddr0 + offsetOffset);
 	frontHeight =		*reinterpret_cast< const float *  >(wheelAddr0 + offsetHeight);
 
 	auto wheelAddr2 =	*reinterpret_cast< uint64_t *     >(wheelPtr + 0x008 * 2);
 	rearCamber =		*reinterpret_cast< const float *  >(wheelAddr2 + offsetCamber);
-	rearDistance =	   -*reinterpret_cast< const float * >(wheelAddr2 + offsetDistance);
+	rearOffset =	   -*reinterpret_cast< const float * >(wheelAddr2 + offsetOffset);
 	rearHeight =		*reinterpret_cast< const float *  >(wheelAddr2 + offsetHeight);
 
 }
 
-void ultraSlam(Vehicle handle, float camberFront, float camberRear, float distanceFront, float distanceRear, float heightFront, float heightRear) {
+void ultraSlam(Vehicle handle, float frontCamber, float rearCamber, float frontOffset, float rearOffset, float frontHeight, float rearHeight) {
 	auto numWheels = ext.GetNumWheels(handle);
 	if (numWheels < 4)
 		return;
@@ -79,23 +79,23 @@ void ultraSlam(Vehicle handle, float camberFront, float camberRear, float distan
 
 	for (auto i = 0; i < numWheels; i++) {
 		float camber;
-		float distance;
+		float offset;
 		float height;
 		if (i == 0 || i ==  1) {
-			camber = camberFront;
-			distance = distanceFront;
-			height = heightFront;
+			camber = frontCamber;
+			offset = frontOffset;
+			height = frontHeight;
 		} else {
-			camber = camberRear;
-			distance = distanceRear;
-			height = heightRear;
+			camber = rearCamber;
+			offset = rearOffset;
+			height = rearHeight;
 		}
 
 		float flip = i % 2 == 0 ? 1.0f : -1.0f; // cuz the wheels on the other side
 		auto wheelAddr = *reinterpret_cast<uint64_t *>(wheelPtr + 0x008 * i);
 		*reinterpret_cast<float *>(wheelAddr + offsetCamber) = camber * flip;
-		*reinterpret_cast<float *>(wheelAddr + offsetinvCamber) = -camber * flip;
-		*reinterpret_cast<float *>(wheelAddr + offsetDistance) = -distance * flip;
+		*reinterpret_cast<float *>(wheelAddr + offsetCamberInv) = -camber * flip;
+		*reinterpret_cast<float *>(wheelAddr + offsetOffset) = -offset * flip;
 		*reinterpret_cast<float *>(wheelAddr + offsetHeight) = height;
 	}
 }
@@ -118,8 +118,8 @@ void init() {
 void savePreset(bool asPreset, std::string presetName) {
 	std::string name = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model);
 	std::string plate;
-	struct Preset::WheelInfo front = { frontCamber, frontDistance, frontHeight};
-	struct Preset::WheelInfo rear = { rearCamber, rearDistance, rearHeight };
+	struct Preset::WheelInfo front = { frontCamber, frontOffset, frontHeight};
+	struct Preset::WheelInfo rear = { rearCamber, rearOffset, rearHeight };
 
 	if (asPreset) {
 		// Blocking? Don't want other things to happen.
@@ -232,11 +232,11 @@ void update_menu() {
 		menu.Title("Suspension menu");
 
 		menu.FloatOption( "Front Camber",	  &frontCamber,   -2.0f, 2.0f, 0.01f);
-		menu.FloatOption( "Front Distance", &frontDistance,  -2.0f, 2.0f,  0.01f);
+		menu.FloatOption( "Front Offset  ", &frontOffset,  -2.0f, 2.0f,  0.01f);
 		menu.FloatOption( "Front Height",   &frontHeight,   -2.0f, 2.0f, 0.01f);
 							 											   
 		menu.FloatOption( "Rear  Camber",    &rearCamber,    -2.0f, 2.0f, 0.01f); 
-		menu.FloatOption( "Rear  Distance",  &rearDistance,   -2.0f, 2.0f,  0.01f);
+		menu.FloatOption( "Rear  Offset  ",  &rearOffset,   -2.0f, 2.0f,  0.01f);
 		menu.FloatOption( "Rear  Height",    &rearHeight,    -2.0f, 2.0f, 0.01f); 
 	}
 
@@ -249,17 +249,17 @@ void update_menu() {
 			std::vector<std::string> info;
 			info.push_back("Press RIGHT to delete preset");
 			info.push_back("Front Camber    " + std::to_string(preset.Front.Camber));
-			info.push_back("Front Distance  " + std::to_string(preset.Front.Distance));
+			info.push_back("Front Offset    " + std::to_string(preset.Front.Offset));
 			info.push_back("Front Height    " + std::to_string(preset.Front.Height));
 			info.push_back("Rear  Camber    " + std::to_string(preset.Rear.Camber));
-			info.push_back("Rear  Distance  " + std::to_string(preset.Rear.Distance));
+			info.push_back("Rear  Offset    " + std::to_string(preset.Rear.Offset));
 			info.push_back("Rear  Height    " + std::to_string(preset.Rear.Height));
 			if (menu.OptionPlus(label_, info, nullptr, std::bind(deletePreset, preset, presets), nullptr)) {
 				ultraSlam(vehicle,
 						  preset.Front.Camber,
 						  preset.Rear.Camber,
-						  preset.Front.Distance,
-						  preset.Rear.Distance,
+						  preset.Front.Offset,
+						  preset.Rear.Offset,
 						  preset.Front.Height,
 						  preset.Rear.Height);
 				getStats(vehicle);
@@ -277,17 +277,17 @@ void update_menu() {
 			std::vector<std::string> info;
 			info.push_back("Press RIGHT to delete preset");
 			info.push_back("Front Camber    " + std::to_string(preset.Front.Camber));
-			info.push_back("Front Distance  " + std::to_string(preset.Front.Distance));
+			info.push_back("Front Offset    " + std::to_string(preset.Front.Offset));
 			info.push_back("Front Height    " + std::to_string(preset.Front.Height));
 			info.push_back("Rear  Camber    " + std::to_string(preset.Rear.Camber));
-			info.push_back("Rear  Distance  " + std::to_string(preset.Rear.Distance));
+			info.push_back("Rear  Offset    " + std::to_string(preset.Rear.Offset));
 			info.push_back("Rear  Height    " + std::to_string(preset.Rear.Height));
 			if (menu.OptionPlus(label_, info, nullptr, std::bind(deletePreset, preset, saved), nullptr)) {
 				ultraSlam(vehicle,
 						  preset.Front.Camber,
 						  preset.Rear.Camber,
-						  preset.Front.Distance,
-						  preset.Rear.Distance,
+						  preset.Front.Offset,
+						  preset.Rear.Offset,
 						  preset.Front.Height,
 						  preset.Rear.Height);
 				getStats(vehicle);
@@ -340,7 +340,7 @@ void update_game() {
 		for (auto preset : saved) {
 			if (VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle) == preset.Plate() &&
 				VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model) == preset.Name()) {
-				ultraSlam(vehicle, preset.Front.Camber, preset.Rear.Camber, preset.Front.Distance, preset.Rear.Distance, preset.Front.Height, preset.Rear.Height);
+				ultraSlam(vehicle, preset.Front.Camber, preset.Rear.Camber, preset.Front.Offset, preset.Rear.Offset, preset.Front.Height, preset.Rear.Height);
 				autoApplied = true;
 				getStats(vehicle);
 				prevNotification = showNotification("Applied preset automatically!", prevNotification);
@@ -348,7 +348,7 @@ void update_game() {
 		}
 	}
 
-	ultraSlam(vehicle, frontCamber, rearCamber, frontDistance, rearDistance, frontHeight, rearHeight);
+	ultraSlam(vehicle, frontCamber, rearCamber, frontOffset, rearOffset, frontHeight, rearHeight);
 }
 
 
