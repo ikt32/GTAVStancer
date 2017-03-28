@@ -79,5 +79,5 @@ private:
 	void changeMenu(char* menuname);
 	void backMenu();
 	char* stringToChar(std::string string);
-
+	void menuBeep();
 };

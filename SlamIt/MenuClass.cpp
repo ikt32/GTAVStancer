@@ -553,6 +553,7 @@ void Menu::CheckKeys(Controls* controls, std::function<void(void) > onMain, std:
 		//if (getKeyPressed(VK_MULTIPLY) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendLb) &&
 		//	CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendRb)) {
 		if (controls->IsKeyJustPressed(Controls::MenuKey)) {
+			menuBeep();
 			if (menulevel == 0) {
 				changeMenu("mainmenu");
 				if (onMain) onMain();
@@ -564,6 +565,7 @@ void Menu::CheckKeys(Controls* controls, std::function<void(void) > onMain, std:
 			delay = GetTickCount();
 		}
 		if (controls->IsKeyJustPressed(Controls::MenuCancel) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendCancel)) {
+			menuBeep();
 			if (menulevel > 0) {
 				backMenu();
 				if (menulevel == 1) { onExit(); }
@@ -571,10 +573,12 @@ void Menu::CheckKeys(Controls* controls, std::function<void(void) > onMain, std:
 			delay = GetTickCount();
 		}
 		if (controls->IsKeyJustPressed(Controls::MenuSelect) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendAccept)) {
+			menuBeep();
 			optionpress = true;
 			delay = GetTickCount();
 		}
 		if (controls->IsKeyJustPressed(Controls::MenuDown) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendDown)) {
+			menuBeep();
 			if (currentoption < optioncount)
 				currentoption++;
 			else
@@ -583,6 +587,7 @@ void Menu::CheckKeys(Controls* controls, std::function<void(void) > onMain, std:
 			downpress = true;
 		}
 		if (controls->IsKeyJustPressed(Controls::MenuUp) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendUp)) {
+			menuBeep();
 			if (currentoption > 1)
 				currentoption--;
 			else
@@ -591,12 +596,19 @@ void Menu::CheckKeys(Controls* controls, std::function<void(void) > onMain, std:
 			uppress = true;
 		}
 		if (controls->IsKeyJustPressed(Controls::MenuLeft) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlPhoneLeft)) {
+			menuBeep();
 			leftpress = true;
 			delay = GetTickCount();
 		}
 		if (controls->IsKeyJustPressed(Controls::MenuRight) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlPhoneRight)) {
+			menuBeep();
 			rightpress = true;
 			delay = GetTickCount();
 		}
 	}
+}
+
+void Menu::menuBeep()
+{
+	AUDIO::PLAY_SOUND_FRONTEND(-1, "NAV_UP_DOWN", "HUD_FRONTEND_DEFAULT_SOUNDSET", 0);
 }
