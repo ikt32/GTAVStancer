@@ -196,7 +196,7 @@ void deletePreset(Preset preset, std::vector<Preset> fromWhich) {
 	}
 
 	if (settings.DeletePreset(preset, fromFile)) {
-		message = "Pang! Deleted " + preset.Name() + " " + preset.Plate();
+		message = "Deleted preset " + preset.Name() + " " + preset.Plate();
 		init();
 	}
 	prevNotification = showNotification((char *)message.c_str(), prevNotification);
@@ -206,7 +206,7 @@ void update_menu() {
 	menu.CheckKeys(&controls, std::bind(init), std::bind(clearmenustuff));
 
 	if (menu.CurrentMenu("mainmenu")) {
-		menu.Title("Slam It v2"); // TODO: Less sucky names
+		menu.Title("VStancer"); // TODO: Less sucky names
 
 		menu.MenuOption("Suspension menu", "suspensionmenu");
 		menu.MenuOption("Load a preset", "presetmenu");
