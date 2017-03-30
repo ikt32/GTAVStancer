@@ -16,8 +16,6 @@ const std::string savedCarsFile = settingsFolder+"SavedCars.xml";
 const std::string presetsFile = settingsFolder +"Presets.xml";
 LPCWSTR menuStyleLocation = L".\\VStancer\\MenuStyle.ini";
 
-std::string cancelText = "wait no";
-
 Hash model;
 Vehicle vehicle;
 Vehicle prevVehicle;
@@ -33,61 +31,74 @@ std::vector<Preset> saved;
 Controls controls;
 Settings settings(settingsFile);
 
+// The current values, updated by getStats
 float frontCamber;
-float frontOffset;
+float frontTrackWidth;
 float frontHeight;
 
 float rearCamber;
-float rearOffset;
+float rearTrackWidth;
 float rearHeight;
 
 bool autoApplied = false;
 
 auto offsetCamber = 0x008;
 auto offsetCamberInv = 0x010;
-auto offsetOffset = 0x030;
+auto offsetTrackWidth = 0x030;
 auto offsetHeight = 0x038;
 
+// Keep track of menu highlight for control disable while typing
 std::string currentInput = "";
 bool presethighlighted = false;
 
+/*
+ *  Update wheels info, not sure if I should move this into vehExt.
+ *  It's not really useful info aside from damage.
+ *  Only the left front and and left rear wheels are used atm.
+ */
 void getStats(Vehicle handle) {
 	auto numWheels = ext.GetNumWheels(handle);
 	if (numWheels < 4)
 		return;
 
-	auto wheelPtr = ext.GetWheelsPtr(handle);  // pointer to wheel pointers
-	auto wheelAddr0 =	*reinterpret_cast< uint64_t *     >(wheelPtr + 0x008 * 0);
-	frontCamber =		*reinterpret_cast< const float *  >(wheelAddr0 + offsetCamber);
-	frontOffset =	   -*reinterpret_cast< const float * >(wheelAddr0 + offsetOffset);
-	frontHeight =		*reinterpret_cast< const float *  >(wheelAddr0 + offsetHeight);
+	auto wheelPtr = ext.GetWheelsPtr(handle);
+	auto wheelAddr0 =	*reinterpret_cast< uint64_t *    >(wheelPtr + 0x008 * 0);
+	frontCamber =		*reinterpret_cast< const float * >(wheelAddr0 + offsetCamber);
+	frontTrackWidth =	   -*reinterpret_cast< const float * >(wheelAddr0 + offsetTrackWidth);
+	frontHeight =		*reinterpret_cast< const float * >(wheelAddr0 + offsetHeight);
 
-	auto wheelAddr2 =	*reinterpret_cast< uint64_t *     >(wheelPtr + 0x008 * 2);
-	rearCamber =		*reinterpret_cast< const float *  >(wheelAddr2 + offsetCamber);
-	rearOffset =	   -*reinterpret_cast< const float * >(wheelAddr2 + offsetOffset);
-	rearHeight =		*reinterpret_cast< const float *  >(wheelAddr2 + offsetHeight);
+	auto wheelAddr2 =	*reinterpret_cast< uint64_t *    >(wheelPtr + 0x008 * 2);
+	rearCamber =		*reinterpret_cast< const float * >(wheelAddr2 + offsetCamber);
+	rearTrackWidth =	   -*reinterpret_cast< const float * >(wheelAddr2 + offsetTrackWidth);
+	rearHeight =		*reinterpret_cast< const float * >(wheelAddr2 + offsetHeight);
 
 }
 
-void ultraSlam(Vehicle handle, float frontCamber, float rearCamber, float frontOffset, float rearOffset, float frontHeight, float rearHeight) {
+
+/*
+ * Write new values. getStats should be called after running this with fresh
+ * new values. Otherwise this should be called constantly unless I get to patching stuff.
+ * Can't camber trikes and stuff for now but why the *fuck* would you want to?
+ */
+void ultraSlam(Vehicle handle, float frontCamber, float rearCamber, float frontTrackWidth, float rearTrackWidth, float frontHeight, float rearHeight) {
 	auto numWheels = ext.GetNumWheels(handle);
 	if (numWheels < 4)
 		return;
 
-	auto wheelPtr = ext.GetWheelsPtr(handle);  // pointer to wheel pointers
-
+	auto wheelPtr = ext.GetWheelsPtr(handle);
 
 	for (auto i = 0; i < numWheels; i++) {
 		float camber;
-		float offset;
+		float trackWidth;
 		float height;
+
 		if (i == 0 || i ==  1) {
 			camber = frontCamber;
-			offset = frontOffset;
+			trackWidth = frontTrackWidth;
 			height = frontHeight;
 		} else {
 			camber = rearCamber;
-			offset = rearOffset;
+			trackWidth = rearTrackWidth;
 			height = rearHeight;
 		}
 
@@ -95,7 +106,7 @@ void ultraSlam(Vehicle handle, float frontCamber, float rearCamber, float frontO
 		auto wheelAddr = *reinterpret_cast<uint64_t *>(wheelPtr + 0x008 * i);
 		*reinterpret_cast<float *>(wheelAddr + offsetCamber) = camber * flip;
 		*reinterpret_cast<float *>(wheelAddr + offsetCamberInv) = -camber * flip;
-		*reinterpret_cast<float *>(wheelAddr + offsetOffset) = -offset * flip;
+		*reinterpret_cast<float *>(wheelAddr + offsetTrackWidth) = -trackWidth * flip;
 		*reinterpret_cast<float *>(wheelAddr + offsetHeight) = height;
 	}
 }
@@ -110,19 +121,17 @@ void init() {
 		saved = settings.ReadPresets(savedCarsFile);
 	}
 	catch (...) {
-		prevNotification = showNotification("Unknown read error!", prevNotification);
+		showNotification("Unknown read error!", &prevNotification);
 	}
 }
-
 
 void savePreset(bool asPreset, std::string presetName) {
 	std::string name = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model);
 	std::string plate;
-	struct Preset::WheelInfo front = { frontCamber, frontOffset, frontHeight};
-	struct Preset::WheelInfo rear = { rearCamber, rearOffset, rearHeight };
+	struct Preset::WheelInfo front = { frontCamber, frontTrackWidth, frontHeight};
+	struct Preset::WheelInfo rear = { rearCamber, rearTrackWidth, rearHeight };
 
 	if (asPreset) {
-		// Blocking? Don't want other things to happen.
 		if (presetName.empty()) {
 			plate = Preset::ReservedPlate();
 		} else {
@@ -143,18 +152,22 @@ void savePreset(bool asPreset, std::string presetName) {
 
 	if (alreadyPresent) {
 		settings.OverwritePreset(Preset(front, rear, name, plate), asPreset ? presetsFile : savedCarsFile);
-		prevNotification = showNotification(asPreset ? "Updated preset" : "Updated car", prevNotification);
+		showNotification(asPreset ? "Updated preset" : "Updated car", &prevNotification);
 	}
 	else {
 		settings.AppendPreset(Preset(front, rear, name, plate), asPreset ? presetsFile : savedCarsFile);
-		prevNotification = showNotification(asPreset ? "Saved new preset" : "Saved new car", prevNotification);
+		showNotification(asPreset ? "Saved new preset" : "Saved new car", &prevNotification);
 	}
 	init();
 }
 
-// ideally this is only done when the thing is highlighted.
+/*
+ * Ah, the typing input thing. Scanning ascii characters from 
+ * ' ' to '~' should cover the alphanumeric range pretty well and it seems to work.
+ * The ' ' isn't detected though so this is weird.
+ * TODO: Fix space character not read
+ */
 std::string evaluateInput() {
-	
 	PLAYER::IS_PLAYER_CONTROL_ON(false);
 	UI::HIDE_HUD_AND_RADAR_THIS_FRAME();
 	UI::SET_PAUSE_MENU_ACTIVE(false);
@@ -175,13 +188,20 @@ std::string evaluateInput() {
 	
 	return currentInput;
 }
+
+/*
+ * This lil' function is just here because std::function stuff. Maybe it'll get more
+ * useful later on when I cram more stuff into it. Anyhow it's run on menu exit.
+ */
 void clearmenustuff() {
 	currentInput.clear();
-
 }
 
-// fuck it, hard-code time :D
-void deletePreset(Preset preset, std::vector<Preset> fromWhich) {
+/*
+ * Scan current configs and remove. Since I cba to scan two lists again and the caller
+ * should probably know which list it is from anyway that list is passed.
+ */
+void deletePreset(Preset preset, const std::vector<Preset> &fromWhich) {
 	std::string fromFile;
 	std::string message = "Couldn't find " + preset.Name() + " " + preset.Plate() + " :(";
 	if (fromWhich == presets) {
@@ -191,7 +211,7 @@ void deletePreset(Preset preset, std::vector<Preset> fromWhich) {
 		fromFile = savedCarsFile;
 	}
 	if (fromFile.empty()) {
-		prevNotification = showNotification((char *)message.c_str(), prevNotification);
+		showNotification(message.c_str(), &prevNotification);
 		return;
 	}
 
@@ -199,9 +219,12 @@ void deletePreset(Preset preset, std::vector<Preset> fromWhich) {
 		message = "Deleted preset " + preset.Name() + " " + preset.Plate();
 		init();
 	}
-	prevNotification = showNotification((char *)message.c_str(), prevNotification);
+	showNotification(message.c_str(), &prevNotification);
 }
 
+/*
+ * I got the menu class from "Unknown Modder", he got it from SudoMod.
+ */
 void update_menu() {
 	menu.CheckKeys(&controls, std::bind(init), std::bind(clearmenustuff));
 
@@ -231,74 +254,68 @@ void update_menu() {
 	if (menu.CurrentMenu("suspensionmenu")) {
 		menu.Title("Suspension menu");
 
-		menu.FloatOption( "Front Camber",	  &frontCamber,   -2.0f, 2.0f, 0.01f);
-		menu.FloatOption( "Front Offset  ", &frontOffset,  -2.0f, 2.0f,  0.01f);
-		menu.FloatOption( "Front Height",   &frontHeight,   -2.0f, 2.0f, 0.01f);
+		menu.FloatOption( "Front Camber     ",	&frontCamber, -2.0f, 2.0f, 0.01f);
+		menu.FloatOption( "Front Track Width", &frontTrackWidth, -2.0f, 2.0f, 0.01f);
+		menu.FloatOption( "Front Height     ",   &frontHeight, -2.0f, 2.0f, 0.01f);
 							 											   
-		menu.FloatOption( "Rear  Camber",    &rearCamber,    -2.0f, 2.0f, 0.01f); 
-		menu.FloatOption( "Rear  Offset  ",  &rearOffset,   -2.0f, 2.0f,  0.01f);
-		menu.FloatOption( "Rear  Height",    &rearHeight,    -2.0f, 2.0f, 0.01f); 
+		menu.FloatOption( "Rear  Camber     ",   &rearCamber, -2.0f, 2.0f, 0.01f); 
+		menu.FloatOption( "Rear  Track Width", &rearTrackWidth, -2.0f, 2.0f, 0.01f);
+		menu.FloatOption( "Rear  Height     ",   &rearHeight, -2.0f, 2.0f, 0.01f); 
 	}
 
-	// Unique name (1 per car model)
 	if (menu.CurrentMenu("presetmenu")) {
 		menu.Title("Load preset");
 		for (auto preset : presets) {
 			std::string label = preset.Name() + " " + preset.Plate();
-			char * label_ = (char *)label.c_str();
 			std::vector<std::string> info;
 			info.push_back("Press RIGHT to delete preset");
-			info.push_back("Front Camber    " + std::to_string(preset.Front.Camber));
-			info.push_back("Front Offset    " + std::to_string(preset.Front.Offset));
-			info.push_back("Front Height    " + std::to_string(preset.Front.Height));
-			info.push_back("Rear  Camber    " + std::to_string(preset.Rear.Camber));
-			info.push_back("Rear  Offset    " + std::to_string(preset.Rear.Offset));
-			info.push_back("Rear  Height    " + std::to_string(preset.Rear.Height));
-			if (menu.OptionPlus(label_, info, nullptr, std::bind(deletePreset, preset, presets), nullptr)) {
+			info.push_back("Front Camber      " + std::to_string(preset.Front.Camber)); // wtf char * vs const char *
+			info.push_back("Front Track width " + std::to_string(preset.Front.TrackWidth));
+			info.push_back("Front Height      " + std::to_string(preset.Front.Height));
+			info.push_back("Rear  Camber      " + std::to_string(preset.Rear.Camber));
+			info.push_back("Rear  Track width " + std::to_string(preset.Rear.TrackWidth));
+			info.push_back("Rear  Height      " + std::to_string(preset.Rear.Height));
+			if (menu.OptionPlus(CharAdapter(label.c_str()), info, nullptr, std::bind(deletePreset, preset, presets), nullptr)) {
 				ultraSlam(vehicle,
 						  preset.Front.Camber,
 						  preset.Rear.Camber,
-						  preset.Front.Offset,
-						  preset.Rear.Offset,
+						  preset.Front.TrackWidth,
+						  preset.Rear.TrackWidth,
 						  preset.Front.Height,
 						  preset.Rear.Height);
 				getStats(vehicle);
-				prevNotification = showNotification("Applied preset!", prevNotification);
+				showNotification("Applied preset!", &prevNotification);
 			}
 		}
 	}
 
-	// Unique name + plate
 	if (menu.CurrentMenu("carsmenu")) {
 		menu.Title("Car overview");
 		for (auto preset : saved) {
 			std::string label = preset.Name() + " " + preset.Plate();
-			char * label_ = (char *)label.c_str();
 			std::vector<std::string> info;
 			info.push_back("Press RIGHT to delete preset");
-			info.push_back("Front Camber    " + std::to_string(preset.Front.Camber));
-			info.push_back("Front Offset    " + std::to_string(preset.Front.Offset));
-			info.push_back("Front Height    " + std::to_string(preset.Front.Height));
-			info.push_back("Rear  Camber    " + std::to_string(preset.Rear.Camber));
-			info.push_back("Rear  Offset    " + std::to_string(preset.Rear.Offset));
-			info.push_back("Rear  Height    " + std::to_string(preset.Rear.Height));
-			if (menu.OptionPlus(label_, info, nullptr, std::bind(deletePreset, preset, saved), nullptr)) {
+			info.push_back("Front Camber      " + std::to_string(preset.Front.Camber)); // wtf char * vs const char *
+			info.push_back("Front Track width " + std::to_string(preset.Front.TrackWidth));
+			info.push_back("Front Height      " + std::to_string(preset.Front.Height));
+			info.push_back("Rear  Camber      " + std::to_string(preset.Rear.Camber));
+			info.push_back("Rear  Track width " + std::to_string(preset.Rear.TrackWidth));
+			info.push_back("Rear  Height      " + std::to_string(preset.Rear.Height));
+			if (menu.OptionPlus(CharAdapter(label.c_str()), info, nullptr, std::bind(deletePreset, preset, saved), nullptr)) {
 				ultraSlam(vehicle,
 						  preset.Front.Camber,
 						  preset.Rear.Camber,
-						  preset.Front.Offset,
-						  preset.Rear.Offset,
+						  preset.Front.TrackWidth,
+						  preset.Rear.TrackWidth,
 						  preset.Front.Height,
 						  preset.Rear.Height);
 				getStats(vehicle);
-				prevNotification = showNotification("Applied preset!", prevNotification);
+				showNotification("Applied preset!", &prevNotification);
 			}
 		}
 	}
 	menu.EndMenu();
 }
-
-
 
 void update_game() {
 	player = PLAYER::PLAYER_ID();
@@ -340,18 +357,16 @@ void update_game() {
 		for (auto preset : saved) {
 			if (VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle) == preset.Plate() &&
 				VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model) == preset.Name()) {
-				ultraSlam(vehicle, preset.Front.Camber, preset.Rear.Camber, preset.Front.Offset, preset.Rear.Offset, preset.Front.Height, preset.Rear.Height);
+				ultraSlam(vehicle, preset.Front.Camber, preset.Rear.Camber, preset.Front.TrackWidth, preset.Rear.TrackWidth, preset.Front.Height, preset.Rear.Height);
 				autoApplied = true;
 				getStats(vehicle);
-				prevNotification = showNotification("Applied preset automatically!", prevNotification);
+				showNotification("Applied preset automatically!", &prevNotification);
 			}
 		}
 	}
 
-	ultraSlam(vehicle, frontCamber, rearCamber, frontOffset, rearOffset, frontHeight, rearHeight);
+	ultraSlam(vehicle, frontCamber, rearCamber, frontTrackWidth, rearTrackWidth, frontHeight, rearHeight);
 }
-
-
 
 void main() {
 	init();

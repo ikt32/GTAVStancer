@@ -73,11 +73,11 @@ private:
 	int infocount = 0;
 	int delay = GetTickCount();
 
-	void drawText(char* text, int font, float x, float y, float scalex, float scaley, rgba rgba, bool center);
+	void drawText(const char *text, int font, float x, float y, float scalex, float scaley, rgba rgba, bool center);
 	void drawRect(float x, float y, float width, float height, rgba rgba);
 	void drawSprite(char* Streamedtexture, char* textureName, float x, float y, float width, float height, float rotation, rgba rgba);
 	void changeMenu(char* menuname);
 	void backMenu();
-	char* stringToChar(std::string string);
+	//char* stringToChar(std::string string);
 	void menuBeep();
 };

@@ -34,5 +34,4 @@ bool Preset::operator==(const Preset &other) const {
 		return true;
 	}
 	return false;
-	// Compare the values, and return a bool result.
 }
