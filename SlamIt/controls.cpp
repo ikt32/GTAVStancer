@@ -2,14 +2,13 @@
 #include "keyboard.h"
 
 
-Controls::Controls()
-{
+Controls::Controls() {
+	std::fill(controlPrev, std::end(controlPrev), false);
+	std::fill(controlCurr, std::end(controlCurr), false);
+	std::fill(controlKeys, std::end(controlKeys), -1);
 }
 
-
-Controls::~Controls()
-{
-}
+Controls::~Controls() { }
 
 bool Controls::IsKeyPressed(int key) {
 	if (IsKeyDown(key))

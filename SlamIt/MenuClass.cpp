@@ -7,7 +7,11 @@
 #include <functional>
 #include "../../GTAVManualTransmission/Gears/Util/Util.hpp"
 
-Menu::Menu() {}
+Menu::Menu() {
+	char* nothing = "";
+	std::fill(currentmenu, std::end(currentmenu), nothing);
+	std::fill(lastoption, std::end(lastoption), 0);
+}
 
 Menu::~Menu() {}
 //
