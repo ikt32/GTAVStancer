@@ -50,6 +50,7 @@ auto offsetHeight = 0x038;
 // Keep track of menu highlight for control disable while typing
 std::string currentInput = "";
 bool presethighlighted = false;
+bool showOnlyCompatible = false;
 
 /*
  *  Update wheels info, not sure if I should move this into vehExt.
@@ -222,6 +223,40 @@ void deletePreset(Preset preset, const std::vector<Preset> &fromWhich) {
 	showNotification(message.c_str(), &prevNotification);
 }
 
+void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
+	menu.Title(CharAdapter(title.c_str()));
+	std::string currentName = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model);
+	std::string compatibleString = "Show only " + currentName;
+	menu.BoolOption(CharAdapter(compatibleString.c_str()), &showOnlyCompatible);
+	for (auto preset : whichPresets) {
+		if (showOnlyCompatible) {
+			if (preset.Name() != currentName) {
+				continue;
+			}
+		}
+		std::string label = preset.Name() + " " + preset.Plate();
+		std::vector<std::string> info;
+		info.push_back("Press RIGHT to delete preset");
+		info.push_back("Front Camber      " + std::to_string(preset.Front.Camber));
+		info.push_back("Front Track width " + std::to_string(preset.Front.TrackWidth));
+		info.push_back("Front Height      " + std::to_string(preset.Front.Height));
+		info.push_back("Rear  Camber      " + std::to_string(preset.Rear.Camber));
+		info.push_back("Rear  Track width " + std::to_string(preset.Rear.TrackWidth));
+		info.push_back("Rear  Height      " + std::to_string(preset.Rear.Height));
+		if (menu.OptionPlus(CharAdapter(label.c_str()), info, nullptr, std::bind(deletePreset, preset, presets), nullptr)) {
+			ultraSlam(vehicle,
+			          preset.Front.Camber,
+			          preset.Rear.Camber,
+			          preset.Front.TrackWidth,
+			          preset.Rear.TrackWidth,
+			          preset.Front.Height,
+			          preset.Rear.Height);
+			getStats(vehicle);
+			showNotification("Applied preset!", &prevNotification);
+		}
+	}
+}
+
 /*
  * I got the menu class from "Unknown Modder", he got it from SudoMod.
  */
@@ -264,55 +299,11 @@ void update_menu() {
 	}
 
 	if (menu.CurrentMenu("presetmenu")) {
-		menu.Title("Load preset");
-		for (auto preset : presets) {
-			std::string label = preset.Name() + " " + preset.Plate();
-			std::vector<std::string> info;
-			info.push_back("Press RIGHT to delete preset");
-			info.push_back("Front Camber      " + std::to_string(preset.Front.Camber)); // wtf char * vs const char *
-			info.push_back("Front Track width " + std::to_string(preset.Front.TrackWidth));
-			info.push_back("Front Height      " + std::to_string(preset.Front.Height));
-			info.push_back("Rear  Camber      " + std::to_string(preset.Rear.Camber));
-			info.push_back("Rear  Track width " + std::to_string(preset.Rear.TrackWidth));
-			info.push_back("Rear  Height      " + std::to_string(preset.Rear.Height));
-			if (menu.OptionPlus(CharAdapter(label.c_str()), info, nullptr, std::bind(deletePreset, preset, presets), nullptr)) {
-				ultraSlam(vehicle,
-						  preset.Front.Camber,
-						  preset.Rear.Camber,
-						  preset.Front.TrackWidth,
-						  preset.Rear.TrackWidth,
-						  preset.Front.Height,
-						  preset.Rear.Height);
-				getStats(vehicle);
-				showNotification("Applied preset!", &prevNotification);
-			}
-		}
+		choosePresetMenu("Load preset", presets);
 	}
 
 	if (menu.CurrentMenu("carsmenu")) {
-		menu.Title("Car overview");
-		for (auto preset : saved) {
-			std::string label = preset.Name() + " " + preset.Plate();
-			std::vector<std::string> info;
-			info.push_back("Press RIGHT to delete preset");
-			info.push_back("Front Camber      " + std::to_string(preset.Front.Camber)); // wtf char * vs const char *
-			info.push_back("Front Track width " + std::to_string(preset.Front.TrackWidth));
-			info.push_back("Front Height      " + std::to_string(preset.Front.Height));
-			info.push_back("Rear  Camber      " + std::to_string(preset.Rear.Camber));
-			info.push_back("Rear  Track width " + std::to_string(preset.Rear.TrackWidth));
-			info.push_back("Rear  Height      " + std::to_string(preset.Rear.Height));
-			if (menu.OptionPlus(CharAdapter(label.c_str()), info, nullptr, std::bind(deletePreset, preset, saved), nullptr)) {
-				ultraSlam(vehicle,
-						  preset.Front.Camber,
-						  preset.Rear.Camber,
-						  preset.Front.TrackWidth,
-						  preset.Rear.TrackWidth,
-						  preset.Front.Height,
-						  preset.Rear.Height);
-				getStats(vehicle);
-				showNotification("Applied preset!", &prevNotification);
-			}
-		}
+		choosePresetMenu("Car overview", saved);
 	}
 	menu.EndMenu();
 }
