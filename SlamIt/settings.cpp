@@ -115,9 +115,9 @@ void Settings::AppendPreset(Preset preset, const std::string &fileName) {
 	pRoot->InsertEndChild(pfront);
 
 	XMLElement *prear = doc.NewElement("rear");
-	prear->SetAttribute("camber", preset.Front.Camber);
-	prear->SetAttribute("trackWidth", preset.Front.TrackWidth);
-	prear->SetAttribute("height", preset.Front.Height);
+	prear->SetAttribute("camber", preset.Rear.Camber);
+	prear->SetAttribute("trackWidth", preset.Rear.TrackWidth);
+	prear->SetAttribute("height", preset.Rear.Height);
 	pRoot->InsertEndChild(prear);
 
 	doc.SaveFile(fileName.c_str());
@@ -145,9 +145,9 @@ bool Settings::OverwritePreset(Preset preset, const std::string &fileName) {
 			pfront->SetAttribute("height", preset.Front.Height);
 
 			XMLElement *prear = pRoot->FirstChildElement("rear");
-			prear->SetAttribute("camber", preset.Front.Camber);
-			prear->SetAttribute("trackWidth", preset.Front.TrackWidth);
-			prear->SetAttribute("height", preset.Front.Height);
+			prear->SetAttribute("camber", preset.Rear.Camber);
+			prear->SetAttribute("trackWidth", preset.Rear.TrackWidth);
+			prear->SetAttribute("height", preset.Rear.Height);
 			doc.SaveFile(fileName.c_str());
 			return true;
 		}
