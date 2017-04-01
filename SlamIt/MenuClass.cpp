@@ -39,7 +39,9 @@ void Menu::nextOption() {
 		currentoption++;
 	else
 		currentoption = 1;
-
+	if (menulevel > 0) {
+		menuBeep();
+	}
 	resetButtonStates();
 }
 
@@ -48,14 +50,20 @@ void Menu::previousOption() {
 		currentoption--;
 	else
 		currentoption = optioncount;
-
+	if (menulevel > 0) {
+		menuBeep();
+	}
 	resetButtonStates();
 }
 
 void Menu::backMenu() {
+	if (menulevel > 0) {
+		menuBeep();
+	}
 	menulevel--;
 	actualmenu = currentmenu[menulevel];
 	currentoption = lastoption[menulevel];
+
 }
 
 void Menu::drawText(const char* text, int font, float x, float y, float scalex, float scaley, rgba rgba, bool center) {
@@ -598,6 +606,9 @@ void Menu::CheckKeys(Controls* controls, std::function<void(void) > onMain, std:
 			delay = GetTickCount();
 		}
 		if (controls->IsKeyJustPressed(Controls::MenuSelect) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendAccept)) {
+			if (menulevel > 0) {
+				menuBeep();
+			}
 			optionpress = true;
 			delay = GetTickCount();
 		}
@@ -612,10 +623,16 @@ void Menu::CheckKeys(Controls* controls, std::function<void(void) > onMain, std:
 			uppress = true;
 		}
 		if (controls->IsKeyJustPressed(Controls::MenuLeft) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlPhoneLeft)) {
+			if (menulevel > 0) {
+				menuBeep();
+			}
 			leftpress = true;
 			delay = GetTickCount();
 		}
 		if (controls->IsKeyJustPressed(Controls::MenuRight) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlPhoneRight)) {
+			if (menulevel > 0) {
+				menuBeep();
+			}
 			rightpress = true;
 			delay = GetTickCount();
 		}
