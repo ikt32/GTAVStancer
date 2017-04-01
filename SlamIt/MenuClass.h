@@ -77,7 +77,10 @@ private:
 	void drawRect(float x, float y, float width, float height, rgba rgba);
 	void drawSprite(char* Streamedtexture, char* textureName, float x, float y, float width, float height, float rotation, rgba rgba);
 	void changeMenu(char* menuname);
+	void nextOption();
+	void previousOption();
 	void backMenu();
-	//char* stringToChar(std::string string);
 	void menuBeep();
+	void resetButtonStates();
+
 };
