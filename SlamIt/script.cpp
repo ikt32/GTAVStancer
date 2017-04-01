@@ -212,6 +212,7 @@ void deletePreset(Preset preset, const std::vector<Preset> &fromWhich) {
 		fromFile = savedCarsFile;
 	}
 	if (fromFile.empty()) {
+		message = "File empty?";
 		showNotification(message.c_str(), &prevNotification);
 		return;
 	}
@@ -243,7 +244,7 @@ void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
 		info.push_back("Rear  Camber      " + std::to_string(preset.Rear.Camber));
 		info.push_back("Rear  Track width " + std::to_string(preset.Rear.TrackWidth));
 		info.push_back("Rear  Height      " + std::to_string(preset.Rear.Height));
-		if (menu.OptionPlus(CharAdapter(label.c_str()), info, nullptr, std::bind(deletePreset, preset, presets), nullptr)) {
+		if (menu.OptionPlus(CharAdapter(label.c_str()), info, nullptr, std::bind(deletePreset, preset, whichPresets), nullptr)) {
 			ultraSlam(vehicle,
 			          preset.Front.Camber,
 			          preset.Rear.Camber,
