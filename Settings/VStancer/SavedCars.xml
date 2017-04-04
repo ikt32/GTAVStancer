@@ -1,0 +1,27 @@
+<preset>
+    <vehicleName>TAILGATE</vehicleName>
+    <plate>5MDS003 </plate>
+    <front camber="-0.059999995" trackWidth="0.80856001" height="-0.70575708"/>
+    <rear camber="-0.029999999" trackWidth="0.84855998" height="-0.71575707"/>
+</preset>
+
+<preset>
+    <vehicleName>FUTO</vehicleName>
+    <plate>DORIFUTO</plate>
+    <front camber="-0.080000006" trackWidth="0.75495094" height="-0.5991565"/>
+    <rear camber="-0.050000012" trackWidth="0.75495094" height="-0.5991565"/>
+</preset>
+
+<preset>
+    <vehicleName>BANSHEE2</vehicleName>
+    <plate>02EBH290</plate>
+    <front camber="-0.059999995" trackWidth="0.94432592" height="-0.67293549"/>
+    <rear camber="-0.059999995" trackWidth="0.94432592" height="-0.67293549"/>
+</preset>
+
+<preset>
+    <vehicleName>ELEGY</vehicleName>
+    <plate>04KPL588</plate>
+    <front camber="-0.099998996" trackWidth="0.7636475" height="-0.47533199"/>
+    <rear camber="-0.099998996" trackWidth="0.7636475" height="-0.47533199"/>
+</preset>
