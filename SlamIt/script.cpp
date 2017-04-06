@@ -8,6 +8,8 @@
 #include "settings.h"
 #include "MenuClass.h"
 
+// TODO: Patching stuff
+
 Menu menu;
 
 const std::string settingsFolder = "./VStancer/";
@@ -179,12 +181,15 @@ std::string evaluateInput() {
 		if (IsKeyJustUp(str2key(std::string(1, c)))) {
 			currentInput += c;
 		}
-		if (IsKeyJustUp(str2key("DELETE"))) {
-			currentInput.pop_back();
-		}
-		if (IsKeyJustUp(str2key("BACKSPACE"))) {
-			currentInput.clear();
-		}
+	}
+	if (IsKeyJustUp(str2key("SPACE"))) {
+		currentInput += ' ';
+	}
+	if (IsKeyJustUp(str2key("DELETE"))) {
+		currentInput.pop_back();
+	}
+	if (IsKeyJustUp(str2key("BACKSPACE"))) {
+		currentInput.clear();
 	}
 	
 	return currentInput;
