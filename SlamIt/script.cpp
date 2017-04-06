@@ -319,24 +319,31 @@ void update_game() {
 	playerPed = PLAYER::PLAYER_PED_ID();
 
 	// check if player ped exists and control is on (e.g. not in a cutscene)
-	if (!ENTITY::DOES_ENTITY_EXIST(playerPed) || !PLAYER::IS_PLAYER_CONTROL_ON(player))
+	if (!ENTITY::DOES_ENTITY_EXIST(playerPed) || !PLAYER::IS_PLAYER_CONTROL_ON(player)) {
+		menu.CloseMenu();
 		return;
+	}
 
 	// check for player ped death and player arrest
-	if (ENTITY::IS_ENTITY_DEAD(playerPed) || PLAYER::IS_PLAYER_BEING_ARRESTED(player, TRUE))
+	if (ENTITY::IS_ENTITY_DEAD(playerPed) || PLAYER::IS_PLAYER_BEING_ARRESTED(player, TRUE)) {
+		menu.CloseMenu();
 		return;
+	}
 
 	vehicle = PED::GET_VEHICLE_PED_IS_IN(playerPed, false);
 
 	if (!ENTITY::DOES_ENTITY_EXIST(vehicle)) {
 		prevVehicle = 0;
 		autoApplied = false;
+		menu.CloseMenu();
 		return;
 	}
 
 	model = ENTITY::GET_ENTITY_MODEL(vehicle);
-	if (!VEHICLE::IS_THIS_MODEL_A_CAR(model) && !VEHICLE::IS_THIS_MODEL_A_QUADBIKE(model))
+	if (!VEHICLE::IS_THIS_MODEL_A_CAR(model) && !VEHICLE::IS_THIS_MODEL_A_QUADBIKE(model)) {
+		menu.CloseMenu();
 		return;
+	}
 
 	if (prevVehicle != vehicle) {
 		ext.ClearAddress();
@@ -344,11 +351,15 @@ void update_game() {
 		getStats(vehicle);
 		prevVehicle = vehicle;
 		autoApplied = false;
+		menu.CloseMenu();
 		return;
 	}
 
-	if (!settings.enableMod)
+	update_menu();
+
+	if (!settings.enableMod) {
 		return;
+	}
 
 	if (settings.autoApply && !autoApplied) {
 		for (auto preset : saved) {
@@ -369,7 +380,6 @@ void main() {
 	init();
 	while (true) {
 		update_game();
-		update_menu();
 		WAIT(0);
 	}
 }

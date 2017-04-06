@@ -651,3 +651,9 @@ void Menu::resetButtonStates() {
 	uppress = false;
 	downpress = false;
 }
+
+void Menu::CloseMenu() {
+	while (menulevel > 0) {
+		backMenu();
+	}
+}

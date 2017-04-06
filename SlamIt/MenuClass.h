@@ -47,7 +47,9 @@ public:
 	void SaveMenuTheme(LPCWSTR file);
 
 	void EndMenu();
-	void Menu::CheckKeys(Controls* controls, std::function<void(void) > onMain, std::function<void(void) > onExit);
+	void CheckKeys(Controls* controls, std::function<void(void) > onMain, std::function<void(void) > onExit);
+	void CloseMenu();
+
 private:
 	int optionsFont = 6;
 	int titleFont = 7;
