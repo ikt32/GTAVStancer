@@ -107,7 +107,7 @@
       <GenerateDebugInformation>No</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalOptions>..\..\lib\ScriptHookV.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>..\..\ScriptHookV_SDK\lib\ScriptHookV.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <BuildLog>
       <Path>log\$(Configuration)\$(MSBuildProjectName).log</Path>

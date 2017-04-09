@@ -422,13 +422,13 @@ void Menu::TeleportOption(char* option, float x, float y, float z) {
 void Menu::IniWriteInt(LPCWSTR file, LPCWSTR section, LPCWSTR key, int value)
 {
 	wchar_t newValue[256];
-	wsprintf(newValue, L"%d", value);
-	WritePrivateProfileString(section, key, newValue, file);
+	wsprintfW(newValue, L"%d", value);
+	WritePrivateProfileStringW(section, key, newValue, file);
 }
 
 int Menu::IniReadInt(LPCWSTR file, LPCWSTR section, LPCWSTR key)
 {
-	int returning = GetPrivateProfileInt(section, key, NULL, file);
+	int returning = GetPrivateProfileIntW(section, key, NULL, file);
 	return returning;
 }
 
@@ -473,7 +473,7 @@ void Menu::SaveMenuTheme(LPCWSTR file)
 	IniWriteInt(file, L"Title Text", L"Green", titleText.g);
 	IniWriteInt(file, L"Title Text", L"Blue", titleText.b);
 	IniWriteInt(file, L"Title Text", L"Alpha", titleText.a);
-	IniWriteInt(file, L"Title Text", L"Fpmt", titleFont);
+	IniWriteInt(file, L"Title Text", L"Font", titleFont);
 
 	// Title Rect
 	IniWriteInt(file, L"Title Rect", L"Red", titleRect.r);
