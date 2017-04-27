@@ -81,6 +81,7 @@
     <OutDir>bin\</OutDir>
     <IntDir>obj\</IntDir>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir);D:\git\ScriptHookV_SDK;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
