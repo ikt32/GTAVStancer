@@ -48,12 +48,64 @@ bool autoApplied = false;
 auto offsetCamber = 0x008;
 auto offsetCamberInv = 0x010;
 auto offsetTrackWidth = 0x030;
-auto offsetHeight = 0x038;
+auto offsetHeight = 0x038; // affected by hydraulics! 0x028 also.
 
 // Keep track of menu highlight for control disable while typing
 std::string currentInput = "";
 bool presethighlighted = false;
 bool showOnlyCompatible = false;
+
+// Assembly shit
+// GTA5.exe + F1023B - F3 0F11 43 28	- movss[rbx + 28], xmm0
+// GTA5.exe + F10240 - F3 44 0F11 63 20 - movss[rbx + 20], xmm12
+// GTA5.exe + F10246 - F3 44 0F11 4B 24 - movss[rbx + 24], xmm9
+// GTA5.exe + F1024C - F3 0F11 73 30	- movss[rbx + 30], xmm6 // track width
+// GTA5.exe + F10251 - F3 0F11 5B 34	- movss[rbx + 34], xmm3 // dunno but it seems to be unique
+// GTA5.exe + F10256 - F3 0F11 63 38	- movss[rbx + 38], xmm4 // height
+
+MemoryAccess mem;
+uintptr_t heightSetInstrPointerAddress = 0;
+int attempts = 0;
+const int maxAttempts = 5;
+byte origInstr[5] = { 0xF3, 0x0F, 0x11, 0x63, 0x38 };
+
+uintptr_t patchShit() {
+	uintptr_t address = NULL;
+	if (heightSetInstrPointerAddress != NULL) {
+		address = heightSetInstrPointerAddress;
+	} else if (attempts < maxAttempts) {
+		address = mem.FindPattern("\xF3\x0F\x11\x63\x38", "xxx?x");
+		heightSetInstrPointerAddress = address;
+	}
+	if (address != NULL) {
+		byte newInstr[5] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
+
+		memcpy(origInstr, reinterpret_cast<void*>(address), 6);	// save whole orig instruction
+		memcpy(reinterpret_cast<void*>(address), newInstr, 6);	// NOP that shit
+		attempts = 0;
+		return address;
+	}
+	attempts++;
+	return 0;
+}
+
+uintptr_t blackMagicToGetWheelPtrFromBytecode() {
+
+	return 0;
+}
+
+// this thing should probably be run in another thread by its own to be FAST?
+void checkEachThing(Vehicle handle) {
+	auto wheelPtr = ext.GetWheelsPtr(handle);  // pointer to wheel pointers
+	auto numWheels = ext.GetNumWheels(handle);
+
+	for (auto i = 0; i < numWheels; i++) {
+		auto wheelAddr = *reinterpret_cast<uint64_t *>(wheelPtr + 0x008 * i);
+		if (blackMagicToGetWheelPtrFromBytecode() == wheelAddr) {
+			patchShit();
+		}
+	}
+}
 
 /*
  *  Update wheels info, not sure if I should move this into vehExt.
@@ -82,7 +134,7 @@ void getStats(Vehicle handle) {
 /*
  * Write new values. getStats should be called after running this with fresh
  * new values. Otherwise this should be called constantly unless I get to patching stuff.
- * Can't camber trikes and stuff for now but why the *fuck* would you want to?
+ * Can't camber trikes and stuff for now
  */
 void ultraSlam(Vehicle handle, float frontCamber, float rearCamber, float frontTrackWidth, float rearTrackWidth, float frontHeight, float rearHeight) {
 	auto numWheels = ext.GetNumWheels(handle);
