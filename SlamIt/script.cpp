@@ -3,10 +3,11 @@
 #include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
 #include "../../GTAVManualTransmission/Gears/Util/Util.hpp"
 #include "../../GTAVManualTransmission/Gears/Util/simpleini/SimpleIni.h"
-#include "controls.h"
+#include "Menu/controls.h"
 #include "presets.h"
 #include "settings.h"
-#include "MenuClass.h"
+#include "Menu/MenuClass.h"
+#include "../../GTAVManualTransmission/Gears/Memory/NativeMemory.hpp"
 
 // TODO: Patching stuff
 
@@ -30,7 +31,7 @@ int prevNotification;
 std::vector<Preset> presets;
 std::vector<Preset> saved;
 
-Controls controls;
+MenuControls controls;
 Settings settings(settingsFile);
 
 // The current values, updated by getStats

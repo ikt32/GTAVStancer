@@ -1,5 +1,5 @@
 #pragma once
-#include "controls.h"
+#include "Menu/controls.h"
 #include <string>
 #include "presets.h"
 #include <vector>
@@ -9,7 +9,7 @@ class Settings
 public:
 	Settings(const std::string &settingsFile);
 	~Settings();
-	void ReadSettings(Controls *control);
+	void ReadSettings(MenuControls *control);
 	void SaveSettings();
 
 	std::vector<Preset> ReadPresets(const std::string &fileName);

@@ -1,10 +1,11 @@
 /* MenuClass.cpp */
 
 #include "MenuClass.h"
-#include "../../ScriptHookV_SDK/inc/natives.h"
-#include "../../ScriptHookV_SDK/inc/enums.h"
-#include "controls.h"
 #include <functional>
+
+#include "inc/natives.h"
+#include "inc/enums.h"
+#include "controls.h"
 #include "../../GTAVManualTransmission/Gears/Util/Util.hpp"
 
 Menu::Menu() {
@@ -68,6 +69,10 @@ void Menu::backMenu() {
 
 void Menu::drawText(const char* text, int font, float x, float y, float scalex, float scaley, rgba rgba, bool center) {
 	UI::SET_TEXT_FONT(font);
+	if (font == 0) { // big-ass Chalet London
+		scaley *= 0.75f;
+		y += 0.0025f;
+	}
 	UI::SET_TEXT_SCALE(scalex, scaley);
 	UI::SET_TEXT_COLOUR(rgba.r, rgba.g, rgba.b, rgba.a);
 	UI::SET_TEXT_CENTRE(center);
@@ -88,8 +93,8 @@ void Menu::drawSprite(char* Streamedtexture, char* textureName, float x, float y
 
 void Menu::Title(char* title) {
 	optioncount = 0;
-	drawText(title, titleFont, menux, 0.095f, 0.85f, 0.85f, titleText, true);
-	drawRect(menux, 0.1175f, 0.23f, 0.085f, titleRect);
+	drawText(title, titleFont, menux, menuy - 0.03f/*0.095f*/, 0.85f, 0.85f, titleText, true);
+	drawRect(menux, menuy - 0.0075f/*0.1175f*/, 0.23f, 0.085f, titleRect);
 };
 
 bool Menu::Option(char* option) {
@@ -100,16 +105,16 @@ bool Menu::Option(char* option) {
 
 	if (currentoption <= 16 && optioncount <= 16)
 	{
-		drawText(option, optionsFont, menux - 0.1f, (optioncount * 0.035f + 0.125f), 0.5f, 0.5f, options, false);
-		drawRect(menux, ((optioncount * 0.035f) + 0.1415f), 0.23f, 0.035f, optionsrect);
-		if (thisOption) drawRect(menux, ((optioncount * 0.035f) + 0.1415f), 0.23f, 0.035f, scroller);
+		drawText(option, optionsFont, menux - 0.1f, (optioncount * 0.035f + menuy), 0.5f, 0.5f, options, false);
+		drawRect(menux, ((optioncount * 0.035f) + (menuy + 0.0165f)/*0.1415f*/), 0.23f, 0.035f, optionsrect);
+		if (thisOption) drawRect(menux, ((optioncount * 0.035f) + (menuy + 0.0165f)/*0.1415f*/), 0.23f, 0.035f, scroller);
 	}
 
 	else if ((optioncount > (currentoption - 16)) && optioncount <= currentoption)
 	{
-		drawText(option, optionsFont, menux - 0.1f, ((optioncount - (currentoption - 16)) * 0.035f + 0.125f), 0.5f, 0.5f, options, false);
-		drawRect(menux, ((optioncount - (currentoption - 16)) * 0.035f + 0.1415f), 0.23f, 0.035f, optionsrect);
-		if (thisOption) drawRect(menux, ((optioncount - (currentoption - 16)) * 0.035f + 0.1415f), 0.23f, 0.035f, scroller);
+		drawText(option, optionsFont, menux - 0.1f, ((optioncount - (currentoption - 16)) * 0.035f + menuy), 0.5f, 0.5f, options, false);
+		drawRect(menux, ((optioncount - (currentoption - 16)) * 0.035f + (menuy + 0.0165f)/*0.1415f*/), 0.23f, 0.035f, optionsrect);
+		if (thisOption) drawRect(menux, ((optioncount - (currentoption - 16)) * 0.035f + (menuy + 0.0165f)/*0.1415f*/), 0.23f, 0.035f, scroller);
 	}
 
 	if (optionpress && currentoption == optioncount) return true;
@@ -118,12 +123,12 @@ bool Menu::Option(char* option) {
 
 void Menu::drawAdditionalInfoBox(std::vector<std::string> &extra, size_t infoLines) {
 	for (int i = 0; i < infoLines; i++) {
-		drawText(extra[i].c_str(), optionsFont, menux + 0.125f, i * 0.035f + 0.125f, 0.5f, 0.5f, options, false);
-		drawRect(										menux + 0.23f,	i * 0.035f + 0.1415f, 0.23f, 0.035f, scroller);
+		drawText(extra[i].c_str(), optionsFont, menux + 0.125f, i * 0.035f + (menuy + 0.035f)/*0.160f*/, 0.5f, 0.5f, options, false);
+		drawRect(menux + 0.23f, i * 0.035f + (menuy + 0.0515f)/*0.1765f*/, 0.23f, 0.035f, optionsrect);
 	}
 }
 
-bool Menu::OptionPlus(char* option, std::vector<std::string> &extra, bool *highlighted, std::function<void (void) > onRight, std::function<void(void) > onLeft) {
+bool Menu::OptionPlus(char* option, std::vector<std::string> &extra, bool *highlighted, std::function<void(void) > onRight, std::function<void(void) > onLeft) {
 	optioncount++;
 	size_t infoLines = extra.size();
 	bool thisOption = false;
@@ -145,20 +150,20 @@ bool Menu::OptionPlus(char* option, std::vector<std::string> &extra, bool *highl
 	}
 
 	if (currentoption <= 16 && optioncount <= 16) {
-		drawText(option, optionsFont,	menux - 0.1f,	(optioncount * 0.035f + 0.125f),	0.5f,	0.5f, options, false);
-		drawRect(						menux,			((optioncount * 0.035f) + 0.1415f), 0.23f,	0.035f, optionsrect);
+		drawText(option, optionsFont, menux - 0.1f, (optioncount * 0.035f + menuy), 0.5f, 0.5f, options, false);
+		drawRect(menux, ((optioncount * 0.035f) + (menuy + 0.0165f)/*0.1415f*/), 0.23f, 0.035f, optionsrect);
 		if (thisOption) {
-			drawRect(menux, ((optioncount * 0.035f) + 0.1415f), 0.23f, 0.035f, scroller); // Highlighted line
+			drawRect(menux, ((optioncount * 0.035f) + (menuy + 0.0165f)/*0.1415f*/), 0.23f, 0.035f, scroller); // Highlighted line
 			drawAdditionalInfoBox(extra, infoLines);
 		}
 	}
 
 	else if ((optioncount > (currentoption - 16)) && optioncount <= currentoption)
 	{
-		drawText(option, optionsFont, menux - 0.1f, ((optioncount - (currentoption - 16)) * 0.035f + 0.125f), 0.5f, 0.5f, options, false);
-		drawRect(menux, ((optioncount - (currentoption - 16)) * 0.035f + 0.1415f), 0.23f, 0.035f, optionsrect);
+		drawText(option, optionsFont, menux - 0.1f, ((optioncount - (currentoption - 16)) * 0.035f + menuy), 0.5f, 0.5f, options, false);
+		drawRect(menux, ((optioncount - (currentoption - 16)) * 0.035f + (menuy + 0.0165f)/*0.1415f*/), 0.23f, 0.035f, optionsrect);
 		if (thisOption) {
-			drawRect(menux, ((optioncount - (currentoption - 16)) * 0.035f + 0.1415f), 0.23f, 0.035f, scroller);
+			drawRect(menux, ((optioncount - (currentoption - 16)) * 0.035f + (menuy + 0.0165f)/*0.1415f*/), 0.23f, 0.035f, scroller);
 			drawAdditionalInfoBox(extra, infoLines);
 		}
 	}
@@ -173,9 +178,9 @@ bool Menu::MenuOption(char* option, char* menu) {
 	Option(option);
 
 	if (currentoption <= 16 && optioncount <= 16)
-		drawText(">>", optionsFont, menux + 0.068f, (optioncount * 0.035f + 0.125f), 0.5f, 0.5f, options, true);
+		drawText(">>", optionsFont, menux + 0.068f, (optioncount * 0.035f + menuy), 0.5f, 0.5f, options, true);
 	else if ((optioncount > (currentoption - 16)) && optioncount <= currentoption)
-		drawText(">>", optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + 0.125f), 0.5f, 0.5f, options, true);
+		drawText(">>", optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + menuy), 0.5f, 0.5f, options, true);
 
 	if (optionpress && currentoption == optioncount) {
 		optionpress = false;
@@ -189,9 +194,9 @@ bool Menu::IntOption(char* option, int *var, int min, int max, int step) {
 	Option(option);
 
 	if (currentoption <= 16 && optioncount <= 16)
-		drawText(("<" + std::to_string(*var) + ">").c_str(), optionsFont, menux + 0.068f, (optioncount * 0.035f + 0.125f), 0.5f, 0.5f, options, true);
+		drawText(("<" + std::to_string(*var) + ">").c_str(), optionsFont, menux + 0.068f, (optioncount * 0.035f + menuy), 0.5f, 0.5f, options, true);
 	else if ((optioncount > (currentoption - 16)) && optioncount <= currentoption)
-		drawText(("<" + std::to_string(*var) + ">").c_str(), optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + 0.125f), 0.5f, 0.5f, options, true);
+		drawText(("<" + std::to_string(*var) + ">").c_str(), optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + menuy), 0.5f, 0.5f, options, true);
 
 	if (currentoption == optioncount) {
 		if (leftpress) {
@@ -222,9 +227,9 @@ bool Menu::FloatOption(char* option, float *var, float min, float max, float ste
 	_snprintf_s(buf, sizeof(buf), "%.2f", *var);
 
 	if (currentoption <= 16 && optioncount <= 16)
-		drawText(("<" + (std::string)buf + ">").c_str(), optionsFont, menux + 0.068f, (optioncount * 0.035f + 0.125f), 0.5f, 0.5f, options, true);
+		drawText(("<" + (std::string)buf + ">").c_str(), optionsFont, menux + 0.068f, (optioncount * 0.035f + menuy), 0.5f, 0.5f, options, true);
 	else if ((optioncount > (currentoption - 16)) && optioncount <= currentoption)
-		drawText(("<" + (std::string)buf + ">").c_str(), optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + 0.125f), 0.5f, 0.5f, options, true);
+		drawText(("<" + (std::string)buf + ">").c_str(), optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + menuy), 0.5f, 0.5f, options, true);
 
 	if (currentoption == optioncount) {
 		if (leftpress) {
@@ -255,9 +260,9 @@ bool Menu::DoubleOption(char* option, double *var, double min, double max, doubl
 	_snprintf_s(buf, sizeof(buf), "%.5f", *var);
 
 	if (currentoption <= 16 && optioncount <= 16)
-		drawText(("<" + (std::string)buf + ">").c_str(), optionsFont, menux + 0.068f, (optioncount * 0.035f + 0.125f), 0.5f, 0.5f, options, true);
+		drawText(("<" + (std::string)buf + ">").c_str(), optionsFont, menux + 0.068f, (optioncount * 0.035f + menuy), 0.5f, 0.5f, options, true);
 	else if ((optioncount > (currentoption - 16)) && optioncount <= currentoption)
-		drawText(("<" + (std::string)buf + ">").c_str(), optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + 0.125f), 0.5f, 0.5f, options, true);
+		drawText(("<" + (std::string)buf + ">").c_str(), optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + menuy), 0.5f, 0.5f, options, true);
 
 	if (currentoption == optioncount) {
 		if (leftpress) {
@@ -286,10 +291,10 @@ bool Menu::BoolOption(char* option, bool *b00l) {
 	Option(option);
 	if (currentoption <= 16 && optioncount <= 16)
 		drawSprite("commonmenu", *b00l ? "shop_box_tick" : "shop_box_blank",
-			menux + 0.068f, (optioncount * 0.035f + 0.141f), 0.03f, 0.05f, 0, options);
+				   menux + 0.068f, (optioncount * 0.035f + (menuy + 0.016f)/*0.141f*/), 0.03f, 0.05f, 0, options);
 	else if ((optioncount > (currentoption - 16)) && optioncount <= currentoption)
 		drawSprite("commonmenu", *b00l ? "shop_box_tick" : "shop_box_blank",
-			menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + 0.141f), 0.03f, 0.05f, 0, options);
+				   menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + (menuy + 0.016f)/*0.141f*/), 0.03f, 0.05f, 0, options);
 	if (optionpress && currentoption == optioncount) {
 		*b00l ^= 1;
 		return true;
@@ -302,10 +307,10 @@ bool Menu::BoolSpriteOption(char* option, bool b00l, char* category, char* sprit
 
 	if (currentoption <= 16 && optioncount <= 16)
 		drawSprite(category, b00l ? spriteOn : spriteOff,
-			menux + 0.068f, (optioncount * 0.035f + 0.141f), 0.03f, 0.05f, 0, options);
+				   menux + 0.068f, (optioncount * 0.035f + (menuy + 0.016f)/*0.141f*/), 0.03f, 0.05f, 0, options);
 	else if ((optioncount > (currentoption - 16)) && optioncount <= currentoption)
 		drawSprite(category, b00l ? spriteOn : spriteOff,
-			menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + 0.141f), 0.03f, 0.05f, 0, options);
+				   menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + (menuy + 0.016f)/*0.141f*/), 0.03f, 0.05f, 0, options);
 
 	if (optionpress && currentoption == optioncount) return true;
 	else return false;
@@ -334,9 +339,9 @@ bool Menu::IntArray(char* option, int display[], int *PlaceHolderInt) {
 		if (*PlaceHolderInt > max) *PlaceHolderInt = min;
 	}
 	if (currentoption <= 16 && optioncount <= 16)
-		drawText(("<" + std::to_string(display[*PlaceHolderInt]) + ">").c_str(), optionsFont, menux + 0.068f, (optioncount * 0.035f + 0.125f), 0.5f, 0.5f, options, true);
+		drawText(("<" + std::to_string(display[*PlaceHolderInt]) + ">").c_str(), optionsFont, menux + 0.068f, (optioncount * 0.035f + menuy), 0.5f, 0.5f, options, true);
 	else if ((optioncount > (currentoption - 16)) && optioncount <= currentoption)
-		drawText(("<" + std::to_string(display[*PlaceHolderInt]) + ">").c_str(), optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + 0.125f), 0.5f, 0.5f, options, true);
+		drawText(("<" + std::to_string(display[*PlaceHolderInt]) + ">").c_str(), optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + menuy), 0.5f, 0.5f, options, true);
 
 	if (optionpress && currentoption == optioncount)
 		return true;
@@ -370,15 +375,16 @@ bool Menu::FloatArray(char* option, float display[], int *PlaceHolderInt) {
 	_snprintf_s(buf, sizeof(buf), "%.2f", display[*PlaceHolderInt]);
 
 	if (currentoption <= 16 && optioncount <= 16)
-		drawText(("<" + (std::string)buf + ">").c_str(), optionsFont, menux + 0.068f, (optioncount * 0.035f + 0.125f), 0.5f, 0.5f, options, true);
+		drawText(("<" + (std::string)buf + ">").c_str(), optionsFont, menux + 0.068f, (optioncount * 0.035f + menuy), 0.5f, 0.5f, options, true);
 	else if ((optioncount > (currentoption - 16)) && optioncount <= currentoption)
-		drawText(("<" + (std::string)buf + ">").c_str(), optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + 0.125f), 0.5f, 0.5f, options, true);
+		drawText(("<" + (std::string)buf + ">").c_str(), optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + menuy), 0.5f, 0.5f, options, true);
 
 	if (optionpress && currentoption == optioncount)
 		return true;
 	else return false;
 }
 
+// why?!
 bool Menu::CharArray(char* option, char* display[], int *PlaceHolderInt) {
 	Option(option);
 
@@ -400,9 +406,45 @@ bool Menu::CharArray(char* option, char* display[], int *PlaceHolderInt) {
 		if (*PlaceHolderInt > max) *PlaceHolderInt = min;
 	}
 	if (currentoption <= 16 && optioncount <= 16)
-		drawText(("<" + (std::string)display[*PlaceHolderInt] + ">").c_str(), optionsFont, menux + 0.068f, (optioncount * 0.035f + 0.125f), 0.5f, 0.5f, options, true);
+		drawText(("<" + (std::string)display[*PlaceHolderInt] + ">").c_str(), optionsFont, menux + 0.068f, (optioncount * 0.035f + menuy), 0.5f, 0.5f, options, true);
 	else if ((optioncount > (currentoption - 16)) && optioncount <= currentoption)
-		drawText(("<" + (std::string)display[*PlaceHolderInt] + ">").c_str(), optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + 0.125f), 0.5f, 0.5f, options, true);
+		drawText(("<" + (std::string)display[*PlaceHolderInt] + ">").c_str(), optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + menuy), 0.5f, 0.5f, options, true);
+
+	if (optionpress && currentoption == optioncount)
+		return true;
+	else return false;
+}
+
+// :ok_hand:
+bool Menu::StringArray(char* option, std::vector<std::string>display, int *PlaceHolderInt) {
+	Option(option);
+
+	int min = 0;
+	int max = static_cast<int>(display.size()) - 1;
+
+	if (currentoption == optioncount) {
+		if (leftpress) {
+			if (*PlaceHolderInt <= min) *PlaceHolderInt = max;
+			else *PlaceHolderInt -= 1;
+			leftpress = false;
+		}
+		if (*PlaceHolderInt < min) *PlaceHolderInt = max;
+		if (rightpress) {
+			if (*PlaceHolderInt >= max) *PlaceHolderInt = min;
+			else *PlaceHolderInt += 1;
+			rightpress = false;
+		}
+		if (*PlaceHolderInt > max) *PlaceHolderInt = min;
+	}
+	std::string leftArrow = "<";
+	std::string rightArrow = ">";
+	if (max == 0) {
+		leftArrow = rightArrow = "";
+	}
+	if (currentoption <= 16 && optioncount <= 16)
+		drawText((leftArrow + (std::string)display[*PlaceHolderInt] + rightArrow).c_str(), optionsFont, menux + 0.068f, (optioncount * 0.035f + menuy), 0.5f, 0.5f, options, true);
+	else if ((optioncount > (currentoption - 16)) && optioncount <= currentoption)
+		drawText((leftArrow + (std::string)display[*PlaceHolderInt] + rightArrow).c_str(), optionsFont, menux + 0.068f, ((optioncount - (currentoption - 16)) * 0.035f + menuy), 0.5f, 0.5f, options, true);
 
 	if (optionpress && currentoption == optioncount)
 		return true;
@@ -433,13 +475,13 @@ int Menu::IniReadInt(LPCWSTR file, LPCWSTR section, LPCWSTR key)
 }
 
 void Menu::LoadMenuTheme(LPCWSTR file)
-{	
+{
 	// Title Text
 	titleText.r = IniReadInt(file, L"Title Text", L"Red");
 	titleText.g = IniReadInt(file, L"Title Text", L"Green");
 	titleText.b = IniReadInt(file, L"Title Text", L"Blue");
 	titleText.a = IniReadInt(file, L"Title Text", L"Alpha");
-	titleFont =   IniReadInt(file, L"Title Text", L"Font");
+	titleFont = IniReadInt(file, L"Title Text", L"Font");
 	// Title Rect
 	titleRect.r = IniReadInt(file, L"Title Rect", L"Red");
 	titleRect.g = IniReadInt(file, L"Title Rect", L"Green");
@@ -467,7 +509,7 @@ void Menu::LoadMenuTheme(LPCWSTR file)
 }
 
 void Menu::SaveMenuTheme(LPCWSTR file)
-{	
+{
 	// Title Text
 	IniWriteInt(file, L"Title Text", L"Red", titleText.r);
 	IniWriteInt(file, L"Title Text", L"Green", titleText.g);
@@ -507,35 +549,35 @@ void Menu::EndMenu() {
 		if (optioncount > 16)
 		{
 			drawText((std::to_string(currentoption) + "/" + std::to_string(optioncount)).c_str(),
-			         optionsFont, menux - 0.1f, (17 * 0.035f + 0.125f), 0.5f, 0.5f, titleText, false);
-			drawRect(menux, (17 * 0.035f + 0.1415f), 0.23f, 0.035f, titleRect);
+					 optionsFont, menux - 0.1f, (17 * 0.035f + menuy), 0.5f, 0.5f, titleText, false);
+			drawRect(menux, (17 * 0.035f + (menuy + 0.0165f)/*0.1415f*/), 0.23f, 0.035f, titleRect);
 
 			if (currentoption == 1) {
-				drawSprite("commonmenu", "arrowright", menux, ((16 + 1) * 0.035f + 0.145f), 0.02f, 0.02f, 90, titleText);
+				drawSprite("commonmenu", "arrowright", menux, ((16 + 1) * 0.035f + (menuy + 0.0175f)/*0.145f*/), 0.02f, 0.02f, 90, titleText);
 			}
 			else if (currentoption == optioncount) {
-				drawSprite("commonmenu", "arrowright", menux, ((16 + 1) * 0.035f + 0.145f), 0.02f, 0.02f, 270, titleText);
+				drawSprite("commonmenu", "arrowright", menux, ((16 + 1) * 0.035f + (menuy + 0.0175f)/*0.145f*/), 0.02f, 0.02f, 270, titleText);
 			}
 			else {
-				drawSprite("commonmenu", "arrowright", menux, ((16 + 1) * 0.035f + 0.14f), 0.02f, 0.02f, 270, titleText);
-				drawSprite("commonmenu", "arrowright", menux, ((16 + 1) * 0.035f + 0.15f), 0.02f, 0.02f, 90, titleText);
+				drawSprite("commonmenu", "arrowright", menux, ((16 + 1) * 0.035f + (menuy + 0.0125f)/*0.14f*/), 0.02f, 0.02f, 270, titleText);
+				drawSprite("commonmenu", "arrowright", menux, ((16 + 1) * 0.035f + (menuy + 0.0225f)/*0.15f*/), 0.02f, 0.02f, 90, titleText);
 			}
 		}
 		else
 		{
 			drawText((std::to_string(currentoption) + "/" + std::to_string(optioncount)).c_str(),
-			         optionsFont, menux - 0.1f, ((optioncount + 1) * 0.035f + 0.125f), 0.5f, 0.5f, titleText, false);
-			drawRect(menux, ((optioncount + 1) * 0.035f + 0.1415f), 0.23f, 0.035f, titleRect);
+					 optionsFont, menux - 0.1f, ((optioncount + 1) * 0.035f + menuy), 0.5f, 0.5f, titleText, false);
+			drawRect(menux, ((optioncount + 1) * 0.035f + (menuy + 0.0165f)/*0.1415f*/), 0.23f, 0.035f, titleRect);
 
 			if (currentoption == 1 && optioncount > 1) {
-				drawSprite("commonmenu", "arrowright", menux, ((optioncount + 1) * 0.035f + 0.145f), 0.02f, 0.02f, 90, titleText);
+				drawSprite("commonmenu", "arrowright", menux, ((optioncount + 1) * 0.035f + (menuy + 0.0175f)/*0.145f*/), 0.02f, 0.02f, 90, titleText);
 			}
 			else if (currentoption == optioncount && optioncount > 1) {
-				drawSprite("commonmenu", "arrowright", menux, ((optioncount + 1) * 0.035f + 0.145f), 0.02f, 0.02f, 270, titleText);
+				drawSprite("commonmenu", "arrowright", menux, ((optioncount + 1) * 0.035f + (menuy + 0.0175f)/*0.145f*/), 0.02f, 0.02f, 270, titleText);
 			}
 			else if (optioncount > 1) {
-				drawSprite("commonmenu", "arrowright", menux, ((optioncount + 1) * 0.035f + 0.14f), 0.02f, 0.02f, 270, titleText);
-				drawSprite("commonmenu", "arrowright", menux, ((optioncount + 1) * 0.035f + 0.15f), 0.02f, 0.02f, 90, titleText);
+				drawSprite("commonmenu", "arrowright", menux, ((optioncount + 1) * 0.035f + (menuy + 0.0125f)/*0.14f*/), 0.02f, 0.02f, 270, titleText);
+				drawSprite("commonmenu", "arrowright", menux, ((optioncount + 1) * 0.035f + (menuy + 0.0225f)/*0.15f*/), 0.02f, 0.02f, 90, titleText);
 			}
 		}
 
@@ -580,12 +622,13 @@ void Menu::EndMenu() {
 	}
 }
 
-void Menu::CheckKeys(Controls* controls, std::function<void(void) > onMain, std::function<void(void) > onExit) {
+void Menu::CheckKeys(MenuControls* controls, std::function<void(void) > onMain, std::function<void(void) > onExit) {
 	optionpress = false;
-	if (GetTickCount() - delay > 120) {
+	if (GetTickCount() - delay > menuTime) {
 		//if (getKeyPressed(VK_MULTIPLY) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendLb) &&
 		//	CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendRb)) {
-		if (controls->IsKeyJustPressed(Controls::MenuKey)) {
+		if (controls->IsKeyJustPressed(MenuControls::MenuKey)) {
+			if (menulevel > 0) { menuTime = menuTimeSlow; }
 			if (menulevel == 0) {
 				changeMenu("mainmenu");
 				if (onMain) onMain();
@@ -596,40 +639,47 @@ void Menu::CheckKeys(Controls* controls, std::function<void(void) > onMain, std:
 			}
 			delay = GetTickCount();
 		}
-		if (controls->IsKeyJustPressed(Controls::MenuCancel) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendCancel)) {
+		if (controls->IsKeyJustPressed(MenuControls::MenuCancel) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendCancel)) {
+			if (menulevel > 0) { menuTime = menuTimeSlow; }
 			if (menulevel > 0) {
-				backMenu();
 				if (menulevel == 1) {
 					if (onExit) onExit();
 				}
+				backMenu();
+
 			}
 			delay = GetTickCount();
 		}
-		if (controls->IsKeyJustPressed(Controls::MenuSelect) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendAccept)) {
+		if (controls->IsKeyJustPressed(MenuControls::MenuSelect) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendAccept)) {
+			if (menulevel > 0) { menuTime = menuTimeSlow; }
 			if (menulevel > 0) {
 				menuBeep();
 			}
 			optionpress = true;
 			delay = GetTickCount();
 		}
-		if (controls->IsKeyJustPressed(Controls::MenuDown) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendDown)) {
+		if (controls->IsKeyJustPressed(MenuControls::MenuDown) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendDown)) {
+			if (menulevel > 0) { menuTime = menuTimeMedium; }
 			nextOption();
 			delay = GetTickCount();
 			downpress = true;
 		}
-		if (controls->IsKeyJustPressed(Controls::MenuUp) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendUp)) {
+		if (controls->IsKeyJustPressed(MenuControls::MenuUp) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlFrontendUp)) {
+			if (menulevel > 0) { menuTime = menuTimeMedium; }
 			previousOption();
 			delay = GetTickCount();
 			uppress = true;
 		}
-		if (controls->IsKeyJustPressed(Controls::MenuLeft) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlPhoneLeft)) {
+		if (controls->IsKeyJustPressed(MenuControls::MenuLeft) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlPhoneLeft)) {
+			if (menulevel > 0) { menuTime = menuTimeFast; }
 			if (menulevel > 0) {
 				menuBeep();
 			}
 			leftpress = true;
 			delay = GetTickCount();
 		}
-		if (controls->IsKeyJustPressed(Controls::MenuRight) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlPhoneRight)) {
+		if (controls->IsKeyJustPressed(MenuControls::MenuRight) || CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, ControlPhoneRight)) {
+			if (menulevel > 0) { menuTime = menuTimeFast; }
 			if (menulevel > 0) {
 				menuBeep();
 			}

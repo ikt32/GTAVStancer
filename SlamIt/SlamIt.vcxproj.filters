@@ -17,9 +17,9 @@
       <Filter>external</Filter>
     </ClCompile>
     <ClCompile Include="settings.cpp" />
-    <ClCompile Include="controls.cpp" />
     <ClCompile Include="presets.cpp" />
-    <ClCompile Include="MenuClass.cpp" />
+    <ClCompile Include="Menu\MenuClass.cpp" />
+    <ClCompile Include="Menu\controls.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="script.h" />
@@ -52,9 +52,9 @@
       <Filter>external</Filter>
     </ClInclude>
     <ClInclude Include="settings.h" />
-    <ClInclude Include="controls.h" />
     <ClInclude Include="presets.h" />
-    <ClInclude Include="MenuClass.h" />
+    <ClInclude Include="Menu\MenuClass.h" />
+    <ClInclude Include="Menu\controls.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="include">

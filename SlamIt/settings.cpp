@@ -1,5 +1,5 @@
 #include "settings.h"
-#include "controls.h"
+#include "Menu/controls.h"
 #include "../../GTAVManualTransmission/Gears/Util/simpleini/SimpleIni.h"
 #include "keyboard.h"
 #include "presets.h"
@@ -13,7 +13,7 @@ Settings::Settings(const std::string &settingsFile): settingsFile(settingsFile) 
 Settings::~Settings() {
 }
 
-void Settings::ReadSettings(Controls *control) {
+void Settings::ReadSettings(MenuControls *control) {
 
 	CSimpleIniA settings;
 	settings.SetUnicode();
@@ -22,13 +22,13 @@ void Settings::ReadSettings(Controls *control) {
 	enableMod = settings.GetBoolValue("OPTIONS", "EnableMod", false);
 	autoApply = settings.GetBoolValue("OPTIONS", "AutoApply", false);
 	
-	control->controlKeys[Controls::ControlType::MenuKey]	= str2key(settings.GetValue("MENU", "MenuKey",		"VK_OEM_4"));
-	control->controlKeys[Controls::ControlType::MenuUp]		= str2key(settings.GetValue("MENU", "MenuUp",		"UP"));
-	control->controlKeys[Controls::ControlType::MenuDown]	= str2key(settings.GetValue("MENU", "MenuDown",		"DOWN"));
-	control->controlKeys[Controls::ControlType::MenuLeft]	= str2key(settings.GetValue("MENU", "MenuLeft",		"LEFT"));
-	control->controlKeys[Controls::ControlType::MenuRight]	= str2key(settings.GetValue("MENU", "MenuRight",	"RIGHT"));
-	control->controlKeys[Controls::ControlType::MenuSelect] = str2key(settings.GetValue("MENU", "MenuSelect",	"RETURN"));
-	control->controlKeys[Controls::ControlType::MenuCancel] = str2key(settings.GetValue("MENU", "MenuCancel",	"BACKSPACE"));
+	control->ControlKeys[MenuControls::ControlType::MenuKey]	= str2key(settings.GetValue("MENU", "MenuKey",		"VK_OEM_4"));
+	control->ControlKeys[MenuControls::ControlType::MenuUp]		= str2key(settings.GetValue("MENU", "MenuUp",		"UP"));
+	control->ControlKeys[MenuControls::ControlType::MenuDown]	= str2key(settings.GetValue("MENU", "MenuDown",		"DOWN"));
+	control->ControlKeys[MenuControls::ControlType::MenuLeft]	= str2key(settings.GetValue("MENU", "MenuLeft",		"LEFT"));
+	control->ControlKeys[MenuControls::ControlType::MenuRight]	= str2key(settings.GetValue("MENU", "MenuRight",	"RIGHT"));
+	control->ControlKeys[MenuControls::ControlType::MenuSelect] = str2key(settings.GetValue("MENU", "MenuSelect",	"RETURN"));
+	control->ControlKeys[MenuControls::ControlType::MenuCancel] = str2key(settings.GetValue("MENU", "MenuCancel",	"BACKSPACE"));
 }
 
 

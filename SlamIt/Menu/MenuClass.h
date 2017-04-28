@@ -1,22 +1,23 @@
 /* MenuClass.h */ /* Taken from SudoMod*/
 
+#pragma once
 #include <string>
 #include <windows.h>
 #include <vector>
 #include <functional>
 
-class Controls;
+class MenuControls;
 
 struct rgba {
 	int r, g, b, a;
 };
 
-extern float menux;
-extern rgba titleText;
-extern rgba titleRect;
-extern rgba scroller;
-extern rgba options;
-extern rgba optionsrect;
+//extern float menux;
+//extern rgba titleText;
+//extern rgba titleRect;
+//extern rgba scroller;
+//extern rgba options;
+//extern rgba optionsrect;
 
 class Menu {
 public:
@@ -36,6 +37,7 @@ public:
 	bool IntArray(char* option, int display[], int *PlaceHolderInt);
 	bool FloatArray(char* option, float display[], int *PlaceHolderInt);
 	bool CharArray(char* option, char* display[], int *PlaceHolderInt);
+	bool StringArray(char *option, std::vector<std::string> display, int *PlaceHolderInt);
 	void TeleportOption(char* option, float x, float y, float z);
 
 	bool CurrentMenu(char* menuname);
@@ -47,18 +49,28 @@ public:
 	void SaveMenuTheme(LPCWSTR file);
 
 	void EndMenu();
-	void CheckKeys(Controls* controls, std::function<void(void) > onMain, std::function<void(void) > onExit);
+	void CheckKeys(MenuControls* controls, std::function<void(void) > onMain, std::function<void(void) > onExit);
 	void CloseMenu();
 
-private:
 	int optionsFont = 6;
 	int titleFont = 7;
 	float menux = 0.2f;
+	float menuy = 0.125f;
 	rgba titleText = { 0, 0, 0, 255 };
 	rgba titleRect = { 255, 200, 0, 255 };
 	rgba scroller = { 80, 80, 80, 200 };
 	rgba options = { 0, 0, 0, 255 };
 	rgba optionsrect = { 255, 220, 30, 60 };
+
+private:
+	//int optionsFont = 6;
+	//int titleFont = 7;
+	//float menux = 0.2f;
+	//rgba titleText = { 0, 0, 0, 255 };
+	//rgba titleRect = { 255, 200, 0, 255 };
+	//rgba scroller = { 80, 80, 80, 200 };
+	//rgba options = { 0, 0, 0, 255 };
+	//rgba optionsrect = { 255, 220, 30, 60 };
 
 	int optioncount = 0;
 	int currentoption = 0;
@@ -73,7 +85,14 @@ private:
 	int lastoption[100];
 	int menulevel = 0;
 	int infocount = 0;
-	int delay = GetTickCount();
+	unsigned int delay = GetTickCount();
+
+	const unsigned int menuTimeSlow = 120;
+	const unsigned int menuTimeMedium = 90;
+	const unsigned int menuTimeFast = 60;
+
+	unsigned int menuTime = menuTimeMedium;
+
 
 	void drawText(const char *text, int font, float x, float y, float scalex, float scaley, rgba rgba, bool center);
 	void drawRect(float x, float y, float width, float height, rgba rgba);

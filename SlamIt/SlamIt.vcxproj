@@ -152,10 +152,10 @@
     <ClCompile Include="..\..\GTAVManualTransmission\Gears\Memory\VehicleExtensions.cpp" />
     <ClCompile Include="..\..\GTAVManualTransmission\Gears\Util\Util.cpp" />
     <ClCompile Include="..\tinyxml2\tinyxml2.cpp" />
-    <ClCompile Include="controls.cpp" />
+    <ClCompile Include="Menu\controls.cpp" />
     <ClCompile Include="keyboard.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MenuClass.cpp" />
+    <ClCompile Include="Menu\MenuClass.cpp" />
     <ClCompile Include="presets.cpp" />
     <ClCompile Include="script.cpp" />
     <ClCompile Include="settings.cpp" />
@@ -170,9 +170,9 @@
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\natives.h" />
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\types.h" />
     <ClInclude Include="..\tinyxml2\tinyxml2.h" />
-    <ClInclude Include="controls.h" />
+    <ClInclude Include="Menu\controls.h" />
     <ClInclude Include="keyboard.h" />
-    <ClInclude Include="MenuClass.h" />
+    <ClInclude Include="Menu\MenuClass.h" />
     <ClInclude Include="presets.h" />
     <ClInclude Include="script.h" />
     <ClInclude Include="settings.h" />
