@@ -5,62 +5,91 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="keyboard.cpp" />
     <ClCompile Include="..\..\GTAVManualTransmission\Gears\Memory\VehicleExtensions.cpp">
-      <Filter>external</Filter>
+      <Filter>External</Filter>
     </ClCompile>
     <ClCompile Include="..\..\GTAVManualTransmission\Gears\Memory\NativeMemory.cpp">
-      <Filter>external</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\GTAVManualTransmission\Gears\Util\Util.cpp">
-      <Filter>external</Filter>
+      <Filter>External</Filter>
     </ClCompile>
     <ClCompile Include="..\tinyxml2\tinyxml2.cpp">
-      <Filter>external</Filter>
+      <Filter>External</Filter>
     </ClCompile>
     <ClCompile Include="settings.cpp" />
     <ClCompile Include="presets.cpp" />
-    <ClCompile Include="Menu\MenuClass.cpp" />
-    <ClCompile Include="Menu\controls.cpp" />
+    <ClCompile Include="Menu\MenuClass.cpp">
+      <Filter>Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="Menu\controls.cpp">
+      <Filter>Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\Util.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\Paths.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="Util\Logger.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="script.h" />
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\enums.h">
-      <Filter>include</Filter>
+      <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\main.h">
-      <Filter>include</Filter>
+      <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\natives.h">
-      <Filter>include</Filter>
+      <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\types.h">
-      <Filter>include</Filter>
+      <Filter>SDK</Filter>
     </ClInclude>
     <ClInclude Include="keyboard.h" />
     <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\VehicleExtensions.hpp">
-      <Filter>external</Filter>
+      <Filter>External</Filter>
     </ClInclude>
     <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\NativeMemory.hpp">
-      <Filter>external</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\GTAVManualTransmission\Gears\Util\Util.hpp">
-      <Filter>external</Filter>
+      <Filter>External</Filter>
     </ClInclude>
     <ClInclude Include="..\..\GTAVManualTransmission\Gears\Util\simpleini\SimpleIni.h">
-      <Filter>external</Filter>
+      <Filter>External</Filter>
     </ClInclude>
     <ClInclude Include="..\tinyxml2\tinyxml2.h">
-      <Filter>external</Filter>
+      <Filter>External</Filter>
     </ClInclude>
     <ClInclude Include="settings.h" />
     <ClInclude Include="presets.h" />
-    <ClInclude Include="Menu\MenuClass.h" />
-    <ClInclude Include="Menu\controls.h" />
+    <ClInclude Include="Menu\MenuClass.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Menu\controls.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Util.hpp">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Paths.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Versions.h">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Logger.hpp">
+      <Filter>Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="include">
+    <Filter Include="Menu">
+      <UniqueIdentifier>{26d64db9-1573-4132-9638-76079dc911c5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{2d981cd8-6f7d-42dd-bf15-44aebcda936b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="SDK">
       <UniqueIdentifier>{01012e73-37b7-4874-b66a-9390e9a83264}</UniqueIdentifier>
     </Filter>
-    <Filter Include="external">
+    <Filter Include="External">
       <UniqueIdentifier>{0897514a-2851-4abe-8806-a5b81136a863}</UniqueIdentifier>
     </Filter>
   </ItemGroup>

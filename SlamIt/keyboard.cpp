@@ -1,7 +1,7 @@
 /*
-		THIS FILE IS A PART OF GTA V SCRIPT HOOK SDK
-					http://dev-c.com
-				(C) Alexander Blade 2015
+THIS FILE IS A PART OF GTA V SCRIPT HOOK SDK
+http://dev-c.com
+(C) Alexander Blade 2015
 */
 
 #include "keyboard.h"
@@ -9,48 +9,111 @@
 
 const int KEYS_SIZE = 255;
 
-struct {
-	DWORD time;
-	BOOL isWithAlt;
-	BOOL wasDownBefore;
-	BOOL isUpNow;
-} keyStates[KEYS_SIZE];
+//struct {
+//	DWORD time;
+//	BOOL isWithAlt;
+//	BOOL wasDownBefore;
+//	BOOL isUpNow;
+//} keyStates[KEYS_SIZE];
 
-void OnKeyboardMessage(DWORD key, WORD repeats, BYTE scanCode, BOOL isExtended, BOOL isWithAlt, BOOL wasDownBefore, BOOL isUpNow)
-{
-	if (key < KEYS_SIZE)
-	{
-		keyStates[key].time = GetTickCount();
-		keyStates[key].isWithAlt = isWithAlt;
-		keyStates[key].wasDownBefore = wasDownBefore;
-		keyStates[key].isUpNow = isUpNow;
-	}
-}
+struct {
+	BOOL curr;
+	BOOL prev;
+} _keyStates[KEYS_SIZE];
+
+//void OnKeyboardMessage(DWORD key, WORD repeats, BYTE scanCode, BOOL isExtended, BOOL isWithAlt, BOOL wasDownBefore, BOOL isUpNow)
+//{
+//	if (key < KEYS_SIZE)
+//	{
+//		keyStates[key].time = GetTickCount();
+//		keyStates[key].isWithAlt = isWithAlt;
+//		keyStates[key].wasDownBefore = wasDownBefore;
+//		keyStates[key].isUpNow = isUpNow;
+//		
+//	}
+//}
 
 // >5 minute holding W or S is improbable
 const int NOW_PERIOD = 100, MAX_DOWN = 300000; // ms
 
+bool IsWindowFocused() {
+	auto foregroundHwnd = GetForegroundWindow();
+	DWORD foregroundProcId;
+	GetWindowThreadProcessId(foregroundHwnd, &foregroundProcId);
+	auto currentProcId = GetCurrentProcessId();
+	if (foregroundProcId == currentProcId) {
+		//showText(0.4, 0.4, 1.0, "We have the window!");
+		return true;
+	}
+	return false;
+}
+
 bool IsKeyDown(DWORD key)
 {
-	return (key < KEYS_SIZE) ? ((GetTickCount() < keyStates[key].time + MAX_DOWN) && !keyStates[key].isUpNow) : false;
+	//return (key < KEYS_SIZE) ? ((GetTickCount() < keyStates[key].time + MAX_DOWN) && !keyStates[key].isUpNow) : false;
+	if (!IsWindowFocused()) return false;
+	if (GetAsyncKeyState(key) & 0x8000) return true;
+	return false;
 }
+
+
 
 bool IsKeyJustUp(DWORD key, bool exclusive)
 {
-	bool b = (key < KEYS_SIZE) ? (GetTickCount() < keyStates[key].time + NOW_PERIOD && keyStates[key].isUpNow) : false;
-	if (b && exclusive)
-		ResetKeyState(key);
-	return b;
+	//bool b = (key < KEYS_SIZE) ? (GetTickCount() < keyStates[key].time + NOW_PERIOD && keyStates[key].isUpNow) : false;
+	//if (b && exclusive)
+	//	ResetKeyState(key);
+	//return b;
+
+	_keyStates[key].curr = IsKeyDown(key);
+	if (!_keyStates[key].curr && _keyStates[key].prev) {
+		_keyStates[key].prev = _keyStates[key].curr;
+		return true;
+	}
+	_keyStates[key].prev = _keyStates[key].curr;
+	return false;
 }
 
-void ResetKeyState(DWORD key)
-{
-	if (key < KEYS_SIZE)
-		memset(&keyStates[key], 0, sizeof(keyStates[0]));
-}
+//void ResetKeyState(DWORD key)
+//{
+//	if (key < KEYS_SIZE)
+//		memset(&keyStates[key], 0, sizeof(keyStates[0]));
+//}
 
 DWORD str2key(std::string humanReadableKey)
 {
+	auto keymap = createKeyMap();
+	if (humanReadableKey.length() == 1)
+	{
+		char letter = humanReadableKey.c_str()[0];
+
+		if ((letter >= 0x30 && letter <= 0x39) || (letter >= 0x41 && letter <= 0x5A))
+		{
+			return static_cast<int>(letter);
+		}
+	}
+
+	//return keymap[humanReadableKey];
+	return GetWithDef(keymap, humanReadableKey, -1);
+}
+
+std::string key2str(DWORD key) {
+	if (key == -1) return "UNKNOWN";
+
+	if ((key >= 0x30 && key <= 0x39) || (key >= 0x41 && key <= 0x5A)) {
+		std::string letter;
+		letter = (char)key;
+		return std::string(letter);
+	}
+
+	auto keymap = createKeyMap();
+	for (auto k : keymap) {
+		if (k.second == key) return k.first;
+	}
+	return "UNKNOWN"; // not in keymap? how???????
+}
+
+std::map<std::string, int> createKeyMap() {
 	std::map<std::string, int> keymap;
 
 	keymap["LMB"] = VK_LBUTTON;
@@ -61,8 +124,8 @@ DWORD str2key(std::string humanReadableKey)
 	keymap["TAB"] = VK_TAB;
 	keymap["CLEAR"] = VK_CLEAR;
 	keymap["RETURN"] = VK_RETURN;
-	keymap["SHIFT"] = VK_SHIFT;
-	keymap["CTRL"] = VK_CONTROL;
+	//keymap["SHIFT"] = VK_SHIFT; // we already have the other two?
+	//keymap["CTRL"] = VK_CONTROL;
 	keymap["ALT"] = VK_MENU;
 	keymap["PAUSE"] = VK_PAUSE;
 	keymap["CAPSLOCK"] = VK_CAPITAL;
@@ -155,28 +218,22 @@ DWORD str2key(std::string humanReadableKey)
 	keymap["LAUNCH_APP2"] = VK_LAUNCH_APP2;
 	keymap["PLAY"] = VK_PLAY;
 	keymap["ZOOM"] = VK_ZOOM;
-	keymap["VK_OEM_1"] = VK_OEM_1;		// : ;
-	keymap["VK_OEM_2"] = VK_OEM_2;		// ? /
-	keymap["VK_OEM_3"] = VK_OEM_3;		// ~ `
-	keymap["VK_OEM_4"] = VK_OEM_4;		// { [
-	keymap["VK_OEM_5"] = VK_OEM_5;		// | Backslash
-	keymap["VK_OEM_6"] = VK_OEM_6;		// } ]
-	keymap["VK_OEM_7"] = VK_OEM_7;		// " '
-	keymap["VK_OEM_8"] = VK_OEM_8;		// § !
-	keymap["VK_OEM_102"] = VK_OEM_102;	// > <
 
+	keymap["VK_OEM_1"] = VK_OEM_1;			// ';:' for US
+	keymap["VK_OEM_PLUS"] = VK_OEM_PLUS;		// '+' any country
+	keymap["VK_OEM_COMMA"] = VK_OEM_COMMA;		// ',' any country
+	keymap["VK_OEM_MINUS"] = VK_OEM_MINUS;		// '-' any country
+	keymap["VK_OEM_PERIOD"] = VK_OEM_PERIOD;  	// '.' any country
+	keymap["VK_OEM_2"] = VK_OEM_2;			// '/?' for US
+	keymap["VK_OEM_3"] = VK_OEM_3;			// '`~' for US
 
+	keymap["VK_OEM_4"] = VK_OEM_4;			//  '[{' for US
+	keymap["VK_OEM_5"] = VK_OEM_5;			//  '\|' for US
+	keymap["VK_OEM_6"] = VK_OEM_6;			//  ']}' for US
+	keymap["VK_OEM_7"] = VK_OEM_7;			//  ''"' for US
+	keymap["VK_OEM_8"] = VK_OEM_8;			// § !
+	keymap["VK_OEM_102"] = VK_OEM_102;		// > <	
 
-	if (humanReadableKey.length() == 1)
-	{
-		char letter = humanReadableKey.c_str()[0];
-
-		if ((letter >= 0x30 && letter <= 0x39) || (letter >= 0x41 && letter <= 0x5A))
-		{
-			return (int)letter;
-		}
-	}
-
-
-	return keymap[humanReadableKey];
+	return keymap;
 }
+

@@ -11,5 +11,8 @@ http://dev-c.com
 #include "..\..\ScriptHookV_SDK\inc\enums.h"
 
 #include "..\..\ScriptHookV_SDK\inc\main.h"
+#include <string>
+
+const std::string modDir  = "\\VStancer";
 
 void ScriptMain();

@@ -1,16 +1,19 @@
 #pragma once
-#include "Menu/controls.h"
 #include <string>
 #include "presets.h"
 #include <vector>
 
+class MenuControls;
+class Menu;
+
 class Settings
 {
 public:
-	Settings(const std::string &settingsFile);
+	Settings();
 	~Settings();
-	void ReadSettings(MenuControls *control);
+	void ReadSettings(MenuControls *control, Menu *menuOpts);
 	void SaveSettings();
+	void SetFiles(const std::string &general, const std::string &menu);
 
 	std::vector<Preset> ReadPresets(const std::string &fileName);
 	void AppendPreset(Preset preset, const std::string &fileName);
@@ -19,5 +22,6 @@ public:
 	bool autoApply = false;
 	bool enableMod = false;
 private:
-	std::string settingsFile;
+	std::string settingsGeneralFile;
+	std::string settingsMenuFile;
 };

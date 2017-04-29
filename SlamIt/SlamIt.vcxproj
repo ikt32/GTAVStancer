@@ -150,7 +150,6 @@
   <ItemGroup>
     <ClCompile Include="..\..\GTAVManualTransmission\Gears\Memory\NativeMemory.cpp" />
     <ClCompile Include="..\..\GTAVManualTransmission\Gears\Memory\VehicleExtensions.cpp" />
-    <ClCompile Include="..\..\GTAVManualTransmission\Gears\Util\Util.cpp" />
     <ClCompile Include="..\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="Menu\controls.cpp" />
     <ClCompile Include="keyboard.cpp" />
@@ -159,12 +158,14 @@
     <ClCompile Include="presets.cpp" />
     <ClCompile Include="script.cpp" />
     <ClCompile Include="settings.cpp" />
+    <ClCompile Include="Util\Logger.cpp" />
+    <ClCompile Include="Util\Paths.cpp" />
+    <ClCompile Include="Util\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\NativeMemory.hpp" />
     <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\VehicleExtensions.hpp" />
     <ClInclude Include="..\..\GTAVManualTransmission\Gears\Util\simpleini\SimpleIni.h" />
-    <ClInclude Include="..\..\GTAVManualTransmission\Gears\Util\Util.hpp" />
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\enums.h" />
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\main.h" />
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\natives.h" />
@@ -176,6 +177,10 @@
     <ClInclude Include="presets.h" />
     <ClInclude Include="script.h" />
     <ClInclude Include="settings.h" />
+    <ClInclude Include="Util\Logger.hpp" />
+    <ClInclude Include="Util\Paths.h" />
+    <ClInclude Include="Util\Util.hpp" />
+    <ClInclude Include="Util\Versions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

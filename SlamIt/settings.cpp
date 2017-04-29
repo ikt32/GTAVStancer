@@ -5,41 +5,55 @@
 #include "presets.h"
 #include <vector>
 #include "../tinyxml2/tinyxml2.h"
+#include "Menu/MenuClass.h"
+#include <fstream>
 
-Settings::Settings(const std::string &settingsFile): settingsFile(settingsFile) {
+Settings::Settings() { }
+
+
+Settings::~Settings() { }
+
+void Settings::SetFiles(const std::string &general, const std::string &menu) {
+	settingsGeneralFile = general;
+	settingsMenuFile = menu;
 }
 
+void Settings::ReadSettings(MenuControls *control, Menu *menuOpts) {
 
-Settings::~Settings() {
-}
-
-void Settings::ReadSettings(MenuControls *control) {
-
-	CSimpleIniA settings;
-	settings.SetUnicode();
-	settings.LoadFile(settingsFile.c_str());
+	CSimpleIniA settingsGeneral;
+	settingsGeneral.SetUnicode();
+	settingsGeneral.LoadFile(settingsGeneralFile.c_str());
 	
-	enableMod = settings.GetBoolValue("OPTIONS", "EnableMod", false);
-	autoApply = settings.GetBoolValue("OPTIONS", "AutoApply", false);
+	enableMod = settingsGeneral.GetBoolValue("OPTIONS", "EnableMod", false);
+	autoApply = settingsGeneral.GetBoolValue("OPTIONS", "AutoApply", false);
 	
-	control->ControlKeys[MenuControls::ControlType::MenuKey]	= str2key(settings.GetValue("MENU", "MenuKey",		"VK_OEM_4"));
-	control->ControlKeys[MenuControls::ControlType::MenuUp]		= str2key(settings.GetValue("MENU", "MenuUp",		"UP"));
-	control->ControlKeys[MenuControls::ControlType::MenuDown]	= str2key(settings.GetValue("MENU", "MenuDown",		"DOWN"));
-	control->ControlKeys[MenuControls::ControlType::MenuLeft]	= str2key(settings.GetValue("MENU", "MenuLeft",		"LEFT"));
-	control->ControlKeys[MenuControls::ControlType::MenuRight]	= str2key(settings.GetValue("MENU", "MenuRight",	"RIGHT"));
-	control->ControlKeys[MenuControls::ControlType::MenuSelect] = str2key(settings.GetValue("MENU", "MenuSelect",	"RETURN"));
-	control->ControlKeys[MenuControls::ControlType::MenuCancel] = str2key(settings.GetValue("MENU", "MenuCancel",	"BACKSPACE"));
+
+	CSimpleIniA settingsMenu;
+	settingsMenu.SetUnicode();
+	settingsMenu.LoadFile(settingsMenuFile.c_str());
+	control->ControlKeys[MenuControls::ControlType::MenuKey]	= str2key(settingsMenu.GetValue("MENU", "MenuKey",		"VK_OEM_4"));
+	control->ControlKeys[MenuControls::ControlType::MenuUp]		= str2key(settingsMenu.GetValue("MENU", "MenuUp",		"UP"));
+	control->ControlKeys[MenuControls::ControlType::MenuDown]	= str2key(settingsMenu.GetValue("MENU", "MenuDown",		"DOWN"));
+	control->ControlKeys[MenuControls::ControlType::MenuLeft]	= str2key(settingsMenu.GetValue("MENU", "MenuLeft",		"LEFT"));
+	control->ControlKeys[MenuControls::ControlType::MenuRight]	= str2key(settingsMenu.GetValue("MENU", "MenuRight",	"RIGHT"));
+	control->ControlKeys[MenuControls::ControlType::MenuSelect] = str2key(settingsMenu.GetValue("MENU", "MenuSelect",	"RETURN"));
+	control->ControlKeys[MenuControls::ControlType::MenuCancel] = str2key(settingsMenu.GetValue("MENU", "MenuCancel",	"BACKSPACE"));
+#pragma warning(push)
+#pragma warning(disable: 4244)
+	menuOpts->menux = settingsMenu.GetDoubleValue("MENU", "MenuX", 0.2);
+	menuOpts->menuy = settingsMenu.GetDoubleValue("MENU", "MenuY", 0.125);
+#pragma warning(pop)
 }
 
 
 void Settings::SaveSettings() {
 	CSimpleIniA settings;
 	settings.SetUnicode();
-	settings.LoadFile(settingsFile.c_str());
+	settings.LoadFile(settingsGeneralFile.c_str());
 
 	settings.SetBoolValue("OPTIONS", "EnableMod", enableMod);
 	settings.SetBoolValue("OPTIONS", "AutoApply", autoApply);
-	settings.SaveFile(settingsFile.c_str());
+	settings.SaveFile(settingsGeneralFile.c_str());
 }
 
 std::vector<Preset> Settings::ReadPresets(const std::string &fileName) {
@@ -90,11 +104,14 @@ void Settings::AppendPreset(Preset preset, const std::string &fileName) {
 	tinyxml2::XMLDocument doc;
 	XMLError err = doc.LoadFile(fileName.c_str());
 
-	if (err == XML_ERROR_EMPTY_DOCUMENT) {
-		
+	if (err == XML_ERROR_FILE_NOT_FOUND || err == XML_ERROR_EMPTY_DOCUMENT) {
+		std::ofstream fs;
+		fs.open(fileName, std::ios::out | std::ios_base::app);
+		fs << "\n";
+		fs.close();
 	}
 	else if (err != XML_SUCCESS) {
-		return;
+		throw std::runtime_error("Couldn't open/load XML with XMLError: " + std::to_string(static_cast<int>(err)));
 	}
 	
 	XMLElement *pRoot = doc.NewElement("preset");

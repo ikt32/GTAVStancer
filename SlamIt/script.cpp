@@ -1,23 +1,24 @@
 #include "script.h"
 #include "keyboard.h"
+#include "Util/Util.hpp"
+
 #include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
-#include "../../GTAVManualTransmission/Gears/Util/Util.hpp"
+#include "../../GTAVManualTransmission/Gears/Memory/NativeMemory.hpp"
 #include "../../GTAVManualTransmission/Gears/Util/simpleini/SimpleIni.h"
+
 #include "Menu/controls.h"
 #include "presets.h"
 #include "settings.h"
 #include "Menu/MenuClass.h"
-#include "../../GTAVManualTransmission/Gears/Memory/NativeMemory.hpp"
-
-// TODO: Patching stuff
+#include "Util/Paths.h"
+#include "Util/Logger.hpp"
 
 Menu menu;
 
-const std::string settingsFolder = "./VStancer/";
-const std::string settingsFile = settingsFolder+"Settings.ini";
-const std::string savedCarsFile = settingsFolder+"SavedCars.xml";
-const std::string presetsFile = settingsFolder +"Presets.xml";
-LPCWSTR menuStyleLocation = L".\\VStancer\\MenuStyle.ini";
+std::string settingsGeneralFile;
+std::string settingsMenuFile;
+std::string savedCarsFile;
+std::string presetCarsFile;
 
 Hash model;
 Vehicle vehicle;
@@ -32,29 +33,30 @@ std::vector<Preset> presets;
 std::vector<Preset> saved;
 
 MenuControls controls;
-Settings settings(settingsFile);
+Settings settings;
 
 // The current values, updated by getStats
-float frontCamber;
-float frontTrackWidth;
-float frontHeight;
+float g_frontCamber;
+float g_frontTrackWidth;
+float g_frontHeight;
 
-float rearCamber;
-float rearTrackWidth;
-float rearHeight;
+float g_rearCamber;
+float g_rearTrackWidth;
+float g_rearHeight;
 
 bool autoApplied = false;
 
-auto offsetCamber = 0x008;
-auto offsetCamberInv = 0x010;
-auto offsetTrackWidth = 0x030;
-auto offsetHeight = 0x038; // affected by hydraulics! 0x028 also.
+const int offsetCamber = 0x008;
+const int offsetCamberInv = 0x010;
+const int offsetTrackWidth = 0x030;
+const int offsetHeight = 0x038; // affected by hydraulics! 0x028 also.
 
 // Keep track of menu highlight for control disable while typing
 std::string currentInput = "";
 bool presethighlighted = false;
 bool showOnlyCompatible = false;
 
+// TODO: Patching stuff
 // Assembly shit
 // GTA5.exe + F1023B - F3 0F11 43 28	- movss[rbx + 28], xmm0
 // GTA5.exe + F10240 - F3 44 0F11 63 20 - movss[rbx + 20], xmm12
@@ -119,17 +121,16 @@ void getStats(Vehicle handle) {
 
 	auto wheelPtr = ext.GetWheelsPtr(handle);
 	auto wheelAddr0 =	*reinterpret_cast< uint64_t *    >(wheelPtr + 0x008 * 0);
-	frontCamber =		*reinterpret_cast< const float * >(wheelAddr0 + offsetCamber);
-	frontTrackWidth =	   -*reinterpret_cast< const float * >(wheelAddr0 + offsetTrackWidth);
-	frontHeight =		*reinterpret_cast< const float * >(wheelAddr0 + offsetHeight);
+	g_frontCamber =		*reinterpret_cast< const float * >(wheelAddr0 + offsetCamber);
+	g_frontTrackWidth =	   -*reinterpret_cast< const float * >(wheelAddr0 + offsetTrackWidth);
+	g_frontHeight =		*reinterpret_cast< const float * >(wheelAddr0 + offsetHeight);
 
 	auto wheelAddr2 =	*reinterpret_cast< uint64_t *    >(wheelPtr + 0x008 * 2);
-	rearCamber =		*reinterpret_cast< const float * >(wheelAddr2 + offsetCamber);
-	rearTrackWidth =	   -*reinterpret_cast< const float * >(wheelAddr2 + offsetTrackWidth);
-	rearHeight =		*reinterpret_cast< const float * >(wheelAddr2 + offsetHeight);
+	g_rearCamber =		*reinterpret_cast< const float * >(wheelAddr2 + offsetCamber);
+	g_rearTrackWidth =	   -*reinterpret_cast< const float * >(wheelAddr2 + offsetTrackWidth);
+	g_rearHeight =		*reinterpret_cast< const float * >(wheelAddr2 + offsetHeight);
 
 }
-
 
 /*
  * Write new values. getStats should be called after running this with fresh
@@ -168,24 +169,39 @@ void ultraSlam(Vehicle handle, float frontCamber, float rearCamber, float frontT
 }
 
 void init() {
-	settings.ReadSettings(&controls);
-	menu.LoadMenuTheme(menuStyleLocation);
+	settings.ReadSettings(&controls, &menu);
+	menu.LoadMenuTheme(std::wstring(settingsMenuFile.begin(), settingsMenuFile.end()).c_str());
+	logger.Write("Settings read");
 
 	// Depending on how crappy the XML is this shit might crash and burn.
 	try {
-		presets = settings.ReadPresets(presetsFile);
+		presets = settings.ReadPresets(presetCarsFile);
 		saved = settings.ReadPresets(savedCarsFile);
 	}
 	catch (...) {
-		showNotification("Unknown read error!", &prevNotification);
+		showSubtitle("Unknown XML read error!");
+		logger.Write("Unknown XML read error!");
 	}
+	logger.Write("Initialization finished");
+
 }
 
 void savePreset(bool asPreset, std::string presetName) {
 	std::string name = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model);
 	std::string plate;
-	struct Preset::WheelInfo front = { frontCamber, frontTrackWidth, frontHeight};
-	struct Preset::WheelInfo rear = { rearCamber, rearTrackWidth, rearHeight };
+	struct Preset::WheelInfo front = { g_frontCamber, g_frontTrackWidth, g_frontHeight};
+	struct Preset::WheelInfo rear = { g_rearCamber, g_rearTrackWidth, g_rearHeight };
+
+	if (asPreset) {
+		GAMEPLAY::DISPLAY_ONSCREEN_KEYBOARD(true, "Preset Name", "", "", "", "", "", 127);
+		while (GAMEPLAY::UPDATE_ONSCREEN_KEYBOARD() == 0) WAIT(0);
+		if (!GAMEPLAY::GET_ONSCREEN_KEYBOARD_RESULT()) {
+			showNotification("Cancelled save");
+			return;
+		}
+		presetName = GAMEPLAY::GET_ONSCREEN_KEYBOARD_RESULT();
+		
+	}
 
 	if (asPreset) {
 		if (presetName.empty()) {
@@ -207,12 +223,19 @@ void savePreset(bool asPreset, std::string presetName) {
 	}
 
 	if (alreadyPresent) {
-		settings.OverwritePreset(Preset(front, rear, name, plate), asPreset ? presetsFile : savedCarsFile);
+		settings.OverwritePreset(Preset(front, rear, name, plate), asPreset ? presetCarsFile : savedCarsFile);
 		showNotification(asPreset ? "Updated preset" : "Updated car", &prevNotification);
 	}
 	else {
-		settings.AppendPreset(Preset(front, rear, name, plate), asPreset ? presetsFile : savedCarsFile);
-		showNotification(asPreset ? "Saved new preset" : "Saved new car", &prevNotification);
+		try {
+			settings.AppendPreset(Preset(front, rear, name, plate), asPreset ? presetCarsFile : savedCarsFile);
+			showNotification(asPreset ? "Saved new preset" : "Saved new car", &prevNotification);
+		}
+		catch (std::runtime_error ex) {
+			logger.Write(ex.what());
+			logger.Write("Saving of " + plate + " to " + (asPreset ? presetCarsFile : savedCarsFile) + " failed!");
+			showNotification("Saving to xml failed!");
+		}
 	}
 	init();
 }
@@ -264,7 +287,7 @@ void deletePreset(Preset preset, const std::vector<Preset> &fromWhich) {
 	std::string fromFile;
 	std::string message = "Couldn't find " + preset.Name() + " " + preset.Plate() + " :(";
 	if (fromWhich == presets) {
-		fromFile = presetsFile;
+		fromFile = presetCarsFile;
 	}
 	if (fromWhich == saved) {
 		fromFile = savedCarsFile;
@@ -296,12 +319,12 @@ void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
 		std::string label = preset.Name() + " " + preset.Plate();
 		std::vector<std::string> info;
 		info.push_back("Press RIGHT to delete preset");
-		info.push_back("Front Camber      " + std::to_string(preset.Front.Camber));
-		info.push_back("Front Track width " + std::to_string(preset.Front.TrackWidth));
-		info.push_back("Front Height      " + std::to_string(preset.Front.Height));
-		info.push_back("Rear  Camber      " + std::to_string(preset.Rear.Camber));
-		info.push_back("Rear  Track width " + std::to_string(preset.Rear.TrackWidth));
-		info.push_back("Rear  Height      " + std::to_string(preset.Rear.Height));
+		info.push_back("Front Camber\t\t" + std::to_string(preset.Front.Camber));
+		info.push_back("Front Track width\t" + std::to_string(preset.Front.TrackWidth));
+		info.push_back("Front Height\t\t" + std::to_string(preset.Front.Height));
+		info.push_back("Rear  Camber\t\t" + std::to_string(preset.Rear.Camber));
+		info.push_back("Rear  Track width\t" + std::to_string(preset.Rear.TrackWidth));
+		info.push_back("Rear  Height\t\t" + std::to_string(preset.Rear.Height));
 		if (menu.OptionPlus(CharAdapter(label.c_str()), info, nullptr, std::bind(deletePreset, preset, whichPresets), nullptr)) {
 			ultraSlam(vehicle,
 			          preset.Front.Camber,
@@ -325,36 +348,29 @@ void update_menu() {
 	if (menu.CurrentMenu("mainmenu")) {
 		menu.Title("VStancer"); // TODO: Less sucky names
 
+		if (menu.BoolOption("Enable mod", &settings.enableMod)) { settings.SaveSettings(); }
 		menu.MenuOption("Suspension menu", "suspensionmenu");
 		menu.MenuOption("Load a preset", "presetmenu");
 		menu.MenuOption("List car configs", "carsmenu");
 		if (menu.Option("Save as car")) {
 			savePreset(false,"");
 		}
-		std::vector<std::string> derp = { "Enter preset name", currentInput };
-		if (menu.OptionPlus("Save as preset", derp , &presethighlighted, nullptr, nullptr)) {
-			savePreset(true , derp[1]);
-			currentInput.clear();
-		}
-		if (presethighlighted) {
-			evaluateInput();
-			presethighlighted = false;
+		if (menu.Option("Save as preset")) {
+			savePreset(true , "");
 		}
 		if (menu.BoolOption("Auto apply cars", &settings.autoApply)) { settings.SaveSettings(); }
-		if (menu.BoolOption("Enable mod",		&settings.enableMod)) { settings.SaveSettings(); }
-
 	}
 
 	if (menu.CurrentMenu("suspensionmenu")) {
 		menu.Title("Suspension menu");
 
-		menu.FloatOption( "Front Camber     ",	&frontCamber, -2.0f, 2.0f, 0.01f);
-		menu.FloatOption( "Front Track Width", &frontTrackWidth, -2.0f, 2.0f, 0.01f);
-		menu.FloatOption( "Front Height     ",   &frontHeight, -2.0f, 2.0f, 0.01f);
+		menu.FloatOption( "Front Camber\t\t",	&g_frontCamber, -2.0f, 2.0f, 0.01f);
+		menu.FloatOption( "Front Track Width", &g_frontTrackWidth, -2.0f, 2.0f, 0.01f);
+		menu.FloatOption( "Front Height\t\t",   &g_frontHeight, -2.0f, 2.0f, 0.01f);
 							 											   
-		menu.FloatOption( "Rear  Camber     ",   &rearCamber, -2.0f, 2.0f, 0.01f); 
-		menu.FloatOption( "Rear  Track Width", &rearTrackWidth, -2.0f, 2.0f, 0.01f);
-		menu.FloatOption( "Rear  Height     ",   &rearHeight, -2.0f, 2.0f, 0.01f); 
+		menu.FloatOption( "Rear  Camber\t\t",   &g_rearCamber, -2.0f, 2.0f, 0.01f); 
+		menu.FloatOption( "Rear  Track Width", &g_rearTrackWidth, -2.0f, 2.0f, 0.01f);
+		menu.FloatOption( "Rear  Height\t\t",   &g_rearHeight, -2.0f, 2.0f, 0.01f); 
 	}
 
 	if (menu.CurrentMenu("presetmenu")) {
@@ -426,10 +442,23 @@ void update_game() {
 		}
 	}
 
-	ultraSlam(vehicle, frontCamber, rearCamber, frontTrackWidth, rearTrackWidth, frontHeight, rearHeight);
+	ultraSlam(vehicle, g_frontCamber, g_rearCamber, g_frontTrackWidth, g_rearTrackWidth, g_frontHeight, g_rearHeight);
 }
 
 void main() {
+	logger.Write("Script started");
+
+	settingsGeneralFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\settings_general.ini";
+	settingsMenuFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\settings_menu.ini";
+	savedCarsFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\car_preset.xml";
+	presetCarsFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\car_saved.xml";
+	settings.SetFiles(settingsGeneralFile, settingsMenuFile);
+
+	logger.Write("Loading " + settingsGeneralFile);
+	logger.Write("Loading " + settingsMenuFile);
+	logger.Write("Loading " + savedCarsFile);
+	logger.Write("Loading " + presetCarsFile);
+
 	init();
 	while (true) {
 		update_game();
