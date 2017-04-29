@@ -407,8 +407,13 @@ void update_menu() {
 	if (menu.CurrentMenu("othermenu")) {
 		menu.Title("Other options");
 
-		if (menu.IntOption("Slam level (SlamIt)", &slamLevel, 0, 2, 1)) { oldSlam(vehicle, slamLevel); }
-		if (menu.FloatOption("Visual Height (LSC)", &g_visualHeight, -0.5f, 0.5f, 0.01f)) { ext.SetVisualHeight(vehicle, g_visualHeight); }
+		if (menu.IntOption("Slam level (SlamIt)", &slamLevel, 0, 2, 1)) {
+			oldSlam(vehicle, slamLevel);
+			CONTROLS::_SET_CONTROL_NORMAL(0, ControlVehicleAccelerate, 0.3f);
+		}
+		if (menu.FloatOption("Visual Height (LSC)", &g_visualHeight, -0.5f, 0.5f, 0.01f)) {
+			ext.SetVisualHeight(vehicle, g_visualHeight);
+		}
 	}
 	menu.EndMenu();
 }
