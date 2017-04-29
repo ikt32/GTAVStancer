@@ -44,6 +44,9 @@ float g_rearCamber;
 float g_rearTrackWidth;
 float g_rearHeight;
 
+float g_visualHeight;
+int slamLevel = 0;
+
 bool autoApplied = false;
 
 const int offsetCamber = 0x008;
@@ -130,6 +133,7 @@ void getStats(Vehicle handle) {
 	g_rearTrackWidth =	   -*reinterpret_cast< const float * >(wheelAddr2 + offsetTrackWidth);
 	g_rearHeight =		*reinterpret_cast< const float * >(wheelAddr2 + offsetHeight);
 
+	g_visualHeight = ext.GetVisualHeight(handle);
 }
 
 /*
@@ -165,6 +169,24 @@ void ultraSlam(Vehicle handle, float frontCamber, float rearCamber, float frontT
 		*reinterpret_cast<float *>(wheelAddr + offsetCamberInv) = -camber * flip;
 		*reinterpret_cast<float *>(wheelAddr + offsetTrackWidth) = -trackWidth * flip;
 		*reinterpret_cast<float *>(wheelAddr + offsetHeight) = height;
+	}
+}
+
+/*
+ * Old "Damage the wheels" thing:
+ */
+void oldSlam(Vehicle vehicle, int slamLevel) {
+	switch (slamLevel) {
+		case (2):
+			ext.SetWheelsHealth(vehicle, 0.0f);
+			break;
+		case (1):
+			ext.SetWheelsHealth(vehicle, 400.0f);
+			break;
+		default:
+		case (0):
+			ext.SetWheelsHealth(vehicle, 1000.0f);
+			break;
 	}
 }
 
@@ -359,6 +381,7 @@ void update_menu() {
 			savePreset(true , "");
 		}
 		if (menu.BoolOption("Auto apply cars", &settings.autoApply)) { settings.SaveSettings(); }
+		menu.MenuOption("Other stuff", "othermenu");
 	}
 
 	if (menu.CurrentMenu("suspensionmenu")) {
@@ -379,6 +402,13 @@ void update_menu() {
 
 	if (menu.CurrentMenu("carsmenu")) {
 		choosePresetMenu("Car overview", saved);
+	}
+
+	if (menu.CurrentMenu("othermenu")) {
+		menu.Title("Other options");
+
+		if (menu.IntOption("Slam level (SlamIt)", &slamLevel, 0, 2, 1)) { oldSlam(vehicle, slamLevel); }
+		if (menu.FloatOption("Visual Height (LSC)", &g_visualHeight, -0.5f, 0.5f, 0.01f)) { ext.SetVisualHeight(vehicle, g_visualHeight); }
 	}
 	menu.EndMenu();
 }
