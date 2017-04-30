@@ -6,26 +6,26 @@
 #include "inc/natives.h"
 #include "inc/enums.h"
 #include "controls.h"
-#include "../../GTAVManualTransmission/Gears/Util/Util.hpp"
+#include "Util/Util.hpp"
 
 Menu::Menu() {
-	char* nothing = "";
-	std::fill(currentmenu, std::end(currentmenu), nothing);
-	std::fill(lastoption, std::end(lastoption), 0);
+	//std::string  nothing = "";
+	//std::fill(currentmenu, std::end(currentmenu), nothing);
+	//std::fill(lastoption, std::end(lastoption), 0);
 }
 
 Menu::~Menu() {}
 //
-//char* Menu::stringToChar(std::string string) {
+//std::string  Menu::stringToChar(std::string string) {
 //	return _strdup(string.c_str());
 //}
 
-bool Menu::CurrentMenu(char* menuname) {
+bool Menu::CurrentMenu(std::string  menuname) {
 	if (menuname == actualmenu) return true;
 	else return false;
 }
 
-void Menu::changeMenu(char* menuname) {
+void Menu::changeMenu(std::string  menuname) {
 	currentmenu[menulevel] = actualmenu;
 	lastoption[menulevel] = currentoption;
 	menulevel++;
@@ -67,7 +67,7 @@ void Menu::backMenu() {
 
 }
 
-void Menu::drawText(const char* text, int font, float x, float y, float scalex, float scaley, rgba rgba, bool center) {
+void Menu::drawText(const std::string  text, int font, float x, float y, float scalex, float scaley, rgba rgba, bool center) {
 	UI::SET_TEXT_FONT(font);
 	if (font == 0) { // big-ass Chalet London
 		scaley *= 0.75f;
@@ -77,7 +77,7 @@ void Menu::drawText(const char* text, int font, float x, float y, float scalex, 
 	UI::SET_TEXT_COLOUR(rgba.r, rgba.g, rgba.b, rgba.a);
 	UI::SET_TEXT_CENTRE(center);
 	UI::BEGIN_TEXT_COMMAND_DISPLAY_TEXT("STRING");
-	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(CharAdapter(text));
+	UI::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(CharAdapter(text.c_str()));
 	UI::END_TEXT_COMMAND_DISPLAY_TEXT(x, y);
 };
 
@@ -85,19 +85,19 @@ void Menu::drawRect(float x, float y, float width, float height, rgba rgba) {
 	GRAPHICS::DRAW_RECT(x, y, width, height, rgba.r, rgba.g, rgba.b, rgba.a);
 };
 
-void Menu::drawSprite(char* Streamedtexture, char* textureName, float x, float y, float width, float height, float rotation, rgba rgba)
+void Menu::drawSprite(std::string  Streamedtexture, std::string  textureName, float x, float y, float width, float height, float rotation, rgba rgba)
 {
-	if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED(Streamedtexture)) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT(Streamedtexture, false);
-	else GRAPHICS::DRAW_SPRITE(Streamedtexture, textureName, x, y, width, height, rotation, rgba.r, rgba.g, rgba.b, rgba.a);
+	if (!GRAPHICS::HAS_STREAMED_TEXTURE_DICT_LOADED(CharAdapter(Streamedtexture.c_str()))) GRAPHICS::REQUEST_STREAMED_TEXTURE_DICT(CharAdapter(Streamedtexture.c_str()), false);
+	else GRAPHICS::DRAW_SPRITE(CharAdapter(Streamedtexture.c_str()), CharAdapter(textureName.c_str()), x, y, width, height, rotation, rgba.r, rgba.g, rgba.b, rgba.a);
 };
 
-void Menu::Title(char* title) {
+void Menu::Title(std::string  title) {
 	optioncount = 0;
 	drawText(title, titleFont, menux, menuy - 0.03f/*0.095f*/, 0.85f, 0.85f, titleText, true);
 	drawRect(menux, menuy - 0.0075f/*0.1175f*/, 0.23f, 0.085f, titleRect);
 };
 
-bool Menu::Option(char* option) {
+bool Menu::Option(std::string  option) {
 	optioncount++;
 
 	bool thisOption = false;
@@ -128,7 +128,7 @@ void Menu::drawAdditionalInfoBox(std::vector<std::string> &extra, size_t infoLin
 	}
 }
 
-bool Menu::OptionPlus(char* option, std::vector<std::string> &extra, bool *highlighted, std::function<void(void) > onRight, std::function<void(void) > onLeft) {
+bool Menu::OptionPlus(std::string  option, std::vector<std::string> &extra, bool *highlighted, std::function<void(void) > onRight, std::function<void(void) > onLeft) {
 	optioncount++;
 	size_t infoLines = extra.size();
 	bool thisOption = false;
@@ -174,7 +174,7 @@ bool Menu::OptionPlus(char* option, std::vector<std::string> &extra, bool *highl
 
 
 
-bool Menu::MenuOption(char* option, char* menu) {
+bool Menu::MenuOption(std::string  option, std::string  menu) {
 	Option(option);
 
 	if (currentoption <= 16 && optioncount <= 16)
@@ -190,7 +190,7 @@ bool Menu::MenuOption(char* option, char* menu) {
 	else return false;
 }
 
-bool Menu::IntOption(char* option, int *var, int min, int max, int step) {
+bool Menu::IntOption(std::string  option, int *var, int min, int max, int step) {
 	Option(option);
 
 	if (currentoption <= 16 && optioncount <= 16)
@@ -220,7 +220,7 @@ bool Menu::IntOption(char* option, int *var, int min, int max, int step) {
 	else return false;
 }
 
-bool Menu::FloatOption(char* option, float *var, float min, float max, float step) {
+bool Menu::FloatOption(std::string  option, float *var, float min, float max, float step) {
 	Option(option);
 
 	char buf[100];
@@ -253,7 +253,7 @@ bool Menu::FloatOption(char* option, float *var, float min, float max, float ste
 	else return false;
 }
 
-bool Menu::DoubleOption(char* option, double *var, double min, double max, double step) {
+bool Menu::DoubleOption(std::string  option, double *var, double min, double max, double step) {
 	Option(option);
 
 	char buf[100];
@@ -287,7 +287,7 @@ bool Menu::DoubleOption(char* option, double *var, double min, double max, doubl
 	else return false;
 }
 
-bool Menu::BoolOption(char* option, bool *b00l) {
+bool Menu::BoolOption(std::string  option, bool *b00l) {
 	Option(option);
 	if (currentoption <= 16 && optioncount <= 16)
 		drawSprite("commonmenu", *b00l ? "shop_box_tick" : "shop_box_blank",
@@ -302,7 +302,7 @@ bool Menu::BoolOption(char* option, bool *b00l) {
 	else return false;
 }
 
-bool Menu::BoolSpriteOption(char* option, bool b00l, char* category, char* spriteOn, char* spriteOff) {
+bool Menu::BoolSpriteOption(std::string  option, bool b00l, std::string  category, std::string  spriteOn, std::string  spriteOff) {
 	Option(option);
 
 	if (currentoption <= 16 && optioncount <= 16)
@@ -316,7 +316,7 @@ bool Menu::BoolSpriteOption(char* option, bool b00l, char* category, char* sprit
 	else return false;
 }
 
-bool Menu::IntArray(char* option, int display[], int *PlaceHolderInt) {
+bool Menu::IntArray(std::string  option, int display[], int *PlaceHolderInt) {
 	Option(option);
 
 	int min = 0;
@@ -348,7 +348,7 @@ bool Menu::IntArray(char* option, int display[], int *PlaceHolderInt) {
 	else return false;
 }
 
-bool Menu::FloatArray(char* option, float display[], int *PlaceHolderInt) {
+bool Menu::FloatArray(std::string  option, float display[], int *PlaceHolderInt) {
 	Option(option);
 
 	int min = 0;
@@ -385,7 +385,7 @@ bool Menu::FloatArray(char* option, float display[], int *PlaceHolderInt) {
 }
 
 // why?!
-bool Menu::CharArray(char* option, char* display[], int *PlaceHolderInt) {
+bool Menu::CharArray(std::string  option, std::string  display[], int *PlaceHolderInt) {
 	Option(option);
 
 	int min = 0;
@@ -416,7 +416,7 @@ bool Menu::CharArray(char* option, char* display[], int *PlaceHolderInt) {
 }
 
 // :ok_hand:
-bool Menu::StringArray(char* option, std::vector<std::string>display, int *PlaceHolderInt) {
+bool Menu::StringArray(std::string  option, std::vector<std::string>display, int *PlaceHolderInt) {
 	Option(option);
 
 	int min = 0;
@@ -451,7 +451,7 @@ bool Menu::StringArray(char* option, std::vector<std::string>display, int *Place
 	else return false;
 }
 
-void Menu::TeleportOption(char* option, float x, float y, float z) {
+void Menu::TeleportOption(std::string  option, float x, float y, float z) {
 	Option(option);
 
 	if (currentoption == optioncount && optionpress) {
