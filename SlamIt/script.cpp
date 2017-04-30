@@ -55,8 +55,6 @@ const int offsetTrackWidth = 0x030;
 const int offsetHeight = 0x038; // affected by hydraulics! 0x028 also.
 
 // Keep track of menu highlight for control disable while typing
-std::string currentInput = "";
-bool presethighlighted = false;
 bool showOnlyCompatible = false;
 
 // TODO: Patching stuff
@@ -263,45 +261,6 @@ void savePreset(bool asPreset, std::string presetName) {
 }
 
 /*
- * Ah, the typing input thing. Scanning ascii characters from 
- * ' ' to '~' should cover the alphanumeric range pretty well and it seems to work.
- * The ' ' isn't detected though so this is weird.
- * TODO: Fix space character not read
- */
-std::string evaluateInput() {
-	PLAYER::IS_PLAYER_CONTROL_ON(false);
-	UI::HIDE_HUD_AND_RADAR_THIS_FRAME();
-	UI::SET_PAUSE_MENU_ACTIVE(false);
-	CONTROLS::DISABLE_ALL_CONTROL_ACTIONS(1);
-	CONTROLS::IS_CONTROL_ENABLED(playerPed, false);
-
-	for (char c = ' '; c < '~'; c++) {
-		if (IsKeyJustUp(str2key(std::string(1, c)))) {
-			currentInput += c;
-		}
-	}
-	if (IsKeyJustUp(str2key("SPACE"))) {
-		currentInput += ' ';
-	}
-	if (IsKeyJustUp(str2key("DELETE"))) {
-		currentInput.pop_back();
-	}
-	if (IsKeyJustUp(str2key("BACKSPACE"))) {
-		currentInput.clear();
-	}
-	
-	return currentInput;
-}
-
-/*
- * This lil' function is just here because std::function stuff. Maybe it'll get more
- * useful later on when I cram more stuff into it. Anyhow it's run on menu exit.
- */
-void clearmenustuff() {
-	currentInput.clear();
-}
-
-/*
  * Scan current configs and remove. Since I cba to scan two lists again and the caller
  * should probably know which list it is from anyway that list is passed.
  */
@@ -328,10 +287,10 @@ void deletePreset(Preset preset, const std::vector<Preset> &fromWhich) {
 }
 
 void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
-	menu.Title(CharAdapter(title.c_str()));
+	menu.Title(title);
 	std::string currentName = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model);
 	std::string compatibleString = "Show only " + currentName;
-	menu.BoolOption(CharAdapter(compatibleString.c_str()), &showOnlyCompatible);
+	menu.BoolOption(compatibleString, &showOnlyCompatible);
 	for (auto preset : whichPresets) {
 		if (showOnlyCompatible) {
 			if (preset.Name() != currentName) {
@@ -347,7 +306,7 @@ void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
 		info.push_back("Rear  Camber\t\t" + std::to_string(preset.Rear.Camber));
 		info.push_back("Rear  Track width\t" + std::to_string(preset.Rear.TrackWidth));
 		info.push_back("Rear  Height\t\t" + std::to_string(preset.Rear.Height));
-		if (menu.OptionPlus(CharAdapter(label.c_str()), info, nullptr, std::bind(deletePreset, preset, whichPresets), nullptr)) {
+		if (menu.OptionPlus(label, info, nullptr, std::bind(deletePreset, preset, whichPresets), nullptr)) {
 			ultraSlam(vehicle,
 			          preset.Front.Camber,
 			          preset.Rear.Camber,
@@ -365,7 +324,7 @@ void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
  * I got the menu class from "Unknown Modder", he got it from SudoMod.
  */
 void update_menu() {
-	menu.CheckKeys(&controls, std::bind(init), std::bind(clearmenustuff));
+	menu.CheckKeys(&controls, std::bind(init), nullptr);
 
 	if (menu.CurrentMenu("mainmenu")) {
 		menu.Title("VStancer"); // TODO: Less sucky names
