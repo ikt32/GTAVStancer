@@ -4,7 +4,7 @@ A script that allows for changing wheel node details, like camber, track width, 
 
 ## Downloads
 
-None yet.
+[GTA5-Mods.com](https://www.gta5-mods.com/scripts/vstancer)
 
 ## Building
 
