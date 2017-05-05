@@ -20,12 +20,19 @@ public:
 
 	MenuControls();
 	~MenuControls();
-	bool IsKeyPressed(int key);
+	bool IsKeyPressed(ControlType control);
 	bool IsKeyJustPressed(ControlType control);
+	bool IsKeyJustReleased(ControlType control);
+	bool IsKeyDownFor(ControlType control, int millis);
+	void Update();
 	static const int controlSize = SIZEOF_ControlType;
 	int ControlKeys[controlSize];
 private:
 	bool controlCurr[controlSize];
 	bool controlPrev[controlSize];
+
+	unsigned long long pressTime[controlSize];
+	unsigned long long releaseTime[controlSize];
+
 };
 

@@ -88,11 +88,12 @@ private:
 	int infocount = 0;
 	unsigned int delay = GetTickCount();
 
+	const unsigned int menuTimeRepeat = 360;
 	const unsigned int menuTimeSlow = 120;
 	const unsigned int menuTimeMedium = 90;
 	const unsigned int menuTimeFast = 60;
 
-	unsigned int menuTime = menuTimeMedium;
+	unsigned int menuTime = menuTimeRepeat;
 
 
 	void drawText(const std::string text, int font, float x, float y, float scalex, float scaley, rgba rgba, bool center);
