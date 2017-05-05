@@ -1,5 +1,7 @@
 #include "controls.h"
 #include "keyboard.h"
+#include "inc/enums.h"
+#include "inc/natives.h"
 
 long long milliseconds_now() { // static
 	LARGE_INTEGER s_frequency; // static
@@ -54,4 +56,20 @@ void MenuControls::Update() {
 		controlPrev[i] = controlCurr[i];
 		controlCurr[i] = IsKeyDown(ControlKeys[i]);
 	}
+	// Size of eControl
+	for (int i = 0; i < eControlSize ; i++) {
+		nControlPrev[i] = nControlCurr[i];
+		nControlCurr[i] = CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, i) != 0;
+	}
+}
+
+bool MenuControls::IsControlDownFor(eControl control, int millis) {
+	if (CONTROLS::IS_DISABLED_CONTROL_JUST_PRESSED(0, control)) {
+		nPressTime[control] = milliseconds_now();
+	}
+
+	if (CONTROLS::IS_DISABLED_CONTROL_PRESSED(0, control) && (milliseconds_now() - nPressTime[control]) >= millis) {
+		return true;
+	}
+	return false;
 }
