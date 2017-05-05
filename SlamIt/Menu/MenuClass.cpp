@@ -712,13 +712,22 @@ void Menu::CheckKeys(MenuControls* controls, std::function<void(void) > onMain, 
 		controls->IsKeyJustPressed(MenuControls::MenuRight)) {
 		menuTime = menuTimeRepeat;
 	}
-	if (controls->IsKeyDownFor(MenuControls::MenuKey	,menuTimeRepeat) ||
-		controls->IsKeyDownFor(MenuControls::MenuSelect	,menuTimeRepeat) ||
-		controls->IsKeyDownFor(MenuControls::MenuCancel	,menuTimeRepeat) ||
-		controls->IsKeyDownFor(MenuControls::MenuUp		,menuTimeRepeat) ||
-		controls->IsKeyDownFor(MenuControls::MenuDown	,menuTimeRepeat) ||
-		controls->IsKeyDownFor(MenuControls::MenuLeft	,menuTimeRepeat) ||
-		controls->IsKeyDownFor(MenuControls::MenuRight	,menuTimeRepeat)) {
+	if (controls->IsKeyDownFor(MenuControls::MenuUp,		2*menuTimeRepeat) ||
+		controls->IsKeyDownFor(MenuControls::MenuDown,		2*menuTimeRepeat) ||
+		controls->IsKeyDownFor(MenuControls::MenuLeft,		2*menuTimeRepeat) ||
+		controls->IsKeyDownFor(MenuControls::MenuRight,		2*menuTimeRepeat)) {
+		menuTime = menuTimeSlow;
+	}
+	if (controls->IsKeyDownFor(MenuControls::MenuUp,		3*menuTimeRepeat) ||
+		controls->IsKeyDownFor(MenuControls::MenuDown,		3*menuTimeRepeat) ||
+		controls->IsKeyDownFor(MenuControls::MenuLeft,		3*menuTimeRepeat) ||
+		controls->IsKeyDownFor(MenuControls::MenuRight,		3*menuTimeRepeat)) {
+		menuTime = menuTimeMedium;
+	}
+	if (controls->IsKeyDownFor(MenuControls::MenuUp,		4*menuTimeRepeat) ||
+		controls->IsKeyDownFor(MenuControls::MenuDown,		4*menuTimeRepeat) ||
+		controls->IsKeyDownFor(MenuControls::MenuLeft,		4*menuTimeRepeat) ||
+		controls->IsKeyDownFor(MenuControls::MenuRight,		4*menuTimeRepeat)) {
 		menuTime = menuTimeFast;
 	}
 }

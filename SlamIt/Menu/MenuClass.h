@@ -88,10 +88,10 @@ private:
 	int infocount = 0;
 	unsigned int delay = GetTickCount();
 
-	const unsigned int menuTimeRepeat = 360;
+	const unsigned int menuTimeRepeat = 240;
 	const unsigned int menuTimeSlow = 120;
-	const unsigned int menuTimeMedium = 90;
-	const unsigned int menuTimeFast = 60;
+	const unsigned int menuTimeMedium = 75;
+	const unsigned int menuTimeFast = 40;
 
 	unsigned int menuTime = menuTimeRepeat;
 
