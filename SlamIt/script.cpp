@@ -6,14 +6,14 @@
 #include "../../GTAVManualTransmission/Gears/Memory/NativeMemory.hpp"
 #include "../../GTAVManualTransmission/Gears/Util/simpleini/SimpleIni.h"
 
-#include "Menu/controls.h"
+#include "menucontrols.h"
 #include "presets.h"
 #include "settings.h"
-#include "Menu/MenuClass.h"
+#include "menu.h"
 #include "Util/Paths.h"
 #include "Util/Logger.hpp"
 
-Menu menu;
+NativeMenu::Menu menu;
 
 std::string settingsGeneralFile;
 std::string settingsMenuFile;
@@ -32,7 +32,7 @@ int prevNotification;
 std::vector<Preset> presets;
 std::vector<Preset> saved;
 
-MenuControls controls;
+NativeMenu::MenuControls controls;
 Settings settings;
 
 // The current values, updated by getStats

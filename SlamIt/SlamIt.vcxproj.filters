@@ -15,12 +15,6 @@
     </ClCompile>
     <ClCompile Include="settings.cpp" />
     <ClCompile Include="presets.cpp" />
-    <ClCompile Include="Menu\MenuClass.cpp">
-      <Filter>Menu</Filter>
-    </ClCompile>
-    <ClCompile Include="Menu\controls.cpp">
-      <Filter>Menu</Filter>
-    </ClCompile>
     <ClCompile Include="Util\Util.cpp">
       <Filter>Util</Filter>
     </ClCompile>
@@ -29,6 +23,12 @@
     </ClCompile>
     <ClCompile Include="Util\Logger.cpp">
       <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\GTAVMenuBase\menu.cpp">
+      <Filter>Menu</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\GTAVMenuBase\menucontrols.cpp">
+      <Filter>Menu</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -60,12 +60,6 @@
     </ClInclude>
     <ClInclude Include="settings.h" />
     <ClInclude Include="presets.h" />
-    <ClInclude Include="Menu\MenuClass.h">
-      <Filter>Menu</Filter>
-    </ClInclude>
-    <ClInclude Include="Menu\controls.h">
-      <Filter>Menu</Filter>
-    </ClInclude>
     <ClInclude Include="Util\Util.hpp">
       <Filter>Util</Filter>
     </ClInclude>
@@ -77,6 +71,12 @@
     </ClInclude>
     <ClInclude Include="Util\Logger.hpp">
       <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\GTAVMenuBase\menu.h">
+      <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\GTAVMenuBase\menucontrols.h">
+      <Filter>Menu</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
