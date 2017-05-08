@@ -4,7 +4,7 @@ http://dev-c.com
 (C) Alexander Blade 2015
 */
 
-#include "..\..\ScriptHookV_SDK\inc\main.h"
+#include "inc\main.h"
 #include "script.h"
 #include "keyboard.h"
 #include "Util/Paths.h"
@@ -22,7 +22,6 @@ BOOL APIENTRY DllMain(HMODULE hInstance, DWORD reason, LPVOID lpReserved)
 	{
 	case DLL_PROCESS_ATTACH:
 		scriptRegister(hInstance, ScriptMain);
-//		keyboardHandlerRegister(OnKeyboardMessage);
 		logger.Clear();
 		logger.Write("VStancer " + std::string(DISPLAY_VERSION));
 		logger.Write("Game version " + eGameVersionToString(getGameVersion()));
@@ -30,7 +29,6 @@ BOOL APIENTRY DllMain(HMODULE hInstance, DWORD reason, LPVOID lpReserved)
 		break;
 	case DLL_PROCESS_DETACH:
 		scriptUnregister(hInstance);
-//		keyboardHandlerUnregister(OnKeyboardMessage);
 		break;
 	}
 	return TRUE;

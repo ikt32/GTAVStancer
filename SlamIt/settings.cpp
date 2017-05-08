@@ -1,10 +1,10 @@
 #include "settings.h"
 #include "menucontrols.h"
-#include "../../GTAVManualTransmission/Gears/Util/simpleini/SimpleIni.h"
+#include "simpleini/SimpleIni.h"
 #include "keyboard.h"
 #include "presets.h"
 #include <vector>
-#include "../tinyxml2/tinyxml2.h"
+#include "tinyxml2/tinyxml2.h"
 #include "menu.h"
 #include <fstream>
 

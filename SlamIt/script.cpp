@@ -4,7 +4,8 @@
 
 #include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
 #include "../../GTAVManualTransmission/Gears/Memory/NativeMemory.hpp"
-#include "../../GTAVManualTransmission/Gears/Util/simpleini/SimpleIni.h"
+
+#include "simpleini/SimpleIni.h"
 
 #include "menucontrols.h"
 #include "presets.h"

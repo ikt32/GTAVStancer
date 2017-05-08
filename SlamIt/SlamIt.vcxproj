@@ -81,7 +81,7 @@
     <OutDir>bin\</OutDir>
     <IntDir>obj\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir);..\..\GTAVMenuBase\;..\..\ScriptHookV_SDK\;$(IncludePath)</IncludePath>
+    <IncludePath>$(ProjectDir);$(SolutionDir)thirdparty\;..\..\GTAVMenuBase\;..\..\ScriptHookV_SDK\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -153,7 +153,7 @@
     <ClCompile Include="..\..\GTAVMenuBase\menu.cpp" />
     <ClCompile Include="..\..\GTAVMenuBase\menucontrols.cpp" />
     <ClCompile Include="..\..\GTAVMenuBase\menukeyboard.cpp" />
-    <ClCompile Include="..\tinyxml2\tinyxml2.cpp" />
+    <ClCompile Include="..\thirdparty\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="keyboard.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="presets.cpp" />
@@ -166,7 +166,6 @@
   <ItemGroup>
     <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\NativeMemory.hpp" />
     <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\VehicleExtensions.hpp" />
-    <ClInclude Include="..\..\GTAVManualTransmission\Gears\Util\simpleini\SimpleIni.h" />
     <ClInclude Include="..\..\GTAVMenuBase\menu.h" />
     <ClInclude Include="..\..\GTAVMenuBase\menucontrols.h" />
     <ClInclude Include="..\..\GTAVMenuBase\menukeyboard.h" />
@@ -174,7 +173,8 @@
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\main.h" />
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\natives.h" />
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\types.h" />
-    <ClInclude Include="..\tinyxml2\tinyxml2.h" />
+    <ClInclude Include="..\thirdparty\simpleini\SimpleIni.h" />
+    <ClInclude Include="..\thirdparty\tinyxml2\tinyxml2.h" />
     <ClInclude Include="keyboard.h" />
     <ClInclude Include="presets.h" />
     <ClInclude Include="script.h" />
