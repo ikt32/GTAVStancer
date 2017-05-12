@@ -54,6 +54,7 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
   </ImportGroup>
   <ImportGroup Label="Shared">
   </ImportGroup>
@@ -156,6 +157,7 @@
     <ClCompile Include="..\thirdparty\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="keyboard.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Patching\Hooking.cpp" />
     <ClCompile Include="presets.cpp" />
     <ClCompile Include="script.cpp" />
     <ClCompile Include="settings.cpp" />
@@ -176,6 +178,8 @@
     <ClInclude Include="..\thirdparty\simpleini\SimpleIni.h" />
     <ClInclude Include="..\thirdparty\tinyxml2\tinyxml2.h" />
     <ClInclude Include="keyboard.h" />
+    <ClInclude Include="Patching\Hooking.h" />
+    <ClInclude Include="Patching\pattern.h" />
     <ClInclude Include="presets.h" />
     <ClInclude Include="script.h" />
     <ClInclude Include="settings.h" />
@@ -186,5 +190,6 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
   </ImportGroup>
 </Project>

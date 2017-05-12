@@ -16,3 +16,4 @@ http://dev-c.com
 const std::string modDir  = "\\VStancer";
 
 void ScriptMain();
+void unloadPatch();

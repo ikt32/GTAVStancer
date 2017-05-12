@@ -28,6 +28,7 @@ BOOL APIENTRY DllMain(HMODULE hInstance, DWORD reason, LPVOID lpReserved)
 		logger.Write("Script registered");
 		break;
 	case DLL_PROCESS_DETACH:
+		unloadPatch();
 		scriptUnregister(hInstance);
 		break;
 	}

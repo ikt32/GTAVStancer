@@ -13,6 +13,9 @@
 #include "menu.h"
 #include "Util/Paths.h"
 #include "Util/Logger.hpp"
+#include "Patching/pattern.h"
+#include "Patching/Hooking.h"
+#include <sstream>
 
 NativeMenu::Menu menu;
 
@@ -58,7 +61,6 @@ const int offsetHeight = 0x038; // affected by hydraulics! 0x028 also.
 // Keep track of menu highlight for control disable while typing
 bool showOnlyCompatible = false;
 
-// TODO: Patching stuff
 // Assembly shit
 // GTA5.exe + F1023B - F3 0F11 43 28	- movss[rbx + 28], xmm0
 // GTA5.exe + F10240 - F3 44 0F11 63 20 - movss[rbx + 20], xmm12
@@ -67,47 +69,60 @@ bool showOnlyCompatible = false;
 // GTA5.exe + F10251 - F3 0F11 5B 34	- movss[rbx + 34], xmm3 // dunno but it seems to be unique
 // GTA5.exe + F10256 - F3 0F11 63 38	- movss[rbx + 38], xmm4 // height
 
-MemoryAccess mem;
-uintptr_t heightSetInstrPointerAddress = 0;
-int attempts = 0;
-const int maxAttempts = 5;
-byte origInstr[5] = { 0xF3, 0x0F, 0x11, 0x63, 0x38 };
+struct CWheel
+{
+	float unknown0;			// 0x000 - 0x004
+	float unknown_;			// 0x004 - 0x008
+	float camber;			// 0x008 - 0x00C
+	float unknown1;			// 0x00C - 0x010
+	float camberInv;		// 0x010 - 0x014
+	char unknown2[0x01C];	// 0x014 - 0x030
+	float trackWidth;		// 0x030 - 0x034
+	float unknown3;			// 0x034 - 0x038
+	float height;			// 0x038 - 0x03C
+	char theRest[0x1D4];
+}; // size = 0x210 (????)
 
-uintptr_t patchShit() {
-	uintptr_t address = NULL;
-	if (heightSetInstrPointerAddress != NULL) {
-		address = heightSetInstrPointerAddress;
-	} else if (attempts < maxAttempts) {
-		address = mem.FindPattern("\xF3\x0F\x11\x63\x38", "xxx?x");
-		heightSetInstrPointerAddress = address;
-	}
-	if (address != NULL) {
-		byte newInstr[5] = { 0x90, 0x90, 0x90, 0x90, 0x90 };
 
-		memcpy(origInstr, reinterpret_cast<void*>(address), 6);	// save whole orig instruction
-		memcpy(reinterpret_cast<void*>(address), newInstr, 6);	// NOP that shit
-		attempts = 0;
-		return address;
-	}
-	attempts++;
-	return 0;
+typedef void(*SetHeight_t)(CWheel * vehWheel, float height);
+
+CallHookRaw<SetHeight_t> * g_SetHeight;
+
+void SetHeight_Stub(CWheel * vehWheel, float height) {
+	//vehWheel->height = -0.5f;
+	//return g_SetHeight->fn(vehWheel, height);
 }
 
-uintptr_t blackMagicToGetWheelPtrFromBytecode() {
+void patchHeightReset() {
+	auto result = BytePattern((BYTE*)"\xF3\x0F\x11\x73\x30"
+									 "\xF3\x0F\x11\x5B\x34"
+									 "\xF3\x0F\x11\x63\x38", 
+									 "xxxxx"
+									 "xxxxx"
+									 "xxxxx").get(10);
+	if (result)
+	{
+		g_SetHeight = HookManager::SetCallRaw<SetHeight_t>(result, SetHeight_Stub, 5);
+		std::stringstream address;
+		address << std::hex << result;
+		logger.Write("patchHeightReset(): SetCall success @ 0x" + address.str());
+		address.str(std::string());
+		address << std::hex << g_SetHeight->fn;
+		logger.Write("patchHeightReset(): g_SetHeight address: " + address.str());
+	}
 
-	return 0;
+	else
+	{
+		logger.Write("patchHeightReset(): Failed to find height setter");
+		return;
+	}
 }
 
-// this thing should probably be run in another thread by its own to be FAST?
-void checkEachThing(Vehicle handle) {
-	auto wheelPtr = ext.GetWheelsPtr(handle);  // pointer to wheel pointers
-	auto numWheels = ext.GetNumWheels(handle);
-
-	for (auto i = 0; i < numWheels; i++) {
-		auto wheelAddr = *reinterpret_cast<uint64_t *>(wheelPtr + 0x008 * i);
-		if (blackMagicToGetWheelPtrFromBytecode() == wheelAddr) {
-			patchShit();
-		}
+void unloadPatch() {
+	if (g_SetHeight)
+	{
+		delete g_SetHeight;
+		g_SetHeight = nullptr;
 	}
 }
 
@@ -455,6 +470,9 @@ void main() {
 	logger.Write("Loading " + presetCarsFile);
 
 	init();
+
+	patchHeightReset();
+
 	while (true) {
 		update_game();
 		WAIT(0);
