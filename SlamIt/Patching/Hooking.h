@@ -1,10 +1,7 @@
 #pragma once
 
 #include <windows.h>
-
 #include <inttypes.h>
-//#include "Util/Logger.hpp"
-//#include <sstream>
 
 template <typename T>
 class Hook
@@ -47,14 +44,16 @@ template <typename T>
 class CallHookRaw : public Hook<T>
 {
 public:
-	CallHookRaw(uintptr_t addr, T func, unsigned char *origBt, unsigned origSz) :
+	CallHookRaw(uintptr_t addr, T func, unsigned char *origBt, unsigned origSz, intptr_t dest) :
 		Hook<T>(addr, func), 
 		origSize(origSz) {
 		memcpy(origBytes, origBt, origSz);
+		pFunction = reinterpret_cast<void*>(dest);
 	}
 	~CallHookRaw();
 	unsigned char origBytes[32] = {0};
 	unsigned origSize;
+	void* pFunction;
 	virtual void remove();
 };
 
@@ -101,10 +100,10 @@ public:
 		auto pFunc = AllocateFunctionStub((void*)(hModule), (void*)target, 0);
 
 		*reinterpret_cast<BYTE*>(address) = 0xE8;
+		auto dest = static_cast<int32_t>((intptr_t)pFunc - (intptr_t)address - 5);
+		*reinterpret_cast<int32_t*>(address + 1) = dest;
 
-		*reinterpret_cast<int32_t*>(address + 1) = static_cast<int32_t>((intptr_t)pFunc - (intptr_t)address - 5);
-
-		return new CallHookRaw<T>(address, orig, origBt, origSz);
+		return new CallHookRaw<T>(address, orig, origBt, origSz, dest);
 	}
 
 	static void *AllocateFunctionStub(void *origin, void *function, int type);

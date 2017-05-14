@@ -1,21 +1,21 @@
 #include "script.h"
-#include "keyboard.h"
-#include "Util/Util.hpp"
 
-#include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
-#include "../../GTAVManualTransmission/Gears/Memory/NativeMemory.hpp"
+#include <sstream>
+#include <simpleini/SimpleIni.h>
+#include <menu.h>
+#include <menucontrols.h>
 
-#include "simpleini/SimpleIni.h"
-
-#include "menucontrols.h"
-#include "presets.h"
-#include "settings.h"
-#include "menu.h"
-#include "Util/Paths.h"
-#include "Util/Logger.hpp"
 #include "Patching/pattern.h"
 #include "Patching/Hooking.h"
-#include <sstream>
+
+#include "Util/Paths.h"
+#include "Util/Util.hpp"
+#include "Util/Logger.hpp"
+
+#include "presets.h"
+#include "settings.h"
+
+#include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
 
 NativeMenu::Menu menu;
 
@@ -83,15 +83,26 @@ struct CWheel
 	char theRest[0x1D4];
 }; // size = 0x210 (????)
 
+   /* Extracted shellcode (75 bytes): */
 
-typedef void(*SetHeight_t)(CWheel * vehWheel, float height);
+char shellcode[] =
+"\x83\xec\x10\x67\xf3\x0f\x7f\x04\x24\x83\xec\x10\x67\xf3\x0f"
+"\x7f\x0c\x24\xeb\x1c\xf3\x0f\x10\x43\x38\x67\xf3\x0f\x6f\x0c"
+"\x24\x83\xc4\x10\x0f\x2f\xc1\x74\x02\xeb\x10\xf3\x0f\x11\x63"
+"\x38\xeb\x09\xe8\xdf\xff\xff\xff\x00\x00\x00\x00\x67\xf3\x0f"
+"\x6f\x0c\x24\x83\xc4\x10\x67\xf3\x0f\x6f\x04\x24\x83\xc4\x10";
+void(*shellFunc)() = (void(*)())&shellcode;
+
+typedef void(*SetHeight_t)();
 
 CallHookRaw<SetHeight_t> * g_SetHeight;
 
-void SetHeight_Stub(CWheel * vehWheel, float height) {
-	//vehWheel->height = -0.5f;
-	//return g_SetHeight->fn(vehWheel, height);
+// magic shit to run the shellcode "properly"
+void SetHeight_Stub() {
+	//shellFunc();
 }
+
+// todo: add more previous instructions and wildcard stuff
 
 void patchHeightReset() {
 	auto result = BytePattern((BYTE*)"\xF3\x0F\x11\x73\x30"
@@ -100,9 +111,10 @@ void patchHeightReset() {
 									 "xxxxx"
 									 "xxxxx"
 									 "xxxxx").get(10);
-	if (result)
-	{
+	if (result) {
 		g_SetHeight = HookManager::SetCallRaw<SetHeight_t>(result, SetHeight_Stub, 5);
+		//g_SetHeight = HookManager::SetCallRaw<SetHeight_t>(result, shellFunc, 5);
+
 		std::stringstream address;
 		address << std::hex << result;
 		logger.Write("patchHeightReset(): SetCall success @ 0x" + address.str());
@@ -111,10 +123,8 @@ void patchHeightReset() {
 		logger.Write("patchHeightReset(): g_SetHeight address: " + address.str());
 	}
 
-	else
-	{
+	else {
 		logger.Write("patchHeightReset(): Failed to find height setter");
-		return;
 	}
 }
 
