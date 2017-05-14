@@ -183,6 +183,7 @@
     <ClInclude Include="presets.h" />
     <ClInclude Include="script.h" />
     <ClInclude Include="settings.h" />
+    <ClInclude Include="Types.h" />
     <ClInclude Include="Util\Logger.hpp" />
     <ClInclude Include="Util\Paths.h" />
     <ClInclude Include="Util\Util.hpp" />

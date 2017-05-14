@@ -93,6 +93,7 @@
     <ClInclude Include="Patching\pattern.h">
       <Filter>Patching</Filter>
     </ClInclude>
+    <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Menu">

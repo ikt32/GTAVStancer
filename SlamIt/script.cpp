@@ -61,27 +61,13 @@ const int offsetHeight = 0x038; // affected by hydraulics! 0x028 also.
 // Keep track of menu highlight for control disable while typing
 bool showOnlyCompatible = false;
 
-// Assembly shit
-// GTA5.exe + F1023B - F3 0F11 43 28	- movss[rbx + 28], xmm0
-// GTA5.exe + F10240 - F3 44 0F11 63 20 - movss[rbx + 20], xmm12
-// GTA5.exe + F10246 - F3 44 0F11 4B 24 - movss[rbx + 24], xmm9
-// GTA5.exe + F1024C - F3 0F11 73 30	- movss[rbx + 30], xmm6 // track width
-// GTA5.exe + F10251 - F3 0F11 5B 34	- movss[rbx + 34], xmm3 // dunno but it seems to be unique
-// GTA5.exe + F10256 - F3 0F11 63 38	- movss[rbx + 38], xmm4 // height
-
-struct CWheel
-{
-	float unknown0;			// 0x000 - 0x004
-	float unknown_;			// 0x004 - 0x008
-	float camber;			// 0x008 - 0x00C
-	float unknown1;			// 0x00C - 0x010
-	float camberInv;		// 0x010 - 0x014
-	char unknown2[0x01C];	// 0x014 - 0x030
-	float trackWidth;		// 0x030 - 0x034
-	float unknown3;			// 0x034 - 0x038
-	float height;			// 0x038 - 0x03C
-	char theRest[0x1D4];
-}; // size = 0x210 (????)
+// Instructions that access suspension members
+// GTA5.exe + F1023B - F3 0F11 43 28	- movss[rbx + 28], xmm0		; ???
+// GTA5.exe + F10240 - F3 44 0F11 63 20 - movss[rbx + 20], xmm12	; ???
+// GTA5.exe + F10246 - F3 44 0F11 4B 24 - movss[rbx + 24], xmm9		; ???
+// GTA5.exe + F1024C - F3 0F11 73 30	- movss[rbx + 30], xmm6		; track width
+// GTA5.exe + F10251 - F3 0F11 5B 34	- movss[rbx + 34], xmm3		; ???
+// GTA5.exe + F10256 - F3 0F11 63 38	- movss[rbx + 38], xmm4		; height
 
 typedef void(*SetHeight_t)();
 
@@ -90,21 +76,26 @@ CallHookRaw<SetHeight_t> * g_SetHeight;
 extern "C" void compare_height();
 //extern "C" void original_thing();
 
-// magic shit to run the shellcode "properly"
 void SetHeight_Stub() {
 	compare_height();
 	//original_thing();
 }
 
-// todo: add more previous instructions and wildcard stuff
-
 void patchHeightReset() {
-	auto result = BytePattern((BYTE*)"\xF3\x0F\x11\x73\x30"
-									 "\xF3\x0F\x11\x5B\x34"
-									 "\xF3\x0F\x11\x63\x38", 
-									 "xxxxx"
-									 "xxxxx"
-									 "xxxxx").get(10);
+	auto result = BytePattern((BYTE*)
+		"\xF3\x0F\x11\x43\x28"
+		"\xF3\x44\x0F\x11\x63\x20"
+		"\xF3\x44\x0F\x11\x4B\x24"
+		"\xF3\x0F\x11\x73\x30"
+		"\xF3\x0F\x11\x5B\x34"
+		"\xF3\x0F\x11\x63\x38", 
+		"xxx?x"
+		"xxxx?x"
+		"xxxx?x"
+		"xxx?x"
+		"xxx?x"
+		"xxx?x").get(27);
+
 	if (result) {
 		g_SetHeight = HookManager::SetCallRaw<SetHeight_t>(result, SetHeight_Stub, 5);
 		//g_SetHeight = HookManager::SetCallRaw<SetHeight_t>(result, shellFunc, 5);
