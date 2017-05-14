@@ -359,11 +359,15 @@ void update_menu() {
 
 		menu.FloatOption( "Front Camber\t\t",	&g_frontCamber, -2.0f, 2.0f, 0.01f);
 		menu.FloatOption( "Front Track Width", &g_frontTrackWidth, -2.0f, 2.0f, 0.01f);
-		menu.FloatOption( "Front Height\t\t",   &g_frontHeight, -2.0f, 2.0f, 0.01f);
+		if (menu.FloatOption( "Front Height\t\t",   &g_frontHeight, -2.0f, 2.0f, 0.01f) ) {
+			ENTITY::APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(vehicle, 1, 0.0f, 0.1f, 0.0f, true, true, true, true);
+		}
 							 											   
 		menu.FloatOption( "Rear  Camber\t\t",   &g_rearCamber, -2.0f, 2.0f, 0.01f); 
 		menu.FloatOption( "Rear  Track Width", &g_rearTrackWidth, -2.0f, 2.0f, 0.01f);
-		menu.FloatOption( "Rear  Height\t\t",   &g_rearHeight, -2.0f, 2.0f, 0.01f); 
+		if (menu.FloatOption( "Rear  Height\t\t",   &g_rearHeight, -2.0f, 2.0f, 0.01f) ) {
+			ENTITY::APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(vehicle, 1, 0.0f, 0.1f, 0.0f, true, true, true, true);
+		}
 	}
 
 	if (menu.CurrentMenu("presetmenu")) {
