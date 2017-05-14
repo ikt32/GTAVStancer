@@ -83,23 +83,17 @@ struct CWheel
 	char theRest[0x1D4];
 }; // size = 0x210 (????)
 
-   /* Extracted shellcode (75 bytes): */
-
-char shellcode[] =
-"\x83\xec\x10\x67\xf3\x0f\x7f\x04\x24\x83\xec\x10\x67\xf3\x0f"
-"\x7f\x0c\x24\xeb\x1c\xf3\x0f\x10\x43\x38\x67\xf3\x0f\x6f\x0c"
-"\x24\x83\xc4\x10\x0f\x2f\xc1\x74\x02\xeb\x10\xf3\x0f\x11\x63"
-"\x38\xeb\x09\xe8\xdf\xff\xff\xff\x00\x00\x00\x00\x67\xf3\x0f"
-"\x6f\x0c\x24\x83\xc4\x10\x67\xf3\x0f\x6f\x04\x24\x83\xc4\x10";
-void(*shellFunc)() = (void(*)())&shellcode;
-
 typedef void(*SetHeight_t)();
 
 CallHookRaw<SetHeight_t> * g_SetHeight;
 
+extern "C" void compare_height();
+//extern "C" void original_thing();
+
 // magic shit to run the shellcode "properly"
 void SetHeight_Stub() {
-	//shellFunc();
+	compare_height();
+	//original_thing();
 }
 
 // todo: add more previous instructions and wildcard stuff

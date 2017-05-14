@@ -114,4 +114,12 @@
       <UniqueIdentifier>{32ac8206-74e8-4562-a961-d7ff3bb5c080}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
+  <ItemGroup>
+    <MASM Include="Patching\compareHeight.asm">
+      <Filter>Patching</Filter>
+    </MASM>
+    <MASM Include="original_thing.asm">
+      <Filter>Patching</Filter>
+    </MASM>
+  </ItemGroup>
 </Project>

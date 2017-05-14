@@ -188,6 +188,10 @@
     <ClInclude Include="Util\Util.hpp" />
     <ClInclude Include="Util\Versions.h" />
   </ItemGroup>
+  <ItemGroup>
+    <MASM Include="original_thing.asm" />
+    <MASM Include="Patching\compareHeight.asm" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
