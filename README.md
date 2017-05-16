@@ -21,4 +21,8 @@ Clone GTAVMenuBase and GTAVManualTransmission to the same folder you're gonna cl
 
 # Todo until V1.0 release
 
-Patching wheel set/reset instructions.
+~~Patching wheel set/reset instructions.~~ __Fixed in v0.1.0__
+Wheel size
+
+# Todo until Sint Juttemis
+Check up glitching with extreme camber
