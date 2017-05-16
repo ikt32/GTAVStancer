@@ -76,7 +76,7 @@ bool showOnlyCompatible = false;
 // FiveM... + F01EAB - F3 0F11 4B 30	- movss[rbx + 30], xmm1		; track width
 // FiveM... + F01EB0 - F3 0F11 5B 34	- movss[rbx + 34], xmm6		; ???
 // FiveM... + F01EB5 - F3 0F11 63 38	- movss[rbx + 38], xmm4		; height
-
+bool patched = false;
 
 typedef void(*SetHeight_t)();
 
@@ -91,6 +91,8 @@ void SetHeight_Stub() {
 }
 
 void patchHeightReset() {
+	if (patched)
+		return;
 
 	uintptr_t result;
 	uintptr_t offset;
@@ -141,18 +143,24 @@ void patchHeightReset() {
 		addressFormatted.str(std::string());
 		addressFormatted << std::hex << g_SetHeight->fn;
 		logger.Write("Patch: g_SetHeight address @ 0x" + addressFormatted.str());
+		patched = true;
 	}
 	else {
 		logger.Write("Patch: No pattern found, aborting");
+		patched = false;
 	}
 }
 
 void unloadPatch() {
+	if (!patched)
+		return;
+
 	if (g_SetHeight)
 	{
 		delete g_SetHeight;
 		g_SetHeight = nullptr;
 		logger.Write("Patch: Unloaded");
+		patched = false;
 	}
 }
 
@@ -377,7 +385,15 @@ void update_menu() {
 	if (menu.CurrentMenu("mainmenu")) {
 		menu.Title("VStancer");
 		
-		if (menu.BoolOption("Enable mod", &settings.enableMod)) { settings.SaveSettings(); }
+		if (menu.BoolOption("Enable mod", &settings.enableMod)) {
+			settings.SaveSettings();
+			if (settings.enableMod) {
+				patchHeightReset();
+			}
+			else {
+				unloadPatch();
+			}
+		}
 		menu.MenuOption("Suspension menu", "suspensionmenu");
 		menu.MenuOption("Load a preset", "presetmenu");
 		menu.MenuOption("List car configs", "carsmenu");
