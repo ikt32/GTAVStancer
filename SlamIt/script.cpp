@@ -201,6 +201,7 @@ void oldSlam(Vehicle vehicle, int slamLevel) {
 
 void init() {
 	settings.ReadSettings(&controls, &menu);
+
 	menu.LoadMenuTheme(std::wstring(settingsMenuFile.begin(), settingsMenuFile.end()).c_str());
 	logger.Write("Settings read");
 
@@ -317,7 +318,7 @@ void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
 		info.push_back("Rear  Camber\t\t" + std::to_string(preset.Rear.Camber));
 		info.push_back("Rear  Track width\t" + std::to_string(preset.Rear.TrackWidth));
 		info.push_back("Rear  Height\t\t" + std::to_string(preset.Rear.Height));
-		if (menu.OptionPlus(label, info, nullptr, std::bind(deletePreset, preset, whichPresets), nullptr)) {
+		if (menu.OptionPlus(label, info, nullptr, std::bind(deletePreset, preset, whichPresets), nullptr, "Preset data")) {
 			ultraSlam(vehicle,
 			          preset.Front.Camber,
 			          preset.Rear.Camber,
@@ -331,6 +332,7 @@ void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
 	}
 }
 
+
 /*
  * I got the menu class from "Unknown Modder", he got it from SudoMod.
  */
@@ -338,8 +340,8 @@ void update_menu() {
 	menu.CheckKeys(&controls, std::bind(init), nullptr);
 
 	if (menu.CurrentMenu("mainmenu")) {
-		menu.Title("VStancer"); // TODO: Less sucky names
-
+		menu.Title("VStancer");
+		
 		if (menu.BoolOption("Enable mod", &settings.enableMod)) { settings.SaveSettings(); }
 		menu.MenuOption("Suspension menu", "suspensionmenu");
 		menu.MenuOption("Load a preset", "presetmenu");
