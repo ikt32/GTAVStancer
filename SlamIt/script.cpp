@@ -61,13 +61,22 @@ const int offsetHeight = 0x038; // affected by hydraulics! 0x028 also.
 // Keep track of menu highlight for control disable while typing
 bool showOnlyCompatible = false;
 
-// Instructions that access suspension members
+// Instructions that access suspension members, 1.0.1032.1
 // GTA5.exe + F1023B - F3 0F11 43 28	- movss[rbx + 28], xmm0		; ???
 // GTA5.exe + F10240 - F3 44 0F11 63 20 - movss[rbx + 20], xmm12	; ???
 // GTA5.exe + F10246 - F3 44 0F11 4B 24 - movss[rbx + 24], xmm9		; ???
 // GTA5.exe + F1024C - F3 0F11 73 30	- movss[rbx + 30], xmm6		; track width
 // GTA5.exe + F10251 - F3 0F11 5B 34	- movss[rbx + 34], xmm3		; ???
 // GTA5.exe + F10256 - F3 0F11 63 38	- movss[rbx + 38], xmm4		; height
+
+// FiveM (1.0.505.2)
+// FiveM... + F01E9B - F3 0F11 43 24	- movss[rbx + 28], xmm0		; ???
+// FiveM... + F01EA0 - F3 0F11 5B 28	- movss[rbx + 20], xmm3		; ???
+// FiveM... + F01EA5 - F3 44 0F11 63 20 - movss[rbx + 24], xmm12	; ???
+// FiveM... + F01EAB - F3 0F11 4B 30	- movss[rbx + 30], xmm1		; track width
+// FiveM... + F01EB0 - F3 0F11 5B 34	- movss[rbx + 34], xmm6		; ???
+// FiveM... + F01EB5 - F3 0F11 63 38	- movss[rbx + 38], xmm4		; height
+
 
 typedef void(*SetHeight_t)();
 
@@ -82,34 +91,59 @@ void SetHeight_Stub() {
 }
 
 void patchHeightReset() {
-	auto result = BytePattern((BYTE*)
-		"\xF3\x0F\x11\x43\x28"
-		"\xF3\x44\x0F\x11\x63\x20"
-		"\xF3\x44\x0F\x11\x4B\x24"
-		"\xF3\x0F\x11\x73\x30"
-		"\xF3\x0F\x11\x5B\x34"
-		"\xF3\x0F\x11\x63\x38", 
-		"xxx?x"
-		"xxxx?x"
-		"xxxx?x"
-		"xxx?x"
-		"xxx?x"
-		"xxx?x").get(27);
 
-	if (result) {
-		g_SetHeight = HookManager::SetCallRaw<SetHeight_t>(result, SetHeight_Stub, 5);
-		//g_SetHeight = HookManager::SetCallRaw<SetHeight_t>(result, shellFunc, 5);
-
-		std::stringstream address;
-		address << std::hex << result;
-		logger.Write("patchHeightReset(): SetCall success @ 0x" + address.str());
-		address.str(std::string());
-		address << std::hex << g_SetHeight->fn;
-		logger.Write("patchHeightReset(): g_SetHeight address: " + address.str());
+	uintptr_t result;
+	uintptr_t offset;
+	if (getGameVersion() == VER_1_0_505_2_NOSTEAM) {
+		result = BytePattern((BYTE*)
+							 "\xF3\x0F\x11\x43\x24"
+							 "\xF3\x0F\x11\x5B\x28"
+							 "\xF3\x44\x0F\x11\x63\x20"
+							 "\xF3\x0F\x11\x4B\x30"
+							 "\xF3\x0F\x11\x73\x34"
+							 "\xF3\x0F\x11\x63\x38",
+							 "xxx?x"
+							 "xxx?x"
+							 "xxxx?x"
+							 "xxxxx"
+							 "xxxxx"
+							 "xxxxx").get();
+		offset = 26;
+	}
+	else {
+		result = BytePattern((BYTE*)
+							 "\xF3\x0F\x11\x43\x28"
+							 "\xF3\x44\x0F\x11\x63\x20"
+							 "\xF3\x44\x0F\x11\x4B\x24"
+							 "\xF3\x0F\x11\x73\x30"
+							 "\xF3\x0F\x11\x5B\x34"
+							 "\xF3\x0F\x11\x63\x38",
+							 "xxx?x"
+							 "xxxx?x"
+							 "xxxx?x"
+							 "xxx?x"
+							 "xxx?x"
+							 "xxx?x").get();
+		offset = 27;
 	}
 
+
+	if (result) {
+		auto address = result + offset;
+
+		std::stringstream addressFormatted;
+		addressFormatted << std::hex << address;
+		logger.Write("Patch: Patching            @ 0x" + addressFormatted.str());
+
+		g_SetHeight = HookManager::SetCallRaw<SetHeight_t>(address, SetHeight_Stub, 5);
+		logger.Write("Patch: SetCall success     @ 0x" + addressFormatted.str());
+
+		addressFormatted.str(std::string());
+		addressFormatted << std::hex << g_SetHeight->fn;
+		logger.Write("Patch: g_SetHeight address @ 0x" + addressFormatted.str());
+	}
 	else {
-		logger.Write("patchHeightReset(): Failed to find height setter");
+		logger.Write("Patch: No pattern found, aborting");
 	}
 }
 
@@ -118,6 +152,7 @@ void unloadPatch() {
 	{
 		delete g_SetHeight;
 		g_SetHeight = nullptr;
+		logger.Write("Patch: Unloaded");
 	}
 }
 
