@@ -9,6 +9,34 @@ struct CEverythingThatHasWheels {
 	// height, other shit
 }; // very incomplete as you can see lmao
 
+
+
+   // 20, 30: offset from body?
+
+   // 40, 50: last position on ground?
+   // 60 - current position? seems to be 0,0,0 when contact is lost
+
+   // B0 - world velocity
+   // C0 - Same, but flipped?
+
+   // 168 - rotation speed rad/s
+   // 16C - slippage y-dir?
+   // 170 - heating
+
+   // materials.dat related
+   // 190 - surface related: tyre grip
+   // 194 - surface related: wet grip
+   // 198 - surface related: tyre drag
+   // 19C - surface related: top speed mult
+
+
+   // 1C4 - steering angle
+   // 1C8/1D4 - Brake
+   // 1CC/1D8 - Throttle/powered
+   // 1E0/1E4 - Health
+
+   // 1EC / (flags?) - Powered states
+
 struct CWheel {
 	float unknown0;			// 0x000 - 0x004
 	float unknown_;			// 0x004 - 0x008

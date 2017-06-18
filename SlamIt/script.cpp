@@ -3,7 +3,6 @@
 #include <sstream>
 #include <simpleini/SimpleIni.h>
 #include <menu.h>
-#include <menucontrols.h>
 
 #include "Patching/pattern.h"
 #include "Patching/Hooking.h"
@@ -36,7 +35,6 @@ int prevNotification;
 std::vector<Preset> presets;
 std::vector<Preset> saved;
 
-NativeMenu::MenuControls controls;
 Settings settings;
 
 // The current values, updated by getStats
@@ -53,10 +51,26 @@ int slamLevel = 0;
 
 bool autoApplied = false;
 
+//0x000 - ?
+//0x004 - toe
 const int offsetCamber = 0x008;
-const int offsetCamberInv = 0x010;
+//0x00C - padding? Can't see difference + no change @ bump
+const int offsetCamberInv = 0x010; // 
+//0x014 - offsetYPos but also affects camber?
+//0x018 - height-related?
+//0x01C - padding? Can't see difference + no change @ bump
+const int offsetTrackWidth2 = 0x020; // Same as 0x030, can't see difference tho
+//0x024 - ???
+//0x02C - padding? Can't see difference + no change @ bump
+//0x028 - height + 0x128?
 const int offsetTrackWidth = 0x030;
+const int offsetYPos = 0x034;
 const int offsetHeight = 0x038; // affected by hydraulics! 0x028 also.
+//0x03C - padding? Can't see difference + no change @ bump
+//0x128 - physics-related?
+//0x12C - ??
+//0x130 - stiffness?
+
 
 // Keep track of menu highlight for control disable while typing
 bool showOnlyCompatible = false;
@@ -243,9 +257,8 @@ void oldSlam(Vehicle vehicle, int slamLevel) {
 }
 
 void init() {
-	settings.ReadSettings(&controls, &menu);
-
-	menu.LoadMenuTheme(std::wstring(settingsMenuFile.begin(), settingsMenuFile.end()).c_str());
+	settings.ReadSettings();
+	menu.ReadSettings();
 	logger.Write("Settings read");
 
 	// Depending on how crappy the XML is this shit might crash and burn.
@@ -345,7 +358,7 @@ void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
 	menu.Title(title);
 	std::string currentName = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model);
 	std::string compatibleString = "Show only " + currentName;
-	menu.BoolOption(compatibleString, &showOnlyCompatible);
+	menu.BoolOption(compatibleString, showOnlyCompatible);
 	for (auto preset : whichPresets) {
 		if (showOnlyCompatible) {
 			if (preset.Name() != currentName) {
@@ -380,12 +393,12 @@ void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
  * I got the menu class from "Unknown Modder", he got it from SudoMod.
  */
 void update_menu() {
-	menu.CheckKeys(&controls, std::bind(init), nullptr);
+	menu.CheckKeys();
 
 	if (menu.CurrentMenu("mainmenu")) {
 		menu.Title("VStancer");
 		
-		if (menu.BoolOption("Enable mod", &settings.enableMod)) {
+		if (menu.BoolOption("Enable mod", settings.enableMod)) {
 			settings.SaveSettings();
 			if (settings.enableMod) {
 				patchHeightReset();
@@ -403,22 +416,22 @@ void update_menu() {
 		if (menu.Option("Save as preset")) {
 			savePreset(true , "");
 		}
-		if (menu.BoolOption("Auto apply cars", &settings.autoApply)) { settings.SaveSettings(); }
+		if (menu.BoolOption("Auto apply cars", settings.autoApply)) { settings.SaveSettings(); }
 		menu.MenuOption("Other stuff", "othermenu");
 	}
 
 	if (menu.CurrentMenu("suspensionmenu")) {
 		menu.Title("Suspension menu");
 
-		menu.FloatOption( "Front Camber\t\t",	&g_frontCamber, -2.0f, 2.0f, 0.01f);
-		menu.FloatOption( "Front Track Width", &g_frontTrackWidth, -2.0f, 2.0f, 0.01f);
-		if (menu.FloatOption( "Front Height\t\t",   &g_frontHeight, -2.0f, 2.0f, 0.01f) ) {
+		menu.FloatOption( "Front Camber\t\t",	g_frontCamber, -2.0f, 2.0f, 0.01f);
+		menu.FloatOption( "Front Track Width", g_frontTrackWidth, -2.0f, 2.0f, 0.01f);
+		if (menu.FloatOption( "Front Height\t\t",   g_frontHeight, -2.0f, 2.0f, 0.01f) ) {
 			ENTITY::APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(vehicle, 1, 0.0f, 0.1f, 0.0f, true, true, true, true);
 		}
 							 											   
-		menu.FloatOption( "Rear  Camber\t\t",   &g_rearCamber, -2.0f, 2.0f, 0.01f); 
-		menu.FloatOption( "Rear  Track Width", &g_rearTrackWidth, -2.0f, 2.0f, 0.01f);
-		if (menu.FloatOption( "Rear  Height\t\t",   &g_rearHeight, -2.0f, 2.0f, 0.01f) ) {
+		menu.FloatOption( "Rear  Camber\t\t",   g_rearCamber, -2.0f, 2.0f, 0.01f); 
+		menu.FloatOption( "Rear  Track Width", g_rearTrackWidth, -2.0f, 2.0f, 0.01f);
+		if (menu.FloatOption( "Rear  Height\t\t",   g_rearHeight, -2.0f, 2.0f, 0.01f) ) {
 			ENTITY::APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(vehicle, 1, 0.0f, 0.1f, 0.0f, true, true, true, true);
 		}
 	}
@@ -434,11 +447,11 @@ void update_menu() {
 	if (menu.CurrentMenu("othermenu")) {
 		menu.Title("Other options");
 
-		if (menu.IntOption("Slam level (SlamIt)", &slamLevel, 0, 2, 1)) {
+		if (menu.IntOption("Slam level (SlamIt)", slamLevel, 0, 2, 1)) {
 			oldSlam(vehicle, slamLevel);
 			CONTROLS::_SET_CONTROL_NORMAL(0, ControlVehicleAccelerate, 0.3f);
 		}
-		if (menu.FloatOption("Visual Height (LSC)", &g_visualHeight, -0.5f, 0.5f, 0.01f)) {
+		if (menu.FloatOption("Visual Height (LSC)", g_visualHeight, -0.5f, 0.5f, 0.01f)) {
 			ext.SetVisualHeight(vehicle, g_visualHeight);
 		}
 	}
@@ -473,6 +486,7 @@ void update_game() {
 	model = ENTITY::GET_ENTITY_MODEL(vehicle);
 	if (!VEHICLE::IS_THIS_MODEL_A_CAR(model) && !VEHICLE::IS_THIS_MODEL_A_QUADBIKE(model)) {
 		menu.CloseMenu();
+		unloadPatch();
 		return;
 	}
 
@@ -514,7 +528,9 @@ void main() {
 	settingsMenuFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\settings_menu.ini";
 	savedCarsFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\car_preset.xml";
 	presetCarsFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\car_saved.xml";
-	settings.SetFiles(settingsGeneralFile, settingsMenuFile);
+	settings.SetFiles(settingsGeneralFile);
+	menu.SetFiles(settingsMenuFile);
+	menu.RegisterOnMain(std::bind(init));
 
 	logger.Write("Loading " + settingsGeneralFile);
 	logger.Write("Loading " + settingsMenuFile);
@@ -523,7 +539,9 @@ void main() {
 
 	init();
 
-	patchHeightReset();
+	if (settings.enableMod) {
+		patchHeightReset();
+	}
 
 	while (true) {
 		update_game();
