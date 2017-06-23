@@ -148,14 +148,15 @@ void patchHeightReset() {
 		auto address = result + offset;
 
 		std::stringstream addressFormatted;
-		addressFormatted << std::hex << address;
+		addressFormatted << std::hex << std::uppercase << (uint64_t)address;
+
 		logger.Write("Patch: Patching            @ 0x" + addressFormatted.str());
 
 		g_SetHeight = HookManager::SetCallRaw<SetHeight_t>(address, SetHeight_Stub, 5);
 		logger.Write("Patch: SetCall success     @ 0x" + addressFormatted.str());
 
 		addressFormatted.str(std::string());
-		addressFormatted << std::hex << g_SetHeight->fn;
+		addressFormatted << std::hex << std::uppercase << (uint64_t)g_SetHeight->fn;
 		logger.Write("Patch: g_SetHeight address @ 0x" + addressFormatted.str());
 		patched = true;
 	}
