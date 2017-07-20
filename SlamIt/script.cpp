@@ -15,6 +15,7 @@
 #include "settings.h"
 
 #include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
+#include "Util/Versions.h"
 
 NativeMenu::Menu menu;
 
@@ -312,12 +313,12 @@ void savePreset(bool asPreset, std::string presetName) {
 	}
 
 	if (alreadyPresent) {
-		settings.OverwritePreset(Preset(front, rear, name, plate), asPreset ? presetCarsFile : savedCarsFile);
+		settings.OverwritePreset(Preset(front, rear, name, plate, g_visualHeight), asPreset ? presetCarsFile : savedCarsFile);
 		showNotification(asPreset ? "Updated preset" : "Updated car", &prevNotification);
 	}
 	else {
 		try {
-			settings.AppendPreset(Preset(front, rear, name, plate), asPreset ? presetCarsFile : savedCarsFile);
+			settings.AppendPreset(Preset(front, rear, name, plate, g_visualHeight), asPreset ? presetCarsFile : savedCarsFile);
 			showNotification(asPreset ? "Saved new preset" : "Saved new car", &prevNotification);
 		}
 		catch (std::runtime_error ex) {
@@ -357,6 +358,8 @@ void deletePreset(Preset preset, const std::vector<Preset> &fromWhich) {
 
 void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
 	menu.Title(title);
+	menu.Subtitle(title);
+
 	std::string currentName = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model);
 	std::string compatibleString = "Show only " + currentName;
 	menu.BoolOption(compatibleString, showOnlyCompatible);
@@ -372,9 +375,12 @@ void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
 		info.push_back("Front Camber\t\t" + std::to_string(preset.Front.Camber));
 		info.push_back("Front Track width\t" + std::to_string(preset.Front.TrackWidth));
 		info.push_back("Front Height\t\t" + std::to_string(preset.Front.Height));
-		info.push_back("Rear  Camber\t\t" + std::to_string(preset.Rear.Camber));
-		info.push_back("Rear  Track width\t" + std::to_string(preset.Rear.TrackWidth));
-		info.push_back("Rear  Height\t\t" + std::to_string(preset.Rear.Height));
+		info.push_back("Rear Camber\t\t" + std::to_string(preset.Rear.Camber));
+		info.push_back("Rear Track width\t" + std::to_string(preset.Rear.TrackWidth));
+		info.push_back("Rear Height\t\t" + std::to_string(preset.Rear.Height));
+		std::string heightDisplay = preset.VisualHeight == -1337.0f ? "Missing Value" : std::to_string(preset.VisualHeight);
+		info.push_back("Visual height\t\t" + heightDisplay);
+
 		if (menu.OptionPlus(label, info, nullptr, std::bind(deletePreset, preset, whichPresets), nullptr, "Preset data")) {
 			ultraSlam(vehicle,
 			          preset.Front.Camber,
@@ -383,6 +389,9 @@ void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
 			          preset.Rear.TrackWidth,
 			          preset.Front.Height,
 			          preset.Rear.Height);
+			if (preset.VisualHeight != -1337.0f)
+				ext.SetVisualHeight(vehicle, preset.VisualHeight);
+
 			getStats(vehicle);
 			showNotification("Applied preset!", &prevNotification);
 		}
@@ -398,8 +407,8 @@ void update_menu() {
 
 	if (menu.CurrentMenu("mainmenu")) {
 		menu.Title("VStancer");
-		
-		if (menu.BoolOption("Enable mod", settings.enableMod)) {
+		menu.Subtitle(DISPLAY_VERSION, false);
+		if (menu.BoolOption("Enable mod", settings.enableMod, { "Enables or disables the entire mod." })) {
 			settings.SaveSettings();
 			if (settings.enableMod) {
 				patchHeightReset();
@@ -408,21 +417,26 @@ void update_menu() {
 				unloadPatch();
 			}
 		}
-		menu.MenuOption("Suspension menu", "suspensionmenu");
-		menu.MenuOption("Load a preset", "presetmenu");
-		menu.MenuOption("List car configs", "carsmenu");
-		if (menu.Option("Save as car")) {
+		menu.MenuOption("Suspension menu", "suspensionmenu", { "Change camber, height, track width and overall height." });
+		menu.MenuOption("Load a preset", "presetmenu", { "Load and manage a generic preset." } );
+		menu.MenuOption("List car configs", "carsmenu", { "Show and manage car-specific presets." });
+		if (menu.Option("Save as car", { "Save as car-specific preset. This loads the current setting when you get in "
+			"this car with this licence plate." } )) {
 			savePreset(false,"");
 		}
-		if (menu.Option("Save as preset")) {
+		if (menu.Option("Save as preset", { "Save as generic preset." } )) {
 			savePreset(true , "");
 		}
-		if (menu.BoolOption("Auto apply cars", settings.autoApply)) { settings.SaveSettings(); }
-		menu.MenuOption("Other stuff", "othermenu");
+		if (menu.BoolOption("Auto-apply", settings.autoApply, { "Automatically apply the car-specific preset if "
+			"the licence plate and car model match." })) {
+			settings.SaveSettings();
+		}
+		menu.MenuOption("Other stuff", "othermenu", { "\"Slam It\" is here at the moment." });
 	}
 
 	if (menu.CurrentMenu("suspensionmenu")) {
 		menu.Title("Suspension menu");
+		menu.Subtitle("");
 
 		menu.FloatOption( "Front Camber\t\t",	g_frontCamber, -2.0f, 2.0f, 0.01f);
 		menu.FloatOption( "Front Track Width", g_frontTrackWidth, -2.0f, 2.0f, 0.01f);
@@ -430,10 +444,14 @@ void update_menu() {
 			ENTITY::APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(vehicle, 1, 0.0f, 0.1f, 0.0f, true, true, true, true);
 		}
 							 											   
-		menu.FloatOption( "Rear  Camber\t\t",   g_rearCamber, -2.0f, 2.0f, 0.01f); 
-		menu.FloatOption( "Rear  Track Width", g_rearTrackWidth, -2.0f, 2.0f, 0.01f);
-		if (menu.FloatOption( "Rear  Height\t\t",   g_rearHeight, -2.0f, 2.0f, 0.01f) ) {
+		menu.FloatOption( "Rear Camber\t\t",   g_rearCamber, -2.0f, 2.0f, 0.01f); 
+		menu.FloatOption( "Rear Track Width", g_rearTrackWidth, -2.0f, 2.0f, 0.01f);
+		if (menu.FloatOption( "Rear Height\t\t",   g_rearHeight, -2.0f, 2.0f, 0.01f) ) {
 			ENTITY::APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(vehicle, 1, 0.0f, 0.1f, 0.0f, true, true, true, true);
+		}
+
+		if (menu.FloatOption("Visual Lowering", g_visualHeight, -0.5f, 0.5f, 0.01f, { "This changes the same value tuning the suspension in mod shops does." })) {
+			ext.SetVisualHeight(vehicle, g_visualHeight);
 		}
 	}
 
@@ -447,13 +465,10 @@ void update_menu() {
 
 	if (menu.CurrentMenu("othermenu")) {
 		menu.Title("Other options");
-
-		if (menu.IntOption("Slam level (SlamIt)", slamLevel, 0, 2, 1)) {
+		menu.Subtitle("");
+		if (menu.IntOption("Slam", slamLevel, 0, 2, 1, { "This damages the suspension/wheel so the car drops. Effect is removed upon vehicle repair."})) {
 			oldSlam(vehicle, slamLevel);
 			CONTROLS::_SET_CONTROL_NORMAL(0, ControlVehicleAccelerate, 0.3f);
-		}
-		if (menu.FloatOption("Visual Height (LSC)", g_visualHeight, -0.5f, 0.5f, 0.01f)) {
-			ext.SetVisualHeight(vehicle, g_visualHeight);
 		}
 	}
 	menu.EndMenu();
@@ -463,15 +478,8 @@ void update_game() {
 	player = PLAYER::PLAYER_ID();
 	playerPed = PLAYER::PLAYER_PED_ID();
 
-	// check if player ped exists and control is on (e.g. not in a cutscene)
-	if (!ENTITY::DOES_ENTITY_EXIST(playerPed) || !PLAYER::IS_PLAYER_CONTROL_ON(player)) {
-		menu.CloseMenu();
-		return;
-	}
-
-	// check for player ped death and player arrest
-	if (ENTITY::IS_ENTITY_DEAD(playerPed) || PLAYER::IS_PLAYER_BEING_ARRESTED(player, TRUE)) {
-		menu.CloseMenu();
+	if (!ENTITY::DOES_ENTITY_EXIST(playerPed) || !PLAYER::IS_PLAYER_CONTROL_ON(player) ||
+		ENTITY::IS_ENTITY_DEAD(playerPed) || PLAYER::IS_PLAYER_BEING_ARRESTED(player, TRUE)) {
 		return;
 	}
 
@@ -480,24 +488,22 @@ void update_game() {
 	if (!ENTITY::DOES_ENTITY_EXIST(vehicle)) {
 		prevVehicle = 0;
 		autoApplied = false;
-		menu.CloseMenu();
 		return;
 	}
 
 	model = ENTITY::GET_ENTITY_MODEL(vehicle);
 	if (!VEHICLE::IS_THIS_MODEL_A_CAR(model) && !VEHICLE::IS_THIS_MODEL_A_QUADBIKE(model)) {
-		menu.CloseMenu();
 		unloadPatch();
 		return;
 	}
 
 	if (prevVehicle != vehicle) {
-		ext.ClearAddress();
-		ext.GetAddress(vehicle);
+		if (!ext.GetAddress(vehicle)) {
+			return;
+		}
 		getStats(vehicle);
 		prevVehicle = vehicle;
 		autoApplied = false;
-		menu.CloseMenu();
 		return;
 	}
 
@@ -512,6 +518,8 @@ void update_game() {
 			if (VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle) == preset.Plate() &&
 				VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model) == preset.Name()) {
 				ultraSlam(vehicle, preset.Front.Camber, preset.Rear.Camber, preset.Front.TrackWidth, preset.Rear.TrackWidth, preset.Front.Height, preset.Rear.Height);
+				if (preset.VisualHeight != -1337.0f)
+					ext.SetVisualHeight(vehicle, preset.VisualHeight);
 				autoApplied = true;
 				getStats(vehicle);
 				showNotification("Applied preset automatically!", &prevNotification);

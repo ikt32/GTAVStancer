@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-#define DISPLAY_VERSION "v0.1.0"
+#define DISPLAY_VERSION "v0.1.2"
 
 static std::vector<std::string> GameVersionString = {
 	"VER_1_0_335_2_STEAM", // 00

@@ -42,6 +42,9 @@
     <ClCompile Include="..\..\GTAVMenuBase\menuutils.cpp">
       <Filter>Menu</Filter>
     </ClCompile>
+    <ClCompile Include="Util\MathExt.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="script.h" />
@@ -108,6 +111,9 @@
     </ClInclude>
     <ClInclude Include="..\..\GTAVMenuBase\menuutils.h">
       <Filter>Menu</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\MathExt.h">
+      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

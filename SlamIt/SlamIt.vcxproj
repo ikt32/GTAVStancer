@@ -73,9 +73,10 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>bin\$(Configuration)\</OutDir>
-    <IntDir>tmp\$(Configuration)\</IntDir>
+    <IntDir>obj\$(Configuration)\</IntDir>
     <TargetExt>.asi</TargetExt>
     <LinkIncremental>false</LinkIncremental>
+    <IncludePath>$(ProjectDir);$(SolutionDir)thirdparty\;..\..\GTAVMenuBase\;..\..\ScriptHookV_SDK\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <TargetExt>.asi</TargetExt>
@@ -106,13 +107,13 @@
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>No</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <AdditionalOptions>..\..\ScriptHookV_SDK\lib\ScriptHookV.lib %(AdditionalOptions)</AdditionalOptions>
     </Link>
     <BuildLog>
-      <Path>log\$(Configuration)\$(MSBuildProjectName).log</Path>
+      <Path>$(IntDir)$(MSBuildProjectName).log</Path>
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -164,6 +165,7 @@
     <ClCompile Include="script.cpp" />
     <ClCompile Include="settings.cpp" />
     <ClCompile Include="Util\Logger.cpp" />
+    <ClCompile Include="Util\MathExt.cpp" />
     <ClCompile Include="Util\Paths.cpp" />
     <ClCompile Include="Util\Util.cpp" />
   </ItemGroup>
@@ -190,6 +192,7 @@
     <ClInclude Include="settings.h" />
     <ClInclude Include="Types.h" />
     <ClInclude Include="Util\Logger.hpp" />
+    <ClInclude Include="Util\MathExt.h" />
     <ClInclude Include="Util\Paths.h" />
     <ClInclude Include="Util\Util.hpp" />
     <ClInclude Include="Util\Versions.h" />

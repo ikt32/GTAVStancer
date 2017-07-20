@@ -62,6 +62,8 @@ std::vector<Preset> Settings::ReadPresets(const std::string &fileName) {
 		float camber;
 		float trackWidth;
 		float height;
+		float visualHeight = -1337.0f;
+
 		pRoot->FirstChildElement("front")->QueryFloatAttribute("camber", &camber);
 		pRoot->FirstChildElement("front")->QueryFloatAttribute("trackWidth", &trackWidth);
 		pRoot->FirstChildElement("front")->QueryFloatAttribute("height", &height);
@@ -72,7 +74,10 @@ std::vector<Preset> Settings::ReadPresets(const std::string &fileName) {
 		pRoot->FirstChildElement("rear")->QueryFloatAttribute("height", &height);
 		struct Preset::WheelInfo rear = { camber, trackWidth, height };
 
-		presets.push_back(Preset(front, rear, name, plate));
+		if (pRoot->FirstChildElement("visualHeight") != nullptr)
+			pRoot->FirstChildElement("visualHeight")->QueryFloatAttribute("value", &visualHeight);
+
+		presets.push_back(Preset(front, rear, name, plate, visualHeight));
 		pRoot = pRoot->NextSibling();
 	}
 	
@@ -117,6 +122,10 @@ void Settings::AppendPreset(Preset preset, const std::string &fileName) {
 	prear->SetAttribute("height", preset.Rear.Height);
 	pRoot->InsertEndChild(prear);
 
+	XMLElement *pvisualHeight = doc.NewElement("visualHeight");
+	pvisualHeight->SetAttribute("value", preset.VisualHeight);
+	pRoot->InsertEndChild(pvisualHeight);
+
 	doc.SaveFile(fileName.c_str());
 }
 
@@ -145,6 +154,10 @@ bool Settings::OverwritePreset(Preset preset, const std::string &fileName) {
 			prear->SetAttribute("camber", preset.Rear.Camber);
 			prear->SetAttribute("trackWidth", preset.Rear.TrackWidth);
 			prear->SetAttribute("height", preset.Rear.Height);
+
+			XMLElement *pvisualHeight = doc.NewElement("visualHeight");
+			pvisualHeight->SetAttribute("value", preset.VisualHeight);
+
 			doc.SaveFile(fileName.c_str());
 			return true;
 		}

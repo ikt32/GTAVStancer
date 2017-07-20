@@ -2,12 +2,12 @@
 
 const std::string Preset::reservedPlate = "_GENERICPRESET_";
 
-Preset::Preset(WheelInfo front, WheelInfo rear, const std::string &name, const std::string &plate) 
-	: Front(front)
-	, Rear(rear)
-	, name(name)
-	, plate(plate) {
-	// lmao nothing
+Preset::Preset(WheelInfo front, 
+			   WheelInfo rear, 
+			   const std::string &name, 
+			   const std::string &plate,
+			   float visualHeight) 
+	: Front(front), Rear(rear), name(name), plate(plate), VisualHeight(visualHeight) {
 }
 
 Preset::~Preset() {

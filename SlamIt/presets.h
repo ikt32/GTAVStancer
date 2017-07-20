@@ -11,7 +11,11 @@ public:
 		float Height;
 	}; 
 	
-	Preset(WheelInfo front, WheelInfo rear, const std::string &name, const std::string &plate);
+	Preset(WheelInfo front, 
+		   WheelInfo rear, 
+		   const std::string &name, 
+		   const std::string &plate,
+		   float visualHeight);
 	~Preset();
 	static std::string ReservedPlate();
 	/*
@@ -21,6 +25,7 @@ public:
 
 	WheelInfo Front;
 	WheelInfo Rear;
+	float VisualHeight;
 
 	std::string Plate();
 	std::string Name();
