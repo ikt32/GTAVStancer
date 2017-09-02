@@ -407,7 +407,7 @@ void update_menu() {
 
 	if (menu.CurrentMenu("mainmenu")) {
 		menu.Title("VStancer");
-		menu.Subtitle(DISPLAY_VERSION, false);
+		menu.Subtitle(DISPLAY_VERSION);
 		if (menu.BoolOption("Enable mod", settings.enableMod, { "Enables or disables the entire mod." })) {
 			settings.SaveSettings();
 			if (settings.enableMod) {

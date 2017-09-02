@@ -50,3 +50,5 @@ struct CWheel {
 	char theRest[0x1D4];
 	// there's a wheel health, tyre health, suspension health somewhere around here
 }; // size = 0x210 (probably)
+
+
