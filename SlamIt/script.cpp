@@ -417,6 +417,11 @@ void update_menu() {
 				unloadPatch();
 			}
 		}
+		if (menu.BoolOption("Auto-apply", settings.autoApply, { "Automatically apply the car-specific preset if "
+			"the licence plate and car model match." })) {
+			settings.SaveSettings();
+		}
+
 		menu.MenuOption("Suspension menu", "suspensionmenu", { "Change camber, height, track width and overall height." });
 		menu.MenuOption("Load a preset", "presetmenu", { "Load and manage a generic preset." } );
 		menu.MenuOption("List car configs", "carsmenu", { "Show and manage car-specific presets." });
@@ -427,11 +432,10 @@ void update_menu() {
 		if (menu.Option("Save as preset", { "Save as generic preset." } )) {
 			savePreset(true , "");
 		}
-		if (menu.BoolOption("Auto-apply", settings.autoApply, { "Automatically apply the car-specific preset if "
-			"the licence plate and car model match." })) {
-			settings.SaveSettings();
-		}
+
 		menu.MenuOption("Other stuff", "othermenu", { "\"Slam It\" is here at the moment." });
+		menu.MenuOption("Tyres", "tyremenu", { "View and edit vehicle tyre settings. Unfinished, only physically affects the car. "
+		"Visuals stay the same. Settings are not saved (yet)."});
 	}
 
 	if (menu.CurrentMenu("suspensionmenu")) {
@@ -471,6 +475,69 @@ void update_menu() {
 			CONTROLS::_SET_CONTROL_NORMAL(0, ControlVehicleAccelerate, 0.3f);
 		}
 	}
+
+	if (menu.CurrentMenu("tyremenu")) {
+		menu.Title("");
+		menu.Subtitle("");
+
+		
+		//for (int i = 0; i < ext.GetNumWheels(vehicle); i++) {
+		//	std::string wheelNr = "Wheel " + std::to_string(i);
+		//	menu.MenuOption(wheelNr, wheelNr);
+		//}
+		menu.MenuOption("Front", "wheelsizefrontmenu");
+		menu.MenuOption("Rear", "wheelsizerearmenu");
+	}
+
+	if (menu.CurrentMenu("wheelsizefrontmenu")) {
+		menu.Title("Front");
+		menu.Subtitle("");
+
+		int numWheels = ext.GetNumWheels(vehicle);
+		if (numWheels < 4) {
+			menu.Option("Vehicle has < 4 wheels");
+			return;
+		}
+
+		auto wheels = ext.GetWheelPtrs(vehicle);
+		for (int i = 0; i < 2; i++) {
+			auto wheelAddr = wheels[i];
+			int offTyreRadius = 0x110;
+			int offRimRadius = 0x114;
+			int offTyreWidth = 0x118;
+
+			menu.FloatOption(std::to_string(i) + ". Tyre radius", *reinterpret_cast<float *>(wheelAddr + offTyreRadius), 0.0f, 10.0f, 0.01f);
+			menu.FloatOption(std::to_string(i) + ". Rim radius", *reinterpret_cast<float *>(wheelAddr + offRimRadius), 0.0f, 10.0f, 0.01f);
+			menu.FloatOption(std::to_string(i) + ". Tyre width", *reinterpret_cast<float *>(wheelAddr + offTyreWidth), 0.0f, 10.0f, 0.01f);
+
+		}
+	}
+
+	if (menu.CurrentMenu("wheelsizerearmenu")) {
+		menu.Title("Rear");
+		menu.Subtitle("");
+
+		int numWheels = ext.GetNumWheels(vehicle);
+		if (numWheels < 4) {
+			menu.Option("Vehicle has < 4 wheels");
+			return;
+		}
+
+		auto wheels = ext.GetWheelPtrs(vehicle);
+		for (int i = 2; i < numWheels; i++) {
+			auto wheelAddr = wheels[i];
+			int offTyreRadius = 0x110;
+			int offRimRadius = 0x114;
+			int offTyreWidth = 0x118;
+
+			menu.FloatOption(std::to_string(i) + ". Tyre radius", *reinterpret_cast<float *>(wheelAddr + offTyreRadius), 0.0f, 10.0f, 0.01f);
+			menu.FloatOption(std::to_string(i) + ". Rim radius", *reinterpret_cast<float *>(wheelAddr + offRimRadius), 0.0f, 10.0f, 0.01f);
+			menu.FloatOption(std::to_string(i) + ". Tyre width", *reinterpret_cast<float *>(wheelAddr + offTyreWidth), 0.0f, 10.0f, 0.01f);
+
+		}
+	}
+
+
 	menu.EndMenu();
 }
 
