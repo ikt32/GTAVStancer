@@ -102,9 +102,9 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <PreprocessorDefinitions>NOGDI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -131,12 +131,12 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;SlamIt_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Async</ExceptionHandling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <FloatingPointModel>Fast</FloatingPointModel>
       <WarningLevel>Level3</WarningLevel>
+      <PreprocessorDefinitions>NOGDI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <AdditionalOptions>..\..\ScriptHookV_SDK\lib\ScriptHookV.lib %(AdditionalOptions)</AdditionalOptions>
@@ -163,6 +163,7 @@
     <ClCompile Include="Patching\Hooking.cpp" />
     <ClCompile Include="presets.cpp" />
     <ClCompile Include="script.cpp" />
+    <ClCompile Include="ScriptMenu.cpp" />
     <ClCompile Include="settings.cpp" />
     <ClCompile Include="Util\Logger.cpp" />
     <ClCompile Include="Util\MathExt.cpp" />
