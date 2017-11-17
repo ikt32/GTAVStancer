@@ -112,6 +112,49 @@ std::vector<Preset> Settings::ReadPresets(const std::string &fileName) {
 	return presets;
 }
 
+void Settings::insertPreset(Preset preset, tinyxml2::XMLDocument &doc, tinyxml2::XMLNode *pRoot) {
+    tinyxml2::XMLElement *pvehicleName = doc.NewElement("vehicleName");
+    pvehicleName->SetText(preset.Name().c_str());
+    pRoot->InsertEndChild(pvehicleName);
+
+    tinyxml2::XMLElement *pplate = doc.NewElement("plate");
+    pplate->SetText(preset.Plate().c_str());
+    pRoot->InsertEndChild(pplate);
+
+    tinyxml2::XMLElement *pfront = doc.NewElement("front");
+    pfront->SetAttribute("camber", preset.FrontSuspension.Camber);
+    pfront->SetAttribute("trackWidth", preset.FrontSuspension.TrackWidth);
+    pfront->SetAttribute("height", preset.FrontSuspension.Height);
+    pRoot->InsertEndChild(pfront);
+
+    tinyxml2::XMLElement *prear = doc.NewElement("rear");
+    prear->SetAttribute("camber", preset.RearSuspension.Camber);
+    prear->SetAttribute("trackWidth", preset.RearSuspension.TrackWidth);
+    prear->SetAttribute("height", preset.RearSuspension.Height);
+    pRoot->InsertEndChild(prear);
+
+    tinyxml2::XMLElement *pvisualHeight = doc.NewElement("visualHeight");
+    pvisualHeight->SetAttribute("value", preset.VisualHeight);
+    pRoot->InsertEndChild(pvisualHeight);
+
+    tinyxml2::XMLElement *pfrontWheels = doc.NewElement("frontWheels");
+    pfrontWheels->SetAttribute("tyreRadius", preset.FrontWheels.TyreRadius);
+    pfrontWheels->SetAttribute("tyreWidth", preset.FrontWheels.TyreWidth);
+    pRoot->InsertEndChild(pfrontWheels);
+
+    tinyxml2::XMLElement *prearWheels = doc.NewElement("rearWheels");
+    prearWheels->SetAttribute("tyreRadius", preset.RearWheels.TyreRadius);
+    prearWheels->SetAttribute("tyreWidth", preset.RearWheels.TyreWidth);
+    pRoot->InsertEndChild(prearWheels);
+
+    tinyxml2::XMLElement *pvisualSize = doc.NewElement("visualSize");
+    pvisualSize->SetAttribute("size", preset.VisualSize.WheelSize);
+    pvisualSize->SetAttribute("width", preset.VisualSize.WheelWidth);
+    pvisualSize->SetAttribute("type", preset.VisualSize.WheelType);
+    pvisualSize->SetAttribute("index", preset.VisualSize.WheelIndex);
+    pRoot->InsertEndChild(pvisualSize);
+}
+
 void Settings::AppendPreset(Preset preset, const std::string &fileName) {
 	using namespace tinyxml2;
 	tinyxml2::XMLDocument doc;
@@ -127,49 +170,10 @@ void Settings::AppendPreset(Preset preset, const std::string &fileName) {
 		throw std::runtime_error("Couldn't open/load XML with XMLError: " + std::to_string(static_cast<int>(err)));
 	}
 	
-	XMLElement *pRoot = doc.NewElement("preset");
+    XMLNode *pRoot = doc.NewElement("preset");
 	doc.InsertFirstChild(pRoot);
 
-	XMLElement *pvehicleName = doc.NewElement("vehicleName");
-	pvehicleName->SetText(preset.Name().c_str());
-	pRoot->InsertEndChild(pvehicleName);
-
-	XMLElement *pplate = doc.NewElement("plate");
-	pplate->SetText(preset.Plate().c_str());
-	pRoot->InsertEndChild(pplate);
-	
-	XMLElement *pfront = doc.NewElement("front");
-	pfront->SetAttribute("camber", preset.FrontSuspension.Camber);
-	pfront->SetAttribute("trackWidth", preset.FrontSuspension.TrackWidth);
-	pfront->SetAttribute("height", preset.FrontSuspension.Height);
-	pRoot->InsertEndChild(pfront);
-
-	XMLElement *prear = doc.NewElement("rear");
-	prear->SetAttribute("camber", preset.RearSuspension.Camber);
-	prear->SetAttribute("trackWidth", preset.RearSuspension.TrackWidth);
-	prear->SetAttribute("height", preset.RearSuspension.Height);
-	pRoot->InsertEndChild(prear);
-
-	XMLElement *pvisualHeight = doc.NewElement("visualHeight");
-	pvisualHeight->SetAttribute("value", preset.VisualHeight);
-	pRoot->InsertEndChild(pvisualHeight);
-
-    XMLElement *pfrontWheels = doc.NewElement("frontWheels");
-    pfrontWheels->SetAttribute("tyreRadius", preset.FrontWheels.TyreRadius);
-    pfrontWheels->SetAttribute("tyreWidth", preset.FrontWheels.TyreWidth);
-    pRoot->InsertEndChild(pfrontWheels);
-
-    XMLElement *prearWheels = doc.NewElement("rearWheels");
-    prearWheels->SetAttribute("tyreRadius", preset.RearWheels.TyreRadius);
-    prearWheels->SetAttribute("tyreWidth", preset.RearWheels.TyreWidth);
-    pRoot->InsertEndChild(prearWheels);
-
-    XMLElement *pvisualSize = doc.NewElement("visualSize");
-    pvisualSize->SetAttribute("size", preset.VisualSize.WheelSize);
-    pvisualSize->SetAttribute("width", preset.VisualSize.WheelWidth);
-    pvisualSize->SetAttribute("type", preset.VisualSize.WheelType);
-    pvisualSize->SetAttribute("index", preset.VisualSize.WheelIndex);
-    pRoot->InsertEndChild(pvisualSize);
+	insertPreset(preset, doc, pRoot);
 
 	doc.SaveFile(fileName.c_str());
 }
@@ -185,23 +189,12 @@ bool Settings::OverwritePreset(Preset preset, const std::string &fileName) {
 
 	XMLNode * pRoot = doc.FirstChildElement("preset");
 
-	std::vector<Preset> presets;
-
 	while (pRoot != nullptr) {
 		if (pRoot->FirstChildElement("vehicleName")->GetText() == preset.Name() &&
 			pRoot->FirstChildElement("plate")->GetText() == preset.Plate()) {
-			XMLElement *pfront = pRoot->FirstChildElement("front");
-			pfront->SetAttribute("camber", preset.FrontSuspension.Camber);
-			pfront->SetAttribute("trackWidth", preset.FrontSuspension.TrackWidth);
-			pfront->SetAttribute("height", preset.FrontSuspension.Height);
+            pRoot->DeleteChildren();
 
-			XMLElement *prear = pRoot->FirstChildElement("rear");
-			prear->SetAttribute("camber", preset.RearSuspension.Camber);
-			prear->SetAttribute("trackWidth", preset.RearSuspension.TrackWidth);
-			prear->SetAttribute("height", preset.RearSuspension.Height);
-
-			XMLElement *pvisualHeight = doc.NewElement("visualHeight");
-			pvisualHeight->SetAttribute("value", preset.VisualHeight);
+            insertPreset(preset, doc, pRoot);
 
 			doc.SaveFile(fileName.c_str());
 			return true;

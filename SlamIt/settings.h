@@ -2,6 +2,7 @@
 #include <string>
 #include "presets.h"
 #include <vector>
+#include "tinyxml2/tinyxml2.h"
 
 namespace NativeMenu {
 	class MenuControls;
@@ -17,7 +18,8 @@ public:
 	void SetFiles(const std::string &general);
 
 	std::vector<Preset> ReadPresets(const std::string &fileName);
-	void AppendPreset(Preset preset, const std::string &fileName);
+    void insertPreset(Preset preset, tinyxml2::XMLDocument &doc, tinyxml2::XMLNode *pRoot);
+    void AppendPreset(Preset preset, const std::string &fileName);
 	bool OverwritePreset(Preset preset, const std::string &fileName);
 	bool DeletePreset(Preset preset, const std::string &fileName);
 	bool autoApply = false;

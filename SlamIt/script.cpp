@@ -184,6 +184,7 @@ void savePreset(bool asPreset, std::string presetName) {
     }
 
 	if (asPreset) {
+        WAIT(32);
 		GAMEPLAY::DISPLAY_ONSCREEN_KEYBOARD(true, "Preset Name", "", "", "", "", "", 127);
 		while (GAMEPLAY::UPDATE_ONSCREEN_KEYBOARD() == 0) WAIT(0);
 		if (!GAMEPLAY::GET_ONSCREEN_KEYBOARD_RESULT()) {
