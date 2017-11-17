@@ -161,6 +161,7 @@
     <ClCompile Include="keyboard.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Patching\Hooking.cpp" />
+    <ClCompile Include="Patching\Patching.cpp" />
     <ClCompile Include="presets.cpp" />
     <ClCompile Include="script.cpp" />
     <ClCompile Include="ScriptMenu.cpp" />
@@ -186,6 +187,8 @@
     <ClInclude Include="..\thirdparty\simpleini\SimpleIni.h" />
     <ClInclude Include="..\thirdparty\tinyxml2\tinyxml2.h" />
     <ClInclude Include="keyboard.h" />
+    <ClInclude Include="Offsets.h" />
+    <ClInclude Include="Patching\Patching.h" />
     <ClInclude Include="Patching\Hooking.h" />
     <ClInclude Include="Patching\pattern.h" />
     <ClInclude Include="presets.h" />
@@ -199,7 +202,7 @@
     <ClInclude Include="Util\Versions.h" />
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="original_thing.asm" />
+    <MASM Include="Patching\original_thing.asm" />
     <MASM Include="Patching\compareHeight.asm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

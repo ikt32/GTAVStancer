@@ -1,15 +1,6 @@
 #pragma once
 
 // todo: Finish this
-// todo: use proper reversed names you idiot
-
-struct CEverythingThatHasWheels {
-	// wheels (num indicated by int before this struct in vehicle struct)
-	// plenty 'o space for more pointers for wheels
-	// height, other shit
-}; // very incomplete as you can see lmao
-
-
 
    // 20, 30: offset from body?
 

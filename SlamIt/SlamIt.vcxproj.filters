@@ -46,6 +46,9 @@
       <Filter>Util</Filter>
     </ClCompile>
     <ClCompile Include="ScriptMenu.cpp" />
+    <ClCompile Include="Patching\Patching.cpp">
+      <Filter>Patching</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="script.h" />
@@ -116,6 +119,10 @@
     <ClInclude Include="Util\MathExt.h">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="Offsets.h" />
+    <ClInclude Include="Patching\Patching.h">
+      <Filter>Patching</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Menu">
@@ -141,7 +148,7 @@
     <MASM Include="Patching\compareHeight.asm">
       <Filter>Patching</Filter>
     </MASM>
-    <MASM Include="original_thing.asm">
+    <MASM Include="Patching\original_thing.asm">
       <Filter>Patching</Filter>
     </MASM>
   </ItemGroup>

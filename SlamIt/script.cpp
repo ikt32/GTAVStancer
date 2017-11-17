@@ -4,8 +4,7 @@
 #include <simpleini/SimpleIni.h>
 #include <menu.h>
 
-#include "Patching/pattern.h"
-#include "Patching/Hooking.h"
+#include "Patching/Patching.h"
 
 #include "Util/Paths.h"
 #include "Util/Util.hpp"
@@ -15,7 +14,7 @@
 #include "settings.h"
 
 #include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
-#include "Util/Versions.h"
+#include "Offsets.h"
 
 NativeMenu::Menu menu;
 
@@ -39,6 +38,7 @@ std::vector<Preset> saved;
 Settings settings;
 
 // The current values, updated by getStats
+// should be continuously applied
 float g_frontCamber;
 float g_frontTrackWidth;
 float g_frontHeight;
@@ -48,137 +48,13 @@ float g_rearTrackWidth;
 float g_rearHeight;
 
 float g_visualHeight;
+
 int slamLevel = 0;
 
 bool autoApplied = false;
 
-//0x000 - ?
-//0x004 - toe
-const int offsetCamber = 0x008;
-//0x00C - padding? Can't see difference + no change @ bump
-const int offsetCamberInv = 0x010; // 
-//0x014 - offsetYPos but also affects camber?
-//0x018 - height-related?
-//0x01C - padding? Can't see difference + no change @ bump
-const int offsetTrackWidth2 = 0x020; // Same as 0x030, can't see difference tho
-//0x024 - ???
-//0x02C - padding? Can't see difference + no change @ bump
-//0x028 - height + 0x128?
-const int offsetTrackWidth = 0x030;
-const int offsetYPos = 0x034;
-const int offsetHeight = 0x038; // affected by hydraulics! 0x028 also.
-//0x03C - padding? Can't see difference + no change @ bump
-//0x128 - physics-related?
-//0x12C - ??
-//0x130 - stiffness?
-
-
 // Keep track of menu highlight for control disable while typing
 bool showOnlyCompatible = false;
-
-// Instructions that access suspension members, 1.0.1032.1
-// GTA5.exe + F1023B - F3 0F11 43 28	- movss[rbx + 28], xmm0		; ???
-// GTA5.exe + F10240 - F3 44 0F11 63 20 - movss[rbx + 20], xmm12	; ???
-// GTA5.exe + F10246 - F3 44 0F11 4B 24 - movss[rbx + 24], xmm9		; ???
-// GTA5.exe + F1024C - F3 0F11 73 30	- movss[rbx + 30], xmm6		; track width
-// GTA5.exe + F10251 - F3 0F11 5B 34	- movss[rbx + 34], xmm3		; ???
-// GTA5.exe + F10256 - F3 0F11 63 38	- movss[rbx + 38], xmm4		; height
-
-// FiveM (1.0.505.2)
-// FiveM... + F01E9B - F3 0F11 43 24	- movss[rbx + 28], xmm0		; ???
-// FiveM... + F01EA0 - F3 0F11 5B 28	- movss[rbx + 20], xmm3		; ???
-// FiveM... + F01EA5 - F3 44 0F11 63 20 - movss[rbx + 24], xmm12	; ???
-// FiveM... + F01EAB - F3 0F11 4B 30	- movss[rbx + 30], xmm1		; track width
-// FiveM... + F01EB0 - F3 0F11 5B 34	- movss[rbx + 34], xmm6		; ???
-// FiveM... + F01EB5 - F3 0F11 63 38	- movss[rbx + 38], xmm4		; height
-bool patched = false;
-
-typedef void(*SetHeight_t)();
-
-CallHookRaw<SetHeight_t> * g_SetHeight;
-
-extern "C" void compare_height();
-//extern "C" void original_thing();
-
-void SetHeight_Stub() {
-	compare_height();
-	//original_thing();
-}
-
-void patchHeightReset() {
-	if (patched)
-		return;
-
-	uintptr_t result;
-	uintptr_t offset;
-	if (getGameVersion() == VER_1_0_505_2_NOSTEAM) {
-		result = BytePattern((BYTE*)
-							 "\xF3\x0F\x11\x43\x24"
-							 "\xF3\x0F\x11\x5B\x28"
-							 "\xF3\x44\x0F\x11\x63\x20"
-							 "\xF3\x0F\x11\x4B\x30"
-							 "\xF3\x0F\x11\x73\x34"
-							 "\xF3\x0F\x11\x63\x38",
-							 "xxx?x"
-							 "xxx?x"
-							 "xxxx?x"
-							 "xxxxx"
-							 "xxxxx"
-							 "xxxxx").get();
-		offset = 26;
-	}
-	else {
-		result = BytePattern((BYTE*)
-							 "\xF3\x0F\x11\x43\x28"
-							 "\xF3\x44\x0F\x11\x63\x20"
-							 "\xF3\x44\x0F\x11\x4B\x24"
-							 "\xF3\x0F\x11\x73\x30"
-							 "\xF3\x0F\x11\x5B\x34"
-							 "\xF3\x0F\x11\x63\x38",
-							 "xxx?x"
-							 "xxxx?x"
-							 "xxxx?x"
-							 "xxx?x"
-							 "xxx?x"
-							 "xxx?x").get();
-		offset = 27;
-	}
-
-
-	if (result) {
-		auto address = result + offset;
-
-		std::stringstream addressFormatted;
-		addressFormatted << std::hex << std::uppercase << (uint64_t)address;
-
-		logger.Write(INFO, "Patch: Patching            @ 0x" + addressFormatted.str());
-
-		g_SetHeight = HookManager::SetCallRaw<SetHeight_t>(address, SetHeight_Stub, 5);
-		logger.Write(INFO, "Patch: SetCall success     @ 0x" + addressFormatted.str());
-
-		addressFormatted.str(std::string());
-		addressFormatted << std::hex << std::uppercase << (uint64_t)g_SetHeight->fn;
-		logger.Write(INFO, "Patch: g_SetHeight address @ 0x" + addressFormatted.str());
-		patched = true;
-	}
-	else {
-		logger.Write(ERROR, "Patch: No pattern found, aborting");
-		patched = false;
-	}
-}
-
-void unloadPatch() {
-	if (!patched)
-		return;
-
-	if (g_SetHeight)
-	{
-		delete g_SetHeight;
-		g_SetHeight = nullptr;
-		logger.Write(INFO, "Patch: Unloaded");
-		patched = false;
-	}
-}
 
 /*
  *  Update wheels info, not sure if I should move this into vehExt.
@@ -280,8 +156,32 @@ void init() {
 void savePreset(bool asPreset, std::string presetName) {
 	std::string name = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model);
 	std::string plate;
-	struct Preset::WheelInfo front = { g_frontCamber, g_frontTrackWidth, g_frontHeight};
-	struct Preset::WheelInfo rear = { g_rearCamber, g_rearTrackWidth, g_rearHeight };
+	Preset::Suspension front { g_frontCamber, g_frontTrackWidth, g_frontHeight};
+	Preset::Suspension rear { g_rearCamber, g_rearTrackWidth, g_rearHeight };
+
+    auto wheels = ext.GetWheelPtrs(vehicle);
+
+    Preset::WheelPhys frontWheels { 
+        *reinterpret_cast<float *>(wheels[0] + offTyreRadius),
+        *reinterpret_cast<float *>(wheels[0] + offTyreWidth)
+    };
+    Preset::WheelPhys rearWheels {
+        *reinterpret_cast<float *>(wheels[2] + offTyreRadius),
+        *reinterpret_cast<float *>(wheels[2] + offTyreWidth)
+    };
+
+    Preset::WheelVis visualSize { 0.0f, 0.0f, -1, -1};
+
+    auto CVeh_0x48 = *(uint64_t *)(ext.GetAddress(vehicle) + 0x48);
+    auto CVeh_0x48_0x370 = *(uint64_t *)(CVeh_0x48 + 0x370);
+    if (CVeh_0x48_0x370 != 0) {
+        visualSize = {
+            *(float *)(CVeh_0x48_0x370 + 0x8),
+            *(float *)(CVeh_0x48_0x370 + 0xB80),
+            VEHICLE::GET_VEHICLE_WHEEL_TYPE(vehicle),
+            VEHICLE::GET_VEHICLE_MOD(vehicle, VehicleModFrontWheels)
+        };
+    }
 
 	if (asPreset) {
 		GAMEPLAY::DISPLAY_ONSCREEN_KEYBOARD(true, "Preset Name", "", "", "", "", "", 127);
@@ -314,17 +214,22 @@ void savePreset(bool asPreset, std::string presetName) {
 	}
 
 	if (alreadyPresent) {
-		settings.OverwritePreset(Preset(front, rear, name, plate, g_visualHeight), asPreset ? presetCarsFile : savedCarsFile);
+		settings.OverwritePreset(
+            Preset(front, rear, frontWheels, rearWheels, visualSize, g_visualHeight, name, plate),
+            asPreset ? presetCarsFile : savedCarsFile);
 		showNotification(asPreset ? "Updated preset" : "Updated car", &prevNotification);
 	}
 	else {
 		try {
-			settings.AppendPreset(Preset(front, rear, name, plate, g_visualHeight), asPreset ? presetCarsFile : savedCarsFile);
+			settings.AppendPreset(
+                Preset(front, rear, frontWheels, rearWheels, visualSize, g_visualHeight, name, plate),
+                asPreset ? presetCarsFile : savedCarsFile);
 			showNotification(asPreset ? "Saved new preset" : "Saved new car", &prevNotification);
 		}
 		catch (std::runtime_error ex) {
 			logger.Write(ERROR, ex.what());
-			logger.Write(ERROR, "Saving of " + plate + " to " + (asPreset ? presetCarsFile : savedCarsFile) + " failed!");
+			logger.Write(ERROR, "Saving of %s to %s failed!", 
+                plate.c_str(), (asPreset ? presetCarsFile : savedCarsFile).c_str());
 			showNotification("Saving to xml failed!");
 		}
 	}
@@ -400,7 +305,7 @@ void update_game() {
 		for (auto preset : saved) {
 			if (VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle) == preset.Plate() &&
 				VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model) == preset.Name()) {
-				ultraSlam(vehicle, preset.Front.Camber, preset.Rear.Camber, preset.Front.TrackWidth, preset.Rear.TrackWidth, preset.Front.Height, preset.Rear.Height);
+				ultraSlam(vehicle, preset.FrontSuspension.Camber, preset.RearSuspension.Camber, preset.FrontSuspension.TrackWidth, preset.RearSuspension.TrackWidth, preset.FrontSuspension.Height, preset.RearSuspension.Height);
 				if (preset.VisualHeight != -1337.0f)
 					ext.SetVisualHeight(vehicle, preset.VisualHeight);
 				autoApplied = true;

@@ -5,6 +5,7 @@
 #include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
 #include "Util/Util.hpp"
 #include "../../GTAVManualTransmission/Gears/Memory/NativeMemory.hpp"
+#include "Offsets.h"
 
 extern NativeMenu::Menu menu;
 extern Hash model;
@@ -40,25 +41,59 @@ void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
         std::string label = preset.Name() + " " + preset.Plate();
         std::vector<std::string> info;
         info.push_back("Press RIGHT to delete preset");
-        info.push_back("Front Camber\t\t" + std::to_string(preset.Front.Camber));
-        info.push_back("Front Track width\t" + std::to_string(preset.Front.TrackWidth));
-        info.push_back("Front Height\t\t" + std::to_string(preset.Front.Height));
-        info.push_back("Rear Camber\t\t" + std::to_string(preset.Rear.Camber));
-        info.push_back("Rear Track width\t" + std::to_string(preset.Rear.TrackWidth));
-        info.push_back("Rear Height\t\t" + std::to_string(preset.Rear.Height));
+        info.push_back("Front Camber\t\t" + std::to_string(preset.FrontSuspension.Camber));
+        info.push_back("Front Track width\t" + std::to_string(preset.FrontSuspension.TrackWidth));
+        info.push_back("Front Height\t\t" + std::to_string(preset.FrontSuspension.Height));
+        info.push_back("Rear Camber\t\t" + std::to_string(preset.RearSuspension.Camber));
+        info.push_back("Rear Track width\t" + std::to_string(preset.RearSuspension.TrackWidth));
+        info.push_back("Rear Height\t\t" + std::to_string(preset.RearSuspension.Height));
         std::string heightDisplay = preset.VisualHeight == -1337.0f ? "Missing Value" : std::to_string(preset.VisualHeight);
         info.push_back("Visual height\t\t" + heightDisplay);
 
         if (menu.OptionPlus(label, info, nullptr, std::bind(deletePreset, preset, whichPresets), nullptr, "Preset data")) {
             ultraSlam(vehicle,
-                preset.Front.Camber,
-                preset.Rear.Camber,
-                preset.Front.TrackWidth,
-                preset.Rear.TrackWidth,
-                preset.Front.Height,
-                preset.Rear.Height);
+                preset.FrontSuspension.Camber,
+                preset.RearSuspension.Camber,
+                preset.FrontSuspension.TrackWidth,
+                preset.RearSuspension.TrackWidth,
+                preset.FrontSuspension.Height,
+                preset.RearSuspension.Height);
+            
             if (preset.VisualHeight != -1337.0f)
                 ext.SetVisualHeight(vehicle, preset.VisualHeight);
+
+            auto wheels = ext.GetWheelPtrs(vehicle);
+            auto numWheels = ext.GetNumWheels(vehicle);
+            if (preset.FrontWheels.TyreWidth != -1337.0f && preset.FrontWheels.TyreWidth != -1337.0f) {
+                for (int i = 0; i < 2; i++) {
+                    *reinterpret_cast<float *>(wheels[i] + offTyreRadius) = preset.FrontWheels.TyreRadius;
+                    *reinterpret_cast<float *>(wheels[i] + offTyreWidth) = preset.FrontWheels.TyreWidth;
+                }
+            }
+
+            if (preset.RearWheels.TyreWidth != -1337.0f && preset.RearWheels.TyreWidth != -1337.0f) {
+                for (int i = 2; i < numWheels; i++) {
+                    *reinterpret_cast<float *>(wheels[i] + offTyreRadius) = preset.RearWheels.TyreRadius;
+                    *reinterpret_cast<float *>(wheels[i] + offTyreWidth) = preset.RearWheels.TyreWidth;
+                }
+            }
+
+            if (preset.VisualSize.WheelType != -1 && preset.VisualSize.WheelIndex != -1) {
+                VEHICLE::SET_VEHICLE_MOD_KIT(vehicle, 0);
+                auto customtyres = VEHICLE::GET_VEHICLE_MOD_VARIATION(vehicle, VehicleModFrontWheels);
+                VEHICLE::SET_VEHICLE_WHEEL_TYPE(vehicle, preset.VisualSize.WheelType);
+                VEHICLE::SET_VEHICLE_MOD(vehicle, VehicleModFrontWheels, preset.VisualSize.WheelIndex, customtyres);
+                WAIT(16);
+                auto CVeh_0x48 = *(uint64_t *)(ext.GetAddress(vehicle) + 0x48);
+                auto CVeh_0x48_0x370 = *(uint64_t *)(CVeh_0x48 + 0x370);
+                if (CVeh_0x48_0x370 != 0) {
+                    *(float *)(CVeh_0x48_0x370 + 0x8) = preset.VisualSize.WheelSize;
+                    *(float *)(CVeh_0x48_0x370 + 0xB80) = preset.VisualSize.WheelWidth;
+                }
+                else {
+                    showNotification("Couldn't set visual sizes!");
+                }
+            }
 
             getStats(vehicle);
             showNotification("Applied preset!", &prevNotification);
@@ -84,6 +119,8 @@ void update_mainmenu() {
     }
 
     menu.MenuOption("Suspension menu", "suspensionmenu", { "Change camber, height, track width and overall height." });
+    menu.MenuOption("Tyres", "tyremenu", { "View and edit vehicle tyre settings." });
+
     menu.MenuOption("Load a preset", "presetmenu", { "Load and manage a generic preset." });
     menu.MenuOption("List car configs", "carsmenu", { "Show and manage car-specific presets." });
     if (menu.Option("Save as car", { "Save as car-specific preset. This loads the current setting when you get in "
@@ -95,8 +132,7 @@ void update_mainmenu() {
     }
 
     menu.MenuOption("Other stuff", "othermenu", { "\"Slam It\" is here at the moment." });
-    menu.MenuOption("Tyres", "tyremenu", { "View and edit vehicle tyre settings. Unfinished, only physically affects the car. "
-                        "Visuals stay the same. Settings are not saved (yet)." });
+
 }
 
 void update_suspensionmenu() {
@@ -151,10 +187,6 @@ void update_wheelsizefrontmenu() {
     menu.Title("Front");
     menu.Subtitle("");
 
-    const int offTyreRadius = 0x110;
-    const int offRimRadius = 0x114;
-    const int offTyreWidth = 0x118;
-
     int numWheels = ext.GetNumWheels(vehicle);
     if (numWheels < 4) {
         menu.Option("Vehicle has < 4 wheels", { "That's " + std::to_string(numWheels) + " wheels." });
@@ -166,35 +198,28 @@ void update_wheelsizefrontmenu() {
     float oldTyreRadius = *reinterpret_cast<float *>(wheels[0] + offTyreRadius);
     float oldRimRadius = *reinterpret_cast<float *>(wheels[0] + offRimRadius);
     float oldTyreWidth = *reinterpret_cast<float *>(wheels[0] + offTyreWidth);
-    float newTyreRadius =  oldTyreRadius;
-    float newRimRadius  =  oldRimRadius ;
-    float newTyreWidth  =  oldTyreWidth ;
 
-    if (menu.FloatOption("Tyre radius", newTyreRadius, 0.0f, 10.0f, 0.01f)) {
-        *reinterpret_cast<float *>(wheels[0] + offTyreRadius) = newTyreRadius;
-        *reinterpret_cast<float *>(wheels[1] + offTyreRadius) = newTyreRadius;
+    if (menu.FloatOption("Tyre radius", oldTyreRadius, 0.0f, 10.0f, 0.01f)) {
+        *reinterpret_cast<float *>(wheels[0] + offTyreRadius) = oldTyreRadius;
+        *reinterpret_cast<float *>(wheels[1] + offTyreRadius) = oldTyreRadius;
     }
 
-    if (menu.FloatOption("Rim radius", newRimRadius, 0.0f, 10.0f, 0.01f)) {
+    if (menu.FloatOption("Rim radius", oldRimRadius, 0.0f, 10.0f, 0.01f)) {
 
-        *reinterpret_cast<float *>(wheels[0] + offRimRadius) = newRimRadius;
-        *reinterpret_cast<float *>(wheels[1] + offRimRadius) = newRimRadius;
+        *reinterpret_cast<float *>(wheels[0] + offRimRadius) = oldRimRadius;
+        *reinterpret_cast<float *>(wheels[1] + offRimRadius) = oldRimRadius;
     }
         
-    if (menu.FloatOption("Tyre width", newTyreWidth, 0.0f, 10.0f, 0.01f)) {
+    if (menu.FloatOption("Tyre width", oldTyreWidth, 0.0f, 10.0f, 0.01f)) {
 
-        *reinterpret_cast<float *>(wheels[0] + offTyreWidth) = newTyreWidth;
-        *reinterpret_cast<float *>(wheels[1] + offTyreWidth) = newTyreWidth;
+        *reinterpret_cast<float *>(wheels[0] + offTyreWidth) = oldTyreWidth;
+        *reinterpret_cast<float *>(wheels[1] + offTyreWidth) = oldTyreWidth;
     }
 }
 
 void update_wheelsizerearmenu() {
     menu.Title("Rear");
     menu.Subtitle("");
-
-    const int offTyreRadius = 0x110;
-    const int offRimRadius = 0x114;
-    const int offTyreWidth = 0x118;
 
     int numWheels = ext.GetNumWheels(vehicle);
     if (numWheels < 4) {
@@ -207,25 +232,22 @@ void update_wheelsizerearmenu() {
     float oldTyreRadius = *reinterpret_cast<float *>(wheels[2] + offTyreRadius);
     float oldRimRadius = *reinterpret_cast<float *>(wheels[2] + offRimRadius);
     float oldTyreWidth = *reinterpret_cast<float *>(wheels[2] + offTyreWidth);
-    float newTyreRadius = oldTyreRadius;
-    float newRimRadius = oldRimRadius;
-    float newTyreWidth = oldTyreWidth;
 
-    if (menu.FloatOption("Tyre radius", newTyreRadius, 0.0f, 10.0f, 0.01f)) {
+    if (menu.FloatOption("Tyre radius", oldTyreRadius, 0.0f, 10.0f, 0.01f)) {
         for (int i = 2; i < numWheels; i++) {
-            *reinterpret_cast<float *>(wheels[i] + offTyreRadius) = newTyreRadius;
+            *reinterpret_cast<float *>(wheels[i] + offTyreRadius) = oldTyreRadius;
         }
     }
 
-    if (menu.FloatOption("Rim radius", newRimRadius, 0.0f, 10.0f, 0.01f)) {
+    if (menu.FloatOption("Rim radius", oldRimRadius, 0.0f, 10.0f, 0.01f)) {
         for (int i = 2; i < numWheels; i++) {
-            *reinterpret_cast<float *>(wheels[i] + offRimRadius) = newRimRadius;
+            *reinterpret_cast<float *>(wheels[i] + offRimRadius) = oldRimRadius;
         }
     }
 
-    if (menu.FloatOption("Tyre width", newTyreWidth, 0.0f, 10.0f, 0.01f)) {
+    if (menu.FloatOption("Tyre width", oldTyreWidth, 0.0f, 10.0f, 0.01f)) {
         for (int i = 2; i < numWheels; i++) {
-            *reinterpret_cast<float *>(wheels[i] + offTyreWidth) = newTyreWidth;
+            *reinterpret_cast<float *>(wheels[i] + offTyreWidth) = oldTyreWidth;
         }
     }
 }

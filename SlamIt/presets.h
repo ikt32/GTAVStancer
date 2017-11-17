@@ -5,26 +5,44 @@ class Settings;
 class Preset
 {
 public:
-	struct WheelInfo {
+	struct Suspension {
 		float Camber;
 		float TrackWidth;
 		float Height;
 	}; 
+
+    struct WheelPhys {
+        float TyreRadius;
+        float TyreWidth;
+    };
+
+    struct WheelVis {
+        float WheelSize;
+        float WheelWidth;
+        int WheelType;
+        int WheelIndex;
+    };
 	
-	Preset(WheelInfo front, 
-		   WheelInfo rear, 
+	Preset(Suspension frontSuspension, 
+		   Suspension rearSuspension, 
+           WheelPhys frontWheels,
+           WheelPhys rearWheels,
+           WheelVis visualSize,
+           float visualHeight,
 		   const std::string &name, 
-		   const std::string &plate,
-		   float visualHeight);
+		   const std::string &plate);
 	~Preset();
 	static std::string ReservedPlate();
 	/*
-	 * If this is NOT a preset then it's a saved cahr.
+	 * If this is NOT a preset then it's a saved car.
 	 */
 	bool IsPreset();
 
-	WheelInfo Front;
-	WheelInfo Rear;
+	Suspension FrontSuspension;
+	Suspension RearSuspension;
+    WheelPhys FrontWheels;
+    WheelPhys RearWheels;
+    WheelVis VisualSize;
 	float VisualHeight;
 
 	std::string Plate();

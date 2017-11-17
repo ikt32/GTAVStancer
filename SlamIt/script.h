@@ -9,6 +9,8 @@
 #include "presets.h"
 #include <vector>
 
+#define DISPLAY_VERSION "v0.2.0"
+
 const std::string modDir  = "\\VStancer";
 
 void ScriptMain();
