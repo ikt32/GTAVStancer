@@ -18,6 +18,9 @@ BOOL APIENTRY DllMain(HMODULE hInstance, DWORD reason, LPVOID lpReserved)
 		logger.Clear();
 		logger.Write(INFO, "VStancer " + std::string(DISPLAY_VERSION));
 		logger.Write(INFO, "Game version " + eGameVersionToString(getGameVersion()));
+        if (getGameVersion() < G_VER_1_0_944_2_STEAM) {
+            logger.Write(WARN, "Incompatible game version. Update your game!");
+        }
 		logger.Write(INFO, "Script registered");
 		break;
 	case DLL_PROCESS_DETACH:

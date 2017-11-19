@@ -263,6 +263,52 @@ void deletePreset(Preset preset, const std::vector<Preset> &fromWhich) {
 	showNotification(message.c_str(), &prevNotification);
 }
 
+void applyPreset(std::vector<Preset>::value_type preset) {
+    ultraSlam(vehicle,
+        preset.FrontSuspension.Camber,
+        preset.RearSuspension.Camber,
+        preset.FrontSuspension.TrackWidth,
+        preset.RearSuspension.TrackWidth,
+        preset.FrontSuspension.Height,
+        preset.RearSuspension.Height);
+
+    if (preset.VisualHeight != -1337.0f)
+        ext.SetVisualHeight(vehicle, preset.VisualHeight);
+
+    auto wheels = ext.GetWheelPtrs(vehicle);
+    auto numWheels = ext.GetNumWheels(vehicle);
+    if (preset.FrontWheels.TyreWidth != -1337.0f && preset.FrontWheels.TyreWidth != -1337.0f) {
+        for (int i = 0; i < 2; i++) {
+            *reinterpret_cast<float *>(wheels[i] + offTyreRadius) = preset.FrontWheels.TyreRadius;
+            *reinterpret_cast<float *>(wheels[i] + offTyreWidth) = preset.FrontWheels.TyreWidth;
+        }
+    }
+
+    if (preset.RearWheels.TyreWidth != -1337.0f && preset.RearWheels.TyreWidth != -1337.0f) {
+        for (int i = 2; i < numWheels; i++) {
+            *reinterpret_cast<float *>(wheels[i] + offTyreRadius) = preset.RearWheels.TyreRadius;
+            *reinterpret_cast<float *>(wheels[i] + offTyreWidth) = preset.RearWheels.TyreWidth;
+        }
+    }
+
+    if (preset.VisualSize.WheelType != -1 && preset.VisualSize.WheelIndex != -1) {
+        VEHICLE::SET_VEHICLE_MOD_KIT(vehicle, 0);
+        auto customtyres = VEHICLE::GET_VEHICLE_MOD_VARIATION(vehicle, VehicleModFrontWheels);
+        VEHICLE::SET_VEHICLE_WHEEL_TYPE(vehicle, preset.VisualSize.WheelType);
+        VEHICLE::SET_VEHICLE_MOD(vehicle, VehicleModFrontWheels, preset.VisualSize.WheelIndex, customtyres);
+        WAIT(500);
+        auto CVeh_0x48 = *(uint64_t *)(ext.GetAddress(vehicle) + 0x48);
+        auto CVeh_0x48_0x370 = *(uint64_t *)(CVeh_0x48 + 0x370);
+        if (CVeh_0x48_0x370 != 0) {
+            *(float *)(CVeh_0x48_0x370 + 0x8) = preset.VisualSize.WheelSize;
+            *(float *)(CVeh_0x48_0x370 + 0xB80) = preset.VisualSize.WheelWidth;
+        }
+        else {
+            showNotification("Couldn't set visual sizes!");
+        }
+    }
+}
+
 void update_game() {
 	player = PLAYER::PLAYER_ID();
 	playerPed = PLAYER::PLAYER_PED_ID();
@@ -306,13 +352,12 @@ void update_game() {
 		for (auto preset : saved) {
 			if (VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle) == preset.Plate() &&
 				VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model) == preset.Name()) {
-				ultraSlam(vehicle, preset.FrontSuspension.Camber, preset.RearSuspension.Camber, preset.FrontSuspension.TrackWidth, preset.RearSuspension.TrackWidth, preset.FrontSuspension.Height, preset.RearSuspension.Height);
-				if (preset.VisualHeight != -1337.0f)
-					ext.SetVisualHeight(vehicle, preset.VisualHeight);
-				autoApplied = true;
+                applyPreset(preset);
+
 				getStats(vehicle);
 				showNotification("Applied preset automatically!", &prevNotification);
-			}
+                autoApplied = true;
+            }
 		}
 	}
 
