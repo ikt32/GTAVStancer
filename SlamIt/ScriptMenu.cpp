@@ -61,6 +61,11 @@ void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
 void update_mainmenu() {
     menu.Title("VStancer");
     menu.Subtitle(DISPLAY_VERSION);
+
+    if (getGameVersion() < G_VER_1_0_944_2_STEAM) {
+        menu.Option("Unsupported game version!", NativeMenu::solidRed, { "You need v1.0.944.2 or newer." });
+    }
+    
     if (menu.BoolOption("Enable mod", settings.enableMod, { "Enables or disables the entire mod." })) {
         settings.SaveSettings();
         if (settings.enableMod) {
