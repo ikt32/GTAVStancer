@@ -131,8 +131,9 @@ void update_tyremenu() {
     menu.Title("Tyres/Wheels");
     menu.Subtitle("");
 
-    menu.MenuOption("Front", "wheelsizefrontmenu");
-    menu.MenuOption("Rear", "wheelsizerearmenu");
+    std::string physDetails = "Change the physical dimensions of your wheels";
+    menu.MenuOption("Front", "wheelsizefrontmenu", { physDetails });
+    menu.MenuOption("Rear", "wheelsizerearmenu", { physDetails });
 
     auto CVeh_0x48 = *(uint64_t *)(ext.GetAddress(vehicle) + 0x48);
     auto CVeh_0x48_0x370 = *(uint64_t *)(CVeh_0x48 + 0x370);
