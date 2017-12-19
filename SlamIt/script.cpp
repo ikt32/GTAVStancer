@@ -135,7 +135,6 @@ void oldSlam(Vehicle vehicle, int slamLevel) {
 }
 
 void init() {
-    ext.initOffsets();
 	settings.ReadSettings();
 	menu.ReadSettings();
 	logger.Write(INFO, "Settings read");
@@ -150,7 +149,6 @@ void init() {
 		logger.Write(ERROR, "Unknown XML read error!");
 	}
 	logger.Write(INFO, "Initialization finished");
-
 }
 
 void savePreset(bool asPreset, std::string presetName) {
@@ -380,7 +378,9 @@ void main() {
 	logger.Write(INFO, "Loading " + savedCarsFile);
 	logger.Write(INFO, "Loading " + presetCarsFile);
 
-	init();
+    ext.initOffsets();
+    
+    init();
 
 	if (settings.enableMod) {
 		patchHeightReset();
