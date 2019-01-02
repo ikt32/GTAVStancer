@@ -24,6 +24,7 @@ public:
 	bool DeletePreset(Preset preset, const std::string &fileName);
 	bool autoApply = false;
 	bool enableMod = false;
+    bool enableHeight = false;
 private:
 	std::string settingsGeneralFile;
 	std::string settingsMenuFile;

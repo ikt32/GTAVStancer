@@ -24,6 +24,7 @@ extern float g_rearHeight;
 extern float g_visualHeight;
 extern int slamLevel;
 extern bool showOnlyCompatible;
+extern uint32_t offVisualWidth;
 
 void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
     menu.Title(title);
@@ -68,7 +69,7 @@ void update_mainmenu() {
     
     if (menu.BoolOption("Enable mod", settings.enableMod, { "Enables or disables the entire mod." })) {
         settings.SaveSettings();
-        if (settings.enableMod) {
+        if (settings.enableMod && settings.enableHeight) {
             patchHeightReset();
         }
         else {
@@ -125,6 +126,16 @@ void update_othermenu() {
         oldSlam(vehicle, slamLevel);
         CONTROLS::_SET_CONTROL_NORMAL(0, ControlVehicleAccelerate, 0.3f);
     }
+    if (menu.BoolOption("Enable Height tuning", settings.enableHeight, { "Enabling the car height setting is not compatible with lowriders "
+    "and cars that have moving/transforming wheels."})) {
+        settings.SaveSettings();
+        if (settings.enableMod && settings.enableHeight) {
+            patchHeightReset();
+        }
+        else {
+            unloadPatch();
+        }
+    }
 }
 
 void update_tyremenu() {
@@ -143,7 +154,7 @@ void update_tyremenu() {
     }
     std::string extraInfo = "Visual property. Applies to all wheels. Doesn't work with stock wheels.";
     menu.FloatOption("Wheel size", *(float *)(CVeh_0x48_0x370 + 0x8), 0.0f, 5.0f, 0.01f, { extraInfo });
-    menu.FloatOption("Wheel width", *(float *)(CVeh_0x48_0x370 + 0xB80), 0.0f, 5.0f, 0.01f, { extraInfo });
+    menu.FloatOption("Wheel width", *(float *)(CVeh_0x48_0x370 + offVisualWidth), 0.0f, 5.0f, 0.01f, { extraInfo });
 }
 
 void update_wheelsizefrontmenu() {

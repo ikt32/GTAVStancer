@@ -204,6 +204,7 @@
     <ClInclude Include="Util\Versions.h" />
   </ItemGroup>
   <ItemGroup>
+    <MASM Include="Patching\compareHeight1604.asm" />
     <MASM Include="Patching\original_thing.asm" />
     <MASM Include="Patching\compareHeight.asm" />
   </ItemGroup>

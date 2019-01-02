@@ -23,6 +23,7 @@ void Settings::ReadSettings() {
 	
 	enableMod = settingsGeneral.GetBoolValue("OPTIONS", "EnableMod", false);
 	autoApply = settingsGeneral.GetBoolValue("OPTIONS", "AutoApply", false);
+    enableHeight = settingsGeneral.GetBoolValue("OPTIONS", "EnableHeight", false);
 }
 
 
@@ -32,7 +33,8 @@ void Settings::SaveSettings() {
 	settings.LoadFile(settingsGeneralFile.c_str());
 
 	settings.SetBoolValue("OPTIONS", "EnableMod", enableMod);
-	settings.SetBoolValue("OPTIONS", "AutoApply", autoApply);
+    settings.SetBoolValue("OPTIONS", "AutoApply", autoApply);
+    settings.SetBoolValue("OPTIONS", "EnableHeight", enableHeight);
 	settings.SaveFile(settingsGeneralFile.c_str());
 }
 

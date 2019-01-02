@@ -151,5 +151,8 @@
     <MASM Include="Patching\original_thing.asm">
       <Filter>Patching</Filter>
     </MASM>
+    <MASM Include="Patching\compareHeight1604.asm">
+      <Filter>Patching</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

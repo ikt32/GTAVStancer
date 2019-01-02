@@ -16,6 +16,8 @@
 #include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
 #include "Offsets.h"
 
+uint32_t offVisualWidth = 0xB80;
+
 NativeMenu::Menu menu;
 
 std::string settingsGeneralFile;
@@ -175,7 +177,7 @@ void savePreset(bool asPreset, std::string presetName) {
     if (CVeh_0x48_0x370 != 0) {
         visualSize = {
             *(float *)(CVeh_0x48_0x370 + 0x8),
-            *(float *)(CVeh_0x48_0x370 + 0xB80),
+            *(float *)(CVeh_0x48_0x370 + offVisualWidth), // BA0?
             VEHICLE::GET_VEHICLE_WHEEL_TYPE(vehicle),
             VEHICLE::GET_VEHICLE_MOD(vehicle, VehicleModFrontWheels)
         };
@@ -382,7 +384,11 @@ void main() {
     
     init();
 
-	if (settings.enableMod) {
+    if (getGameVersion() >= 46) {
+        offVisualWidth = 0xBA0;
+    }
+
+	if (settings.enableMod && settings.enableHeight) {
 		patchHeightReset();
 	}
 
