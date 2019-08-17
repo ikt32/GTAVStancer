@@ -9,7 +9,7 @@
 #include "presets.h"
 #include <vector>
 
-#define DISPLAY_VERSION "v0.2.3"
+#define DISPLAY_VERSION "v0.2.4"
 
 const std::string modDir  = "\\VStancer";
 
