@@ -301,7 +301,7 @@ void applyPreset(std::vector<Preset>::value_type preset) {
         auto CVeh_0x48_0x370 = *(uint64_t *)(CVeh_0x48 + 0x370);
         if (CVeh_0x48_0x370 != 0) {
             *(float *)(CVeh_0x48_0x370 + 0x8) = preset.VisualSize.WheelSize;
-            *(float *)(CVeh_0x48_0x370 + 0xB80) = preset.VisualSize.WheelWidth;
+            *(float *)(CVeh_0x48_0x370 + offVisualWidth) = preset.VisualSize.WheelWidth;
         }
         else {
             showNotification("Couldn't set visual sizes!");
