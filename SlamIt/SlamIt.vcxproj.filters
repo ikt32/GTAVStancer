@@ -49,6 +49,9 @@
     <ClCompile Include="Patching\Patching.cpp">
       <Filter>Patching</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\GTAVMenuBase\menumemutils.cpp">
+      <Filter>Menu</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="script.h" />
@@ -122,6 +125,9 @@
     <ClInclude Include="Offsets.h" />
     <ClInclude Include="Patching\Patching.h">
       <Filter>Patching</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\GTAVMenuBase\menumemutils.hpp">
+      <Filter>Menu</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

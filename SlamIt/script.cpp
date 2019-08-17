@@ -374,11 +374,7 @@ void main() {
 	settings.SetFiles(settingsGeneralFile);
 	menu.SetFiles(settingsMenuFile);
 	menu.RegisterOnMain(std::bind(init));
-
-	logger.Write(INFO, "Loading " + settingsGeneralFile);
-	logger.Write(INFO, "Loading " + settingsMenuFile);
-	logger.Write(INFO, "Loading " + savedCarsFile);
-	logger.Write(INFO, "Loading " + presetCarsFile);
+    menu.Initialize();
 
     ext.initOffsets();
     
