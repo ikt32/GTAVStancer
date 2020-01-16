@@ -1,9 +1,9 @@
-#pragma once
-#include "../Util/Logger.hpp"
+#include "Patching.h"
+
 #include "Hooking.h"
-#include "pattern.h"
-#include <inc/nativeCaller.h>
+#include "../Util/Logger.hpp"
 #include "../../../GTAVManualTransmission/Gears/Memory/NativeMemory.hpp"
+#include <inc/nativeCaller.h>
 
 // Instructions that access suspension members, 1.0.1032.1
 // GTA5.exe + F1023B - F3 0F11 43 28	- movss[rbx + 28], xmm0		; ???

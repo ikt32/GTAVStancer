@@ -1,9 +1,8 @@
 #include "settings.h"
-#include "simpleini/SimpleIni.h"
-#include "keyboard.h"
 #include "presets.h"
-#include <vector>
+#include "simpleini/SimpleIni.h"
 #include "tinyxml2/tinyxml2.h"
+#include <vector>
 #include <fstream>
 
 Settings::Settings() { }

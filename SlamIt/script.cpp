@@ -1,20 +1,18 @@
 #include "script.h"
 
-#include <sstream>
-#include <simpleini/SimpleIni.h>
-#include <GTAVMenuBase/menu.h>
+#include "presets.h"
+#include "settings.h"
 
-#include "Patching/Patching.h"
+#include "Offsets.h"
 
 #include "Util/Paths.h"
 #include "Util/Util.hpp"
 #include "Util/Logger.hpp"
 
-#include "presets.h"
-#include "settings.h"
-
 #include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
-#include "Offsets.h"
+#include <GTAVMenuBase/menu.h>
+#include <simpleini/SimpleIni.h>
+#include <sstream>
 
 uint32_t offVisualWidth = 0xB80;
 

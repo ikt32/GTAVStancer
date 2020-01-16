@@ -1,8 +1,8 @@
 #pragma once
-#include <string>
 #include "presets.h"
-#include <vector>
 #include "tinyxml2/tinyxml2.h"
+#include <string>
+#include <vector>
 
 namespace NativeMenu {
 	class MenuControls;

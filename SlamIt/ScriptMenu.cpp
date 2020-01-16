@@ -1,11 +1,11 @@
 #include "script.h"
-#include "GTAVMenuBase/menu.h"
-#include "Util/Versions.h"
+
 #include "settings.h"
-#include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
-#include "Util/Util.hpp"
-#include "../../GTAVManualTransmission/Gears/Memory/NativeMemory.hpp"
 #include "Offsets.h"
+#include "Util/Util.hpp"
+#include "Util/Versions.h"
+#include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
+#include "GTAVMenuBase/menu.h"
 
 extern NativeMenu::Menu menu;
 extern Hash model;

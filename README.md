@@ -12,17 +12,25 @@ A script that allows for changing wheel node details, like camber, track width, 
 * [ScriptHookV SDK by Alexander Blade](http://www.dev-c.com/gtav/scripthookv/)
 * [GTAVMenuBase](https://github.com/E66666666/GTAVMenuBase)
 * [GTAVManualTransmission](https://github.com/E66666666/GTAVManualTransmission)
+* Visual Studio 2019 (and its build tools)
 
-Download the [ScriptHookV SDK](http://www.dev-c.com/gtav/scripthookv/) and extract its contents to ScriptHookV_SDK.
+Instructions:
 
-Clone this repository to the same folder ScriptHookV_SDK was extracted so you have ScriptHookV_SDK and GTAVManualTransmission in the same folder. If you get build errors about missing functions, update your [natives.h](http://www.dev-c.com/nativedb/natives.h).
+* Clone both this repo and Manual Transmission to one directory
+  * `git clone --recurse-submodules https://github.com/E66666666/GTAVStancer.git`
+  * `git clone --recurse-submodules https://github.com/E66666666/GTAVManualTransmission.git`
+* Build!
 
-Clone GTAVMenuBase and GTAVManualTransmission to the same folder you're gonna clone this to.
+## Todo until v1.0.0 release
 
-# Todo until V1.0 release
+* ~~Patching wheel set/reset instructions.~~ __Fixed in v0.1.0__
+* Automatic optional blacklist for unsupported models (lowrider suspension drop handling)
 
-~~Patching wheel set/reset instructions.~~ __Fixed in v0.1.0__
-Wheel size
+### Less attainable goals
 
-# Todo until Sint Juttemis
-Check up glitching with extreme camber
+* Independent (visual) wheel size, tie visual/physical sizes together
+* Fix glitching with extreme camber or height changes
+
+## Related
+
+[carmineos' VStancer](https://github.com/carmineos/fivem-vstancer) for [FiveM](https://fivem.net/)

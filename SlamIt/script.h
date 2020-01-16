@@ -1,12 +1,13 @@
 #pragma once
 
+#include "presets.h"
+
 #include "inc\natives.h"
 #include "inc\types.h"
 #include "inc\enums.h"
 #include "inc\main.h"
 
 #include <string>
-#include "presets.h"
 #include <vector>
 
 #define DISPLAY_VERSION "v0.2.4"
