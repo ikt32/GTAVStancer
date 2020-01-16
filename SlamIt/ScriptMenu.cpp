@@ -1,5 +1,5 @@
 #include "script.h"
-#include "menu.h"
+#include "GTAVMenuBase/menu.h"
 #include "Util/Versions.h"
 #include "settings.h"
 #include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"

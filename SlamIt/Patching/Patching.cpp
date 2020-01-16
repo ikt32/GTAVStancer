@@ -1,7 +1,7 @@
 #pragma once
-#include "Util/Logger.hpp"
-#include "Patching/Hooking.h"
-#include "Patching/pattern.h"
+#include "../Util/Logger.hpp"
+#include "Hooking.h"
+#include "pattern.h"
 #include <inc/nativeCaller.h>
 #include "../../../GTAVManualTransmission/Gears/Memory/NativeMemory.hpp"
 

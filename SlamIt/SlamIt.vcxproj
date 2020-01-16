@@ -21,34 +21,34 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{71D4C2A8-9E78-47A8-A2B7-3FB2DE014D27}</ProjectGuid>
     <RootNamespace>InversePower</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
     <ProjectName>VStancer</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v141</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
@@ -83,7 +83,6 @@
     <OutDir>bin\</OutDir>
     <IntDir>obj\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <IncludePath>$(ProjectDir);$(SolutionDir)thirdparty\;..\..\GTAVMenuBase\;..\..\ScriptHookV_SDK\;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -139,9 +138,10 @@
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>NOGDI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\ScriptHookV_SDK;$(SolutionDir)thirdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalOptions>..\..\ScriptHookV_SDK\lib\ScriptHookV.lib %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>..\thirdparty\ScriptHookV_SDK\lib\ScriptHookV.lib %(AdditionalOptions)</AdditionalOptions>
       <GenerateDebugInformation>No</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -154,12 +154,12 @@
   <ItemGroup>
     <ClCompile Include="..\..\GTAVManualTransmission\Gears\Memory\NativeMemory.cpp" />
     <ClCompile Include="..\..\GTAVManualTransmission\Gears\Memory\VehicleExtensions.cpp" />
-    <ClCompile Include="..\..\GTAVMenuBase\menu.cpp" />
-    <ClCompile Include="..\..\GTAVMenuBase\menucontrols.cpp" />
-    <ClCompile Include="..\..\GTAVMenuBase\menukeyboard.cpp" />
-    <ClCompile Include="..\..\GTAVMenuBase\menumemutils.cpp" />
-    <ClCompile Include="..\..\GTAVMenuBase\menusettings.cpp" />
-    <ClCompile Include="..\..\GTAVMenuBase\menuutils.cpp" />
+    <ClCompile Include="..\thirdparty\GTAVMenuBase\menu.cpp" />
+    <ClCompile Include="..\thirdparty\GTAVMenuBase\menucontrols.cpp" />
+    <ClCompile Include="..\thirdparty\GTAVMenuBase\menukeyboard.cpp" />
+    <ClCompile Include="..\thirdparty\GTAVMenuBase\menumemutils.cpp" />
+    <ClCompile Include="..\thirdparty\GTAVMenuBase\menusettings.cpp" />
+    <ClCompile Include="..\thirdparty\GTAVMenuBase\menuutils.cpp" />
     <ClCompile Include="..\thirdparty\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="keyboard.cpp" />
     <ClCompile Include="main.cpp" />
@@ -178,12 +178,6 @@
     <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\NativeMemory.hpp" />
     <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\Offsets.hpp" />
     <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\VehicleExtensions.hpp" />
-    <ClInclude Include="..\..\GTAVMenuBase\menu.h" />
-    <ClInclude Include="..\..\GTAVMenuBase\menucontrols.h" />
-    <ClInclude Include="..\..\GTAVMenuBase\menukeyboard.h" />
-    <ClInclude Include="..\..\GTAVMenuBase\menumemutils.hpp" />
-    <ClInclude Include="..\..\GTAVMenuBase\menusettings.h" />
-    <ClInclude Include="..\..\GTAVMenuBase\menuutils.h" />
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\enums.h" />
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\main.h" />
     <ClInclude Include="..\..\ScriptHookV_SDK\inc\natives.h" />

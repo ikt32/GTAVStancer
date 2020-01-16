@@ -2,7 +2,7 @@
 
 #include <sstream>
 #include <simpleini/SimpleIni.h>
-#include <menu.h>
+#include <GTAVMenuBase/menu.h>
 
 #include "Patching/Patching.h"
 
