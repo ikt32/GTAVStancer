@@ -62,22 +62,22 @@ bool showOnlyCompatible = false;
  *  Only the left front and and left rear wheels are used atm.
  */
 void getStats(Vehicle handle) {
-	auto numWheels = ext.GetNumWheels(handle);
-	if (numWheels < 4)
-		return;
+    auto numWheels = ext.GetNumWheels(handle);
+    if (numWheels < 4)
+        return;
 
-	auto wheelPtr = ext.GetWheelsPtr(handle);
-	auto wheelAddr0 =	*reinterpret_cast< uint64_t *    >(wheelPtr + 0x008 * 0);
-	g_frontCamber =		*reinterpret_cast< const float * >(wheelAddr0 + offsetCamber);
-	g_frontTrackWidth =	   -*reinterpret_cast< const float * >(wheelAddr0 + offsetTrackWidth);
-	g_frontHeight =		*reinterpret_cast< const float * >(wheelAddr0 + offsetHeight);
+    auto wheelPtr = ext.GetWheelsPtr(handle);
+    auto wheelAddr0 =	*reinterpret_cast< uint64_t *    >(wheelPtr + 0x008 * 0);
+    g_frontCamber =		*reinterpret_cast< const float * >(wheelAddr0 + offsetCamber);
+    g_frontTrackWidth =	   -*reinterpret_cast< const float * >(wheelAddr0 + offsetTrackWidth);
+    g_frontHeight =		*reinterpret_cast< const float * >(wheelAddr0 + offsetHeight);
 
-	auto wheelAddr2 =	*reinterpret_cast< uint64_t *    >(wheelPtr + 0x008 * 2);
-	g_rearCamber =		*reinterpret_cast< const float * >(wheelAddr2 + offsetCamber);
-	g_rearTrackWidth =	   -*reinterpret_cast< const float * >(wheelAddr2 + offsetTrackWidth);
-	g_rearHeight =		*reinterpret_cast< const float * >(wheelAddr2 + offsetHeight);
+    auto wheelAddr2 =	*reinterpret_cast< uint64_t *    >(wheelPtr + 0x008 * 2);
+    g_rearCamber =		*reinterpret_cast< const float * >(wheelAddr2 + offsetCamber);
+    g_rearTrackWidth =	   -*reinterpret_cast< const float * >(wheelAddr2 + offsetTrackWidth);
+    g_rearHeight =		*reinterpret_cast< const float * >(wheelAddr2 + offsetHeight);
 
-	g_visualHeight = ext.GetVisualHeight(handle);
+    g_visualHeight = ext.GetVisualHeight(handle);
 }
 
 /*
@@ -86,76 +86,76 @@ void getStats(Vehicle handle) {
  * Can't camber trikes and stuff for now
  */
 void ultraSlam(Vehicle handle, float frontCamber, float rearCamber, float frontTrackWidth, float rearTrackWidth, float frontHeight, float rearHeight) {
-	auto numWheels = ext.GetNumWheels(handle);
-	if (numWheels < 4)
-		return;
+    auto numWheels = ext.GetNumWheels(handle);
+    if (numWheels < 4)
+        return;
 
-	auto wheelPtr = ext.GetWheelsPtr(handle);
+    auto wheelPtr = ext.GetWheelsPtr(handle);
 
-	for (auto i = 0; i < numWheels; i++) {
-		float camber;
-		float trackWidth;
-		float height;
+    for (auto i = 0; i < numWheels; i++) {
+        float camber;
+        float trackWidth;
+        float height;
 
-		if (i == 0 || i ==  1) {
-			camber = frontCamber;
-			trackWidth = frontTrackWidth;
-			height = frontHeight;
-		} else {
-			camber = rearCamber;
-			trackWidth = rearTrackWidth;
-			height = rearHeight;
-		}
+        if (i == 0 || i ==  1) {
+            camber = frontCamber;
+            trackWidth = frontTrackWidth;
+            height = frontHeight;
+        } else {
+            camber = rearCamber;
+            trackWidth = rearTrackWidth;
+            height = rearHeight;
+        }
 
-		float flip = i % 2 == 0 ? 1.0f : -1.0f; // cuz the wheels on the other side
-		auto wheelAddr = *reinterpret_cast<uint64_t *>(wheelPtr + 0x008 * i);
-		*reinterpret_cast<float *>(wheelAddr + offsetCamber) = camber * flip;
-		*reinterpret_cast<float *>(wheelAddr + offsetCamberInv) = -camber * flip;
-		*reinterpret_cast<float *>(wheelAddr + offsetTrackWidth) = -trackWidth * flip;
-		*reinterpret_cast<float *>(wheelAddr + offsetHeight) = height;
-	}
+        float flip = i % 2 == 0 ? 1.0f : -1.0f; // cuz the wheels on the other side
+        auto wheelAddr = *reinterpret_cast<uint64_t *>(wheelPtr + 0x008 * i);
+        *reinterpret_cast<float *>(wheelAddr + offsetCamber) = camber * flip;
+        *reinterpret_cast<float *>(wheelAddr + offsetCamberInv) = -camber * flip;
+        *reinterpret_cast<float *>(wheelAddr + offsetTrackWidth) = -trackWidth * flip;
+        *reinterpret_cast<float *>(wheelAddr + offsetHeight) = height;
+    }
 }
 
 /*
  * Old "Damage the wheels" thing:
  */
 void oldSlam(Vehicle vehicle, int slamLevel) {
-	switch (slamLevel) {
-		case (2):
-			ext.SetWheelsHealth(vehicle, 0.0f);
-			break;
-		case (1):
-			ext.SetWheelsHealth(vehicle, 400.0f);
-			break;
-		default:
-		case (0):
-			ext.SetWheelsHealth(vehicle, 1000.0f);
-			break;
-	}
+    switch (slamLevel) {
+        case (2):
+            ext.SetWheelsHealth(vehicle, 0.0f);
+            break;
+        case (1):
+            ext.SetWheelsHealth(vehicle, 400.0f);
+            break;
+        default:
+        case (0):
+            ext.SetWheelsHealth(vehicle, 1000.0f);
+            break;
+    }
 }
 
 void init() {
-	settings.ReadSettings();
-	menu.ReadSettings();
-	logger.Write(INFO, "Settings read");
+    settings.ReadSettings();
+    menu.ReadSettings();
+    logger.Write(INFO, "Settings read");
 
-	// Depending on how crappy the XML is this shit might crash and burn.
-	try {
-		presets = settings.ReadPresets(presetCarsFile);
-		saved = settings.ReadPresets(savedCarsFile);
-	}
-	catch (...) {
-		showSubtitle("Unknown XML read error!");
-		logger.Write(ERROR, "Unknown XML read error!");
-	}
-	logger.Write(INFO, "Initialization finished");
+    // Depending on how crappy the XML is this shit might crash and burn.
+    try {
+        presets = settings.ReadPresets(presetCarsFile);
+        saved = settings.ReadPresets(savedCarsFile);
+    }
+    catch (...) {
+        showSubtitle("Unknown XML read error!");
+        logger.Write(ERROR, "Unknown XML read error!");
+    }
+    logger.Write(INFO, "Initialization finished");
 }
 
 void savePreset(bool asPreset, std::string presetName) {
-	std::string name = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model);
-	std::string plate;
-	Preset::Suspension front { g_frontCamber, g_frontTrackWidth, g_frontHeight};
-	Preset::Suspension rear { g_rearCamber, g_rearTrackWidth, g_rearHeight };
+    std::string name = VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model);
+    std::string plate;
+    Preset::Suspension front { g_frontCamber, g_frontTrackWidth, g_frontHeight};
+    Preset::Suspension rear { g_rearCamber, g_rearTrackWidth, g_rearHeight };
 
     auto wheels = ext.GetWheelPtrs(vehicle);
 
@@ -181,58 +181,58 @@ void savePreset(bool asPreset, std::string presetName) {
         };
     }
 
-	if (asPreset) {
+    if (asPreset) {
         WAIT(32);
-		GAMEPLAY::DISPLAY_ONSCREEN_KEYBOARD(true, "Preset Name", "", "", "", "", "", 127);
-		while (GAMEPLAY::UPDATE_ONSCREEN_KEYBOARD() == 0) WAIT(0);
-		if (!GAMEPLAY::GET_ONSCREEN_KEYBOARD_RESULT()) {
-			showNotification("Cancelled save");
-			return;
-		}
-		presetName = GAMEPLAY::GET_ONSCREEN_KEYBOARD_RESULT();
-		
-	}
+        GAMEPLAY::DISPLAY_ONSCREEN_KEYBOARD(true, "Preset Name", "", "", "", "", "", 127);
+        while (GAMEPLAY::UPDATE_ONSCREEN_KEYBOARD() == 0) WAIT(0);
+        if (!GAMEPLAY::GET_ONSCREEN_KEYBOARD_RESULT()) {
+            showNotification("Cancelled save");
+            return;
+        }
+        presetName = GAMEPLAY::GET_ONSCREEN_KEYBOARD_RESULT();
+        
+    }
 
-	if (asPreset) {
-		if (presetName.empty()) {
-			plate = Preset::ReservedPlate();
-		} else {
-			plate = presetName;
-		}
-	} else {
-		plate = VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle);
-	}
+    if (asPreset) {
+        if (presetName.empty()) {
+            plate = Preset::ReservedPlate();
+        } else {
+            plate = presetName;
+        }
+    } else {
+        plate = VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle);
+    }
 
-	bool alreadyPresent = false;
+    bool alreadyPresent = false;
 
-	for (auto preset : asPreset ? presets : saved) {
-		if (plate == preset.Plate() &&
-			name == preset.Name()) {
-			alreadyPresent = true;
-		}
-	}
+    for (auto preset : asPreset ? presets : saved) {
+        if (plate == preset.Plate() &&
+            name == preset.Name()) {
+            alreadyPresent = true;
+        }
+    }
 
-	if (alreadyPresent) {
-		settings.OverwritePreset(
+    if (alreadyPresent) {
+        settings.OverwritePreset(
             Preset(front, rear, frontWheels, rearWheels, visualSize, g_visualHeight, name, plate),
             asPreset ? presetCarsFile : savedCarsFile);
-		showNotification(asPreset ? "Updated preset" : "Updated car", &prevNotification);
-	}
-	else {
-		try {
-			settings.AppendPreset(
+        showNotification(asPreset ? "Updated preset" : "Updated car", &prevNotification);
+    }
+    else {
+        try {
+            settings.AppendPreset(
                 Preset(front, rear, frontWheels, rearWheels, visualSize, g_visualHeight, name, plate),
                 asPreset ? presetCarsFile : savedCarsFile);
-			showNotification(asPreset ? "Saved new preset" : "Saved new car", &prevNotification);
-		}
-		catch (std::runtime_error ex) {
-			logger.Write(ERROR, ex.what());
-			logger.Write(ERROR, "Saving of %s to %s failed!", 
+            showNotification(asPreset ? "Saved new preset" : "Saved new car", &prevNotification);
+        }
+        catch (std::runtime_error ex) {
+            logger.Write(ERROR, ex.what());
+            logger.Write(ERROR, "Saving of %s to %s failed!", 
                 plate.c_str(), (asPreset ? presetCarsFile : savedCarsFile).c_str());
-			showNotification("Saving to xml failed!");
-		}
-	}
-	init();
+            showNotification("Saving to xml failed!");
+        }
+    }
+    init();
 }
 
 /*
@@ -240,25 +240,25 @@ void savePreset(bool asPreset, std::string presetName) {
  * should probably know which list it is from anyway that list is passed.
  */
 void deletePreset(Preset preset, const std::vector<Preset> &fromWhich) {
-	std::string fromFile;
-	std::string message = "Couldn't find " + preset.Name() + " " + preset.Plate() + " :(";
-	if (fromWhich == presets) {
-		fromFile = presetCarsFile;
-	}
-	if (fromWhich == saved) {
-		fromFile = savedCarsFile;
-	}
-	if (fromFile.empty()) {
-		message = "File empty?";
-		showNotification(message.c_str(), &prevNotification);
-		return;
-	}
+    std::string fromFile;
+    std::string message = "Couldn't find " + preset.Name() + " " + preset.Plate() + " :(";
+    if (fromWhich == presets) {
+        fromFile = presetCarsFile;
+    }
+    if (fromWhich == saved) {
+        fromFile = savedCarsFile;
+    }
+    if (fromFile.empty()) {
+        message = "File empty?";
+        showNotification(message.c_str(), &prevNotification);
+        return;
+    }
 
-	if (settings.DeletePreset(preset, fromFile)) {
-		message = "Deleted preset " + preset.Name() + " " + preset.Plate();
-		init();
-	}
-	showNotification(message.c_str(), &prevNotification);
+    if (settings.DeletePreset(preset, fromFile)) {
+        message = "Deleted preset " + preset.Name() + " " + preset.Plate();
+        init();
+    }
+    showNotification(message.c_str(), &prevNotification);
 }
 
 void applyPreset(std::vector<Preset>::value_type preset) {
@@ -308,70 +308,70 @@ void applyPreset(std::vector<Preset>::value_type preset) {
 }
 
 void update_game() {
-	player = PLAYER::PLAYER_ID();
-	playerPed = PLAYER::PLAYER_PED_ID();
+    player = PLAYER::PLAYER_ID();
+    playerPed = PLAYER::PLAYER_PED_ID();
 
-	if (!ENTITY::DOES_ENTITY_EXIST(playerPed) || !PLAYER::IS_PLAYER_CONTROL_ON(player) ||
-		ENTITY::IS_ENTITY_DEAD(playerPed) || PLAYER::IS_PLAYER_BEING_ARRESTED(player, TRUE)) {
-		return;
-	}
+    if (!ENTITY::DOES_ENTITY_EXIST(playerPed) || !PLAYER::IS_PLAYER_CONTROL_ON(player) ||
+        ENTITY::IS_ENTITY_DEAD(playerPed) || PLAYER::IS_PLAYER_BEING_ARRESTED(player, TRUE)) {
+        return;
+    }
 
-	vehicle = PED::GET_VEHICLE_PED_IS_IN(playerPed, false);
+    vehicle = PED::GET_VEHICLE_PED_IS_IN(playerPed, false);
 
-	if (!ENTITY::DOES_ENTITY_EXIST(vehicle)) {
-		prevVehicle = 0;
-		autoApplied = false;
-		return;
-	}
+    if (!ENTITY::DOES_ENTITY_EXIST(vehicle)) {
+        prevVehicle = 0;
+        autoApplied = false;
+        return;
+    }
 
-	model = ENTITY::GET_ENTITY_MODEL(vehicle);
-	if (!VEHICLE::IS_THIS_MODEL_A_CAR(model) && !VEHICLE::IS_THIS_MODEL_A_QUADBIKE(model)) {
-		unloadPatch();
-		return;
-	}
+    model = ENTITY::GET_ENTITY_MODEL(vehicle);
+    if (!VEHICLE::IS_THIS_MODEL_A_CAR(model) && !VEHICLE::IS_THIS_MODEL_A_QUADBIKE(model)) {
+        unloadPatch();
+        return;
+    }
 
-	if (prevVehicle != vehicle) {
-		if (!ext.GetAddress(vehicle)) {
-			return;
-		}
-		getStats(vehicle);
-		prevVehicle = vehicle;
-		autoApplied = false;
-		return;
-	}
+    if (prevVehicle != vehicle) {
+        if (!ext.GetAddress(vehicle)) {
+            return;
+        }
+        getStats(vehicle);
+        prevVehicle = vehicle;
+        autoApplied = false;
+        return;
+    }
 
-	update_menu();
+    update_menu();
 
-	if (!settings.enableMod) {
-		return;
-	}
+    if (!settings.enableMod) {
+        return;
+    }
 
-	if (settings.autoApply && !autoApplied) {
-		for (auto preset : saved) {
-			if (VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle) == preset.Plate() &&
-				VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model) == preset.Name()) {
+    if (settings.autoApply && !autoApplied) {
+        for (auto preset : saved) {
+            if (VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(vehicle) == preset.Plate() &&
+                VEHICLE::GET_DISPLAY_NAME_FROM_VEHICLE_MODEL(model) == preset.Name()) {
                 applyPreset(preset);
 
-				getStats(vehicle);
-				showNotification("Applied preset automatically!", &prevNotification);
+                getStats(vehicle);
+                showNotification("Applied preset automatically!", &prevNotification);
                 autoApplied = true;
             }
-		}
-	}
+        }
+    }
 
-	ultraSlam(vehicle, g_frontCamber, g_rearCamber, g_frontTrackWidth, g_rearTrackWidth, g_frontHeight, g_rearHeight);
+    ultraSlam(vehicle, g_frontCamber, g_rearCamber, g_frontTrackWidth, g_rearTrackWidth, g_frontHeight, g_rearHeight);
 }
 
 void main() {
-	logger.Write(INFO, "Script started");
+    logger.Write(INFO, "Script started");
 
-	settingsGeneralFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\settings_general.ini";
-	settingsMenuFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\settings_menu.ini";
-	savedCarsFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\car_preset.xml";
-	presetCarsFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\car_saved.xml";
-	settings.SetFiles(settingsGeneralFile);
-	menu.SetFiles(settingsMenuFile);
-	menu.RegisterOnMain(std::bind(init));
+    settingsGeneralFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\settings_general.ini";
+    settingsMenuFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\settings_menu.ini";
+    savedCarsFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\car_preset.xml";
+    presetCarsFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\car_saved.xml";
+    settings.SetFiles(settingsGeneralFile);
+    menu.SetFiles(settingsMenuFile);
+    menu.RegisterOnMain(std::bind(init));
     menu.Initialize();
 
     ext.initOffsets();
@@ -382,17 +382,17 @@ void main() {
         offVisualWidth = 0xBA0;
     }
 
-	if (settings.enableMod && settings.enableHeight) {
-		patchHeightReset();
-	}
+    if (settings.enableMod && settings.enableHeight) {
+        patchHeightReset();
+    }
 
-	while (true) {
-		update_game();
-		WAIT(0);
-	}
+    while (true) {
+        update_game();
+        WAIT(0);
+    }
 }
 
 void ScriptMain() {
-	srand(GetTickCount());
-	main();
+    srand(GetTickCount());
+    main();
 }

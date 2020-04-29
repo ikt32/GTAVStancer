@@ -11,72 +11,72 @@ Settings::Settings() { }
 Settings::~Settings() { }
 
 void Settings::SetFiles(const std::string &general) {
-	settingsGeneralFile = general;
+    settingsGeneralFile = general;
 }
 
 void Settings::ReadSettings() {
 
-	CSimpleIniA settingsGeneral;
-	settingsGeneral.SetUnicode();
-	settingsGeneral.LoadFile(settingsGeneralFile.c_str());
-	
-	enableMod = settingsGeneral.GetBoolValue("OPTIONS", "EnableMod", false);
-	autoApply = settingsGeneral.GetBoolValue("OPTIONS", "AutoApply", false);
+    CSimpleIniA settingsGeneral;
+    settingsGeneral.SetUnicode();
+    settingsGeneral.LoadFile(settingsGeneralFile.c_str());
+    
+    enableMod = settingsGeneral.GetBoolValue("OPTIONS", "EnableMod", false);
+    autoApply = settingsGeneral.GetBoolValue("OPTIONS", "AutoApply", false);
     enableHeight = settingsGeneral.GetBoolValue("OPTIONS", "EnableHeight", false);
 }
 
 
 void Settings::SaveSettings() {
-	CSimpleIniA settings;
-	settings.SetUnicode();
-	settings.LoadFile(settingsGeneralFile.c_str());
+    CSimpleIniA settings;
+    settings.SetUnicode();
+    settings.LoadFile(settingsGeneralFile.c_str());
 
-	settings.SetBoolValue("OPTIONS", "EnableMod", enableMod);
+    settings.SetBoolValue("OPTIONS", "EnableMod", enableMod);
     settings.SetBoolValue("OPTIONS", "AutoApply", autoApply);
     settings.SetBoolValue("OPTIONS", "EnableHeight", enableHeight);
-	settings.SaveFile(settingsGeneralFile.c_str());
+    settings.SaveFile(settingsGeneralFile.c_str());
 }
 
 std::vector<Preset> Settings::ReadPresets(const std::string &fileName) {
-	std::vector<Preset> presets;
-	
-	using namespace tinyxml2;
-	tinyxml2::XMLDocument doc;
-	XMLError err = doc.LoadFile(fileName.c_str());
+    std::vector<Preset> presets;
+    
+    using namespace tinyxml2;
+    tinyxml2::XMLDocument doc;
+    XMLError err = doc.LoadFile(fileName.c_str());
 
-	if (err != XML_SUCCESS) {
-		return presets;
-	}
-	
-	XMLNode * pRoot = doc.FirstChildElement("preset");
+    if (err != XML_SUCCESS) {
+        return presets;
+    }
+    
+    XMLNode * pRoot = doc.FirstChildElement("preset");
 
-	while (pRoot != nullptr) {
-		std::string name = "MISSINGNAME";
-		std::string plate = "MISSINGPLATE";
+    while (pRoot != nullptr) {
+        std::string name = "MISSINGNAME";
+        std::string plate = "MISSINGPLATE";
 
-		if (pRoot->FirstChildElement("vehicleName")->GetText() != nullptr) 
-			name = pRoot->FirstChildElement("vehicleName")->GetText();
+        if (pRoot->FirstChildElement("vehicleName")->GetText() != nullptr) 
+            name = pRoot->FirstChildElement("vehicleName")->GetText();
 
-		if (pRoot->FirstChildElement("plate")->GetText() != nullptr) 
-			plate = pRoot->FirstChildElement("plate")->GetText();
-		
-		float camber;
-		float trackWidth;
-		float height;
-		float visualHeight = -1337.0f;
+        if (pRoot->FirstChildElement("plate")->GetText() != nullptr) 
+            plate = pRoot->FirstChildElement("plate")->GetText();
+        
+        float camber;
+        float trackWidth;
+        float height;
+        float visualHeight = -1337.0f;
         Preset::WheelPhys frontWheels { -1337.0f, -1337.0f };
         Preset::WheelPhys rearWheels { -1337.0f, -1337.0f };
         Preset::WheelVis visualSize { -1337.0f, -1337.0f, -1, -1};
 
-		pRoot->FirstChildElement("front")->QueryFloatAttribute("camber", &camber);
-		pRoot->FirstChildElement("front")->QueryFloatAttribute("trackWidth", &trackWidth);
-		pRoot->FirstChildElement("front")->QueryFloatAttribute("height", &height);
-		struct Preset::Suspension front = { camber, trackWidth, height };
+        pRoot->FirstChildElement("front")->QueryFloatAttribute("camber", &camber);
+        pRoot->FirstChildElement("front")->QueryFloatAttribute("trackWidth", &trackWidth);
+        pRoot->FirstChildElement("front")->QueryFloatAttribute("height", &height);
+        struct Preset::Suspension front = { camber, trackWidth, height };
 
-		pRoot->FirstChildElement("rear")->QueryFloatAttribute("camber", &camber);
-		pRoot->FirstChildElement("rear")->QueryFloatAttribute("trackWidth", &trackWidth);
-		pRoot->FirstChildElement("rear")->QueryFloatAttribute("height", &height);
-		struct Preset::Suspension rear = { camber, trackWidth, height };
+        pRoot->FirstChildElement("rear")->QueryFloatAttribute("camber", &camber);
+        pRoot->FirstChildElement("rear")->QueryFloatAttribute("trackWidth", &trackWidth);
+        pRoot->FirstChildElement("rear")->QueryFloatAttribute("height", &height);
+        struct Preset::Suspension rear = { camber, trackWidth, height };
 
         if (pRoot->FirstChildElement("visualHeight") != nullptr) {
             pRoot->FirstChildElement("visualHeight")->QueryFloatAttribute("value", &visualHeight);
@@ -106,11 +106,11 @@ std::vector<Preset> Settings::ReadPresets(const std::string &fileName) {
             visualSize = { size, width, wheelType, wheelIndex };
         }
 
-		presets.push_back(Preset(front, rear, frontWheels, rearWheels, visualSize ,visualHeight, name, plate));
-		pRoot = pRoot->NextSibling();
-	}
-	
-	return presets;
+        presets.push_back(Preset(front, rear, frontWheels, rearWheels, visualSize ,visualHeight, name, plate));
+        pRoot = pRoot->NextSibling();
+    }
+    
+    return presets;
 }
 
 void Settings::insertPreset(Preset preset, tinyxml2::XMLDocument &doc, tinyxml2::XMLNode *pRoot) {
@@ -157,75 +157,75 @@ void Settings::insertPreset(Preset preset, tinyxml2::XMLDocument &doc, tinyxml2:
 }
 
 void Settings::AppendPreset(Preset preset, const std::string &fileName) {
-	using namespace tinyxml2;
-	tinyxml2::XMLDocument doc;
-	XMLError err = doc.LoadFile(fileName.c_str());
+    using namespace tinyxml2;
+    tinyxml2::XMLDocument doc;
+    XMLError err = doc.LoadFile(fileName.c_str());
 
-	if (err == XML_ERROR_FILE_NOT_FOUND || err == XML_ERROR_EMPTY_DOCUMENT) {
-		std::ofstream fs;
-		fs.open(fileName, std::ios::out | std::ios_base::app);
-		fs << "\n";
-		fs.close();
-	}
-	else if (err != XML_SUCCESS) {
-		throw std::runtime_error("Couldn't open/load XML with XMLError: " + std::to_string(static_cast<int>(err)));
-	}
-	
+    if (err == XML_ERROR_FILE_NOT_FOUND || err == XML_ERROR_EMPTY_DOCUMENT) {
+        std::ofstream fs;
+        fs.open(fileName, std::ios::out | std::ios_base::app);
+        fs << "\n";
+        fs.close();
+    }
+    else if (err != XML_SUCCESS) {
+        throw std::runtime_error("Couldn't open/load XML with XMLError: " + std::to_string(static_cast<int>(err)));
+    }
+    
     XMLNode *pRoot = doc.NewElement("preset");
-	doc.InsertFirstChild(pRoot);
+    doc.InsertFirstChild(pRoot);
 
-	insertPreset(preset, doc, pRoot);
+    insertPreset(preset, doc, pRoot);
 
-	doc.SaveFile(fileName.c_str());
+    doc.SaveFile(fileName.c_str());
 }
 
 bool Settings::OverwritePreset(Preset preset, const std::string &fileName) {
-	using namespace tinyxml2;
-	tinyxml2::XMLDocument doc;
-	XMLError err = doc.LoadFile(fileName.c_str());
+    using namespace tinyxml2;
+    tinyxml2::XMLDocument doc;
+    XMLError err = doc.LoadFile(fileName.c_str());
 
-	if (err != XML_SUCCESS) {
-		return false;
-	}
+    if (err != XML_SUCCESS) {
+        return false;
+    }
 
-	XMLNode * pRoot = doc.FirstChildElement("preset");
+    XMLNode * pRoot = doc.FirstChildElement("preset");
 
-	while (pRoot != nullptr) {
-		if (pRoot->FirstChildElement("vehicleName")->GetText() == preset.Name() &&
-			pRoot->FirstChildElement("plate")->GetText() == preset.Plate()) {
+    while (pRoot != nullptr) {
+        if (pRoot->FirstChildElement("vehicleName")->GetText() == preset.Name() &&
+            pRoot->FirstChildElement("plate")->GetText() == preset.Plate()) {
             pRoot->DeleteChildren();
 
             insertPreset(preset, doc, pRoot);
 
-			doc.SaveFile(fileName.c_str());
-			return true;
-		}
-		pRoot = pRoot->NextSibling();
-	}
-	return false;
+            doc.SaveFile(fileName.c_str());
+            return true;
+        }
+        pRoot = pRoot->NextSibling();
+    }
+    return false;
 }
 
 bool Settings::DeletePreset(Preset preset, const std::string &fileName) {
-	using namespace tinyxml2;
-	tinyxml2::XMLDocument doc;
-	XMLError err = doc.LoadFile(fileName.c_str());
+    using namespace tinyxml2;
+    tinyxml2::XMLDocument doc;
+    XMLError err = doc.LoadFile(fileName.c_str());
 
-	if (err != XML_SUCCESS) {
-		return false;
-	}
+    if (err != XML_SUCCESS) {
+        return false;
+    }
 
-	XMLNode * pRoot = doc.FirstChildElement("preset");
+    XMLNode * pRoot = doc.FirstChildElement("preset");
 
-	std::vector<Preset> presets;
+    std::vector<Preset> presets;
 
-	while (pRoot != nullptr) {
-		if (pRoot->FirstChildElement("vehicleName")->GetText() == preset.Name() &&
-			pRoot->FirstChildElement("plate")->GetText() == preset.Plate()) {
-			doc.DeleteNode(pRoot);
-			doc.SaveFile(fileName.c_str());
-			return true;
-		}
-		pRoot = pRoot->NextSibling();
-	}
-	return false;
+    while (pRoot != nullptr) {
+        if (pRoot->FirstChildElement("vehicleName")->GetText() == preset.Name() &&
+            pRoot->FirstChildElement("plate")->GetText() == preset.Plate()) {
+            doc.DeleteNode(pRoot);
+            doc.SaveFile(fileName.c_str());
+            return true;
+        }
+        pRoot = pRoot->NextSibling();
+    }
+    return false;
 }
