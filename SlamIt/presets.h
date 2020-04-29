@@ -14,6 +14,7 @@ public:
     struct WheelPhys {
         float TyreRadius;
         float TyreWidth;
+        float RimRadius;
     };
 
     struct WheelVis {

@@ -10,7 +10,7 @@
 #include <string>
 #include <vector>
 
-#define DISPLAY_VERSION "v0.2.4"
+#define DISPLAY_VERSION "v0.2.5"
 
 const std::string modDir  = "\\VStancer";
 
@@ -24,4 +24,4 @@ void ultraSlam(Vehicle handle, float frontCamber, float rearCamber, float frontT
 void deletePreset(Preset preset, const std::vector<Preset> &fromWhich);
 void getStats(Vehicle handle);
 void oldSlam(Vehicle vehicle, int slamLevel);
-void applyPreset(std::vector<Preset>::value_type preset);
+void applyPreset(const Preset& preset);

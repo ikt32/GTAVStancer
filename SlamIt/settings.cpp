@@ -64,8 +64,8 @@ std::vector<Preset> Settings::ReadPresets(const std::string &fileName) {
         float trackWidth;
         float height;
         float visualHeight = -1337.0f;
-        Preset::WheelPhys frontWheels { -1337.0f, -1337.0f };
-        Preset::WheelPhys rearWheels { -1337.0f, -1337.0f };
+        Preset::WheelPhys frontWheels { -1337.0f, -1337.0f, -1337.0f };
+        Preset::WheelPhys rearWheels { -1337.0f, -1337.0f, -1337.0f };
         Preset::WheelVis visualSize { -1337.0f, -1337.0f, -1, -1};
 
         pRoot->FirstChildElement("front")->QueryFloatAttribute("camber", &camber);
@@ -83,17 +83,19 @@ std::vector<Preset> Settings::ReadPresets(const std::string &fileName) {
         }
 
         if (pRoot->FirstChildElement("frontWheels") != nullptr) {
-            float rad, width;
+            float rad, width, rimrad;
             pRoot->FirstChildElement("frontWheels")->QueryFloatAttribute("tyreRadius", &rad);
             pRoot->FirstChildElement("frontWheels")->QueryFloatAttribute("tyreWidth", &width);
-            frontWheels = { rad, width };
+            pRoot->FirstChildElement("frontWheels")->QueryFloatAttribute("rimRadius", &rimrad);
+            frontWheels = { rad, width, rimrad };
         }
 
         if (pRoot->FirstChildElement("rearWheels") != nullptr) {
-            float rad, width;
+            float rad, width, rimrad;
             pRoot->FirstChildElement("rearWheels")->QueryFloatAttribute("tyreRadius", &rad);
             pRoot->FirstChildElement("rearWheels")->QueryFloatAttribute("tyreWidth", &width);
-            rearWheels = { rad, width };
+            pRoot->FirstChildElement("rearWheels")->QueryFloatAttribute("rimRadius", &rimrad);
+            rearWheels = { rad, width, rimrad };
         }
 
         if (pRoot->FirstChildElement("visualSize") != nullptr) {
@@ -106,7 +108,7 @@ std::vector<Preset> Settings::ReadPresets(const std::string &fileName) {
             visualSize = { size, width, wheelType, wheelIndex };
         }
 
-        presets.push_back(Preset(front, rear, frontWheels, rearWheels, visualSize ,visualHeight, name, plate));
+        presets.emplace_back(front, rear, frontWheels, rearWheels, visualSize ,visualHeight, name, plate);
         pRoot = pRoot->NextSibling();
     }
     
@@ -141,11 +143,13 @@ void Settings::insertPreset(Preset preset, tinyxml2::XMLDocument &doc, tinyxml2:
     tinyxml2::XMLElement *pfrontWheels = doc.NewElement("frontWheels");
     pfrontWheels->SetAttribute("tyreRadius", preset.FrontWheels.TyreRadius);
     pfrontWheels->SetAttribute("tyreWidth", preset.FrontWheels.TyreWidth);
+    pfrontWheels->SetAttribute("rimRadius", preset.FrontWheels.RimRadius);
     pRoot->InsertEndChild(pfrontWheels);
 
     tinyxml2::XMLElement *prearWheels = doc.NewElement("rearWheels");
     prearWheels->SetAttribute("tyreRadius", preset.RearWheels.TyreRadius);
     prearWheels->SetAttribute("tyreWidth", preset.RearWheels.TyreWidth);
+    prearWheels->SetAttribute("rimRadius", preset.RearWheels.RimRadius);
     pRoot->InsertEndChild(prearWheels);
 
     tinyxml2::XMLElement *pvisualSize = doc.NewElement("visualSize");

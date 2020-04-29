@@ -160,12 +160,14 @@ void savePreset(bool asPreset, std::string presetName) {
     auto wheels = ext.GetWheelPtrs(vehicle);
 
     Preset::WheelPhys frontWheels { 
-        *reinterpret_cast<float *>(wheels[0] + offTyreRadius),
-        *reinterpret_cast<float *>(wheels[0] + offTyreWidth)
+        *reinterpret_cast<float*>(wheels[0] + offTyreRadius),
+        *reinterpret_cast<float*>(wheels[0] + offTyreWidth),
+        *reinterpret_cast<float*>(wheels[0] + offRimRadius),
     };
     Preset::WheelPhys rearWheels {
-        *reinterpret_cast<float *>(wheels[2] + offTyreRadius),
-        *reinterpret_cast<float *>(wheels[2] + offTyreWidth)
+        *reinterpret_cast<float*>(wheels[2] + offTyreRadius),
+        *reinterpret_cast<float*>(wheels[2] + offTyreWidth),
+        *reinterpret_cast<float*>(wheels[2] + offRimRadius),
     };
 
     Preset::WheelVis visualSize { 0.0f, 0.0f, -1, -1};
@@ -225,7 +227,7 @@ void savePreset(bool asPreset, std::string presetName) {
                 asPreset ? presetCarsFile : savedCarsFile);
             showNotification(asPreset ? "Saved new preset" : "Saved new car", &prevNotification);
         }
-        catch (std::runtime_error ex) {
+        catch (std::runtime_error& ex) {
             logger.Write(ERROR, ex.what());
             logger.Write(ERROR, "Saving of %s to %s failed!", 
                 plate.c_str(), (asPreset ? presetCarsFile : savedCarsFile).c_str());
@@ -261,7 +263,7 @@ void deletePreset(Preset preset, const std::vector<Preset> &fromWhich) {
     showNotification(message.c_str(), &prevNotification);
 }
 
-void applyPreset(std::vector<Preset>::value_type preset) {
+void applyPreset(const Preset& preset) {
     ultraSlam(vehicle,
         preset.FrontSuspension.Camber,
         preset.RearSuspension.Camber,
@@ -275,18 +277,22 @@ void applyPreset(std::vector<Preset>::value_type preset) {
 
     auto wheels = ext.GetWheelPtrs(vehicle);
     auto numWheels = ext.GetNumWheels(vehicle);
-    if (preset.FrontWheels.TyreWidth != -1337.0f && preset.FrontWheels.TyreWidth != -1337.0f) {
-        for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 2; i++) {
+        if (preset.FrontWheels.TyreRadius != -1337.0f)
             *reinterpret_cast<float *>(wheels[i] + offTyreRadius) = preset.FrontWheels.TyreRadius;
+        if (preset.FrontWheels.TyreWidth != -1337.0f)
             *reinterpret_cast<float *>(wheels[i] + offTyreWidth) = preset.FrontWheels.TyreWidth;
-        }
+        if (preset.FrontWheels.RimRadius != -1337.0f)
+            *reinterpret_cast<float*>(wheels[i] + offRimRadius) = preset.FrontWheels.RimRadius;
     }
 
-    if (preset.RearWheels.TyreWidth != -1337.0f && preset.RearWheels.TyreWidth != -1337.0f) {
-        for (int i = 2; i < numWheels; i++) {
+    for (int i = 2; i < numWheels; i++) {
+        if (preset.RearWheels.TyreRadius != -1337.0f)
             *reinterpret_cast<float *>(wheels[i] + offTyreRadius) = preset.RearWheels.TyreRadius;
+        if (preset.RearWheels.TyreWidth != -1337.0f)
             *reinterpret_cast<float *>(wheels[i] + offTyreWidth) = preset.RearWheels.TyreWidth;
-        }
+        if (preset.RearWheels.RimRadius != -1337.0f)
+            *reinterpret_cast<float*>(wheels[i] + offRimRadius) = preset.RearWheels.RimRadius;
     }
 
     if (preset.VisualSize.WheelType != -1 && preset.VisualSize.WheelIndex != -1) {
@@ -371,7 +377,7 @@ void main() {
     presetCarsFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\car_saved.xml";
     settings.SetFiles(settingsGeneralFile);
     menu.SetFiles(settingsMenuFile);
-    menu.RegisterOnMain(std::bind(init));
+    menu.RegisterOnMain([] { return init(); });
     menu.Initialize();
 
     ext.initOffsets();
