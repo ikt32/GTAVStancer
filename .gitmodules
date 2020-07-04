@@ -4,3 +4,6 @@
 [submodule "thirdparty/GTAVMenuBase"]
 	path = thirdparty/GTAVMenuBase
 	url = https://github.com/E66666666/GTAVMenuBase
+[submodule "thirdparty/GTAVManualTransmission"]
+	path = thirdparty/GTAVManualTransmission
+	url = https://github.com/E66666666/GTAVManualTransmission

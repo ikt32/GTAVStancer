@@ -4,12 +4,6 @@
     <ClCompile Include="script.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="keyboard.cpp" />
-    <ClCompile Include="..\..\GTAVManualTransmission\Gears\Memory\VehicleExtensions.cpp">
-      <Filter>External</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\GTAVManualTransmission\Gears\Memory\NativeMemory.cpp">
-      <Filter>External</Filter>
-    </ClCompile>
     <ClCompile Include="settings.cpp" />
     <ClCompile Include="presets.cpp" />
     <ClCompile Include="Util\Util.cpp">
@@ -52,28 +46,16 @@
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menuutils.cpp">
       <Filter>Menu</Filter>
     </ClCompile>
+    <ClCompile Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\NativeMemory.cpp">
+      <Filter>ManualTransmission</Filter>
+    </ClCompile>
+    <ClCompile Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\VehicleExtensions.cpp">
+      <Filter>ManualTransmission</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="script.h" />
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\enums.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\main.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\natives.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\types.h">
-      <Filter>SDK</Filter>
-    </ClInclude>
     <ClInclude Include="keyboard.h" />
-    <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\VehicleExtensions.hpp">
-      <Filter>External</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\NativeMemory.hpp">
-      <Filter>External</Filter>
-    </ClInclude>
     <ClInclude Include="settings.h" />
     <ClInclude Include="presets.h" />
     <ClInclude Include="Util\Util.hpp">
@@ -101,15 +83,36 @@
       <Filter>Patching</Filter>
     </ClInclude>
     <ClInclude Include="Types.h" />
-    <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\Offsets.hpp">
-      <Filter>External</Filter>
-    </ClInclude>
     <ClInclude Include="Util\MathExt.h">
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="Offsets.h" />
     <ClInclude Include="Patching\Patching.h">
       <Filter>Patching</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\NativeMemory.hpp">
+      <Filter>ManualTransmission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\Offsets.hpp">
+      <Filter>ManualTransmission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\VehicleExtensions.hpp">
+      <Filter>ManualTransmission</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\enums.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\main.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\nativeCaller.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\natives.h">
+      <Filter>SDK</Filter>
+    </ClInclude>
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\types.h">
+      <Filter>SDK</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -122,14 +125,14 @@
     <Filter Include="SDK">
       <UniqueIdentifier>{01012e73-37b7-4874-b66a-9390e9a83264}</UniqueIdentifier>
     </Filter>
-    <Filter Include="External">
-      <UniqueIdentifier>{0897514a-2851-4abe-8806-a5b81136a863}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Thirdparty">
       <UniqueIdentifier>{dc7b1612-ca12-4e55-a2fb-b3c530c8647c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Patching">
       <UniqueIdentifier>{32ac8206-74e8-4562-a961-d7ff3bb5c080}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ManualTransmission">
+      <UniqueIdentifier>{0897514a-2851-4abe-8806-a5b81136a863}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

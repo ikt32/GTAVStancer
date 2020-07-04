@@ -9,10 +9,12 @@
 #include "Util/Util.hpp"
 #include "Util/Logger.hpp"
 
-#include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
+#include <GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp>
 #include <GTAVMenuBase/menu.h>
 #include <simpleini/SimpleIni.h>
 #include <sstream>
+
+using VExt = VehicleExtensions;
 
 uint32_t offVisualWidth = 0xB80;
 
@@ -26,7 +28,6 @@ std::string presetCarsFile;
 Hash model;
 Vehicle vehicle;
 Vehicle prevVehicle;
-VehicleExtensions ext;
 Player player;
 Ped playerPed;
 
@@ -57,16 +58,16 @@ bool autoApplied = false;
 bool showOnlyCompatible = false;
 
 /*
- *  Update wheels info, not sure if I should move this into vehExt.
+ *  Update wheels info, not sure if I should move this into vehVExt::
  *  It's not really useful info aside from damage.
  *  Only the left front and and left rear wheels are used atm.
  */
 void getStats(Vehicle handle) {
-    auto numWheels = ext.GetNumWheels(handle);
+    auto numWheels = VExt::GetNumWheels(handle);
     if (numWheels < 4)
         return;
 
-    auto wheelPtr = ext.GetWheelsPtr(handle);
+    auto wheelPtr = VExt::GetWheelsPtr(handle);
     auto wheelAddr0 =	*reinterpret_cast< uint64_t *    >(wheelPtr + 0x008 * 0);
     g_frontCamber =		*reinterpret_cast< const float * >(wheelAddr0 + offsetCamber);
     g_frontTrackWidth =	   -*reinterpret_cast< const float * >(wheelAddr0 + offsetTrackWidth);
@@ -77,7 +78,7 @@ void getStats(Vehicle handle) {
     g_rearTrackWidth =	   -*reinterpret_cast< const float * >(wheelAddr2 + offsetTrackWidth);
     g_rearHeight =		*reinterpret_cast< const float * >(wheelAddr2 + offsetHeight);
 
-    g_visualHeight = ext.GetVisualHeight(handle);
+    g_visualHeight = VExt::GetVisualHeight(handle);
 }
 
 /*
@@ -86,11 +87,11 @@ void getStats(Vehicle handle) {
  * Can't camber trikes and stuff for now
  */
 void ultraSlam(Vehicle handle, float frontCamber, float rearCamber, float frontTrackWidth, float rearTrackWidth, float frontHeight, float rearHeight) {
-    auto numWheels = ext.GetNumWheels(handle);
+    auto numWheels = VExt::GetNumWheels(handle);
     if (numWheels < 4)
         return;
 
-    auto wheelPtr = ext.GetWheelsPtr(handle);
+    auto wheelPtr = VExt::GetWheelsPtr(handle);
 
     for (auto i = 0; i < numWheels; i++) {
         float camber;
@@ -122,14 +123,14 @@ void ultraSlam(Vehicle handle, float frontCamber, float rearCamber, float frontT
 void oldSlam(Vehicle vehicle, int slamLevel) {
     switch (slamLevel) {
         case (2):
-            ext.SetWheelsHealth(vehicle, 0.0f);
+            VExt::SetWheelsHealth(vehicle, 0.0f);
             break;
         case (1):
-            ext.SetWheelsHealth(vehicle, 400.0f);
+            VExt::SetWheelsHealth(vehicle, 400.0f);
             break;
         default:
         case (0):
-            ext.SetWheelsHealth(vehicle, 1000.0f);
+            VExt::SetWheelsHealth(vehicle, 1000.0f);
             break;
     }
 }
@@ -157,7 +158,7 @@ void savePreset(bool asPreset, std::string presetName) {
     Preset::Suspension front { g_frontCamber, g_frontTrackWidth, g_frontHeight};
     Preset::Suspension rear { g_rearCamber, g_rearTrackWidth, g_rearHeight };
 
-    auto wheels = ext.GetWheelPtrs(vehicle);
+    auto wheels = VExt::GetWheelPtrs(vehicle);
 
     Preset::WheelPhys frontWheels { 
         *reinterpret_cast<float*>(wheels[0] + offTyreRadius),
@@ -172,7 +173,7 @@ void savePreset(bool asPreset, std::string presetName) {
 
     Preset::WheelVis visualSize { 0.0f, 0.0f, -1, -1};
 
-    auto CVeh_0x48 = *(uint64_t *)(ext.GetAddress(vehicle) + 0x48);
+    auto CVeh_0x48 = *(uint64_t *)(VExt::GetAddress(vehicle) + 0x48);
     auto CVeh_0x48_0x370 = *(uint64_t *)(CVeh_0x48 + 0x370);
     if (CVeh_0x48_0x370 != 0) {
         visualSize = {
@@ -273,10 +274,10 @@ void applyPreset(const Preset& preset) {
         preset.RearSuspension.Height);
 
     if (preset.VisualHeight != -1337.0f)
-        ext.SetVisualHeight(vehicle, preset.VisualHeight);
+        VExt::SetVisualHeight(vehicle, preset.VisualHeight);
 
-    auto wheels = ext.GetWheelPtrs(vehicle);
-    auto numWheels = ext.GetNumWheels(vehicle);
+    auto wheels = VExt::GetWheelPtrs(vehicle);
+    auto numWheels = VExt::GetNumWheels(vehicle);
     for (int i = 0; i < 2; i++) {
         if (preset.FrontWheels.TyreRadius != -1337.0f)
             *reinterpret_cast<float *>(wheels[i] + offTyreRadius) = preset.FrontWheels.TyreRadius;
@@ -301,7 +302,7 @@ void applyPreset(const Preset& preset) {
         VEHICLE::SET_VEHICLE_WHEEL_TYPE(vehicle, preset.VisualSize.WheelType);
         VEHICLE::SET_VEHICLE_MOD(vehicle, VehicleModFrontWheels, preset.VisualSize.WheelIndex, customtyres);
         WAIT(500);
-        auto CVeh_0x48 = *(uint64_t *)(ext.GetAddress(vehicle) + 0x48);
+        auto CVeh_0x48 = *(uint64_t *)(VExt::GetAddress(vehicle) + 0x48);
         auto CVeh_0x48_0x370 = *(uint64_t *)(CVeh_0x48 + 0x370);
         if (CVeh_0x48_0x370 != 0) {
             *(float *)(CVeh_0x48_0x370 + 0x8) = preset.VisualSize.WheelSize;
@@ -337,7 +338,7 @@ void update_game() {
     }
 
     if (prevVehicle != vehicle) {
-        if (!ext.GetAddress(vehicle)) {
+        if (!VExt::GetAddress(vehicle)) {
             return;
         }
         getStats(vehicle);
@@ -380,7 +381,7 @@ void main() {
     menu.RegisterOnMain([] { return init(); });
     menu.Initialize();
 
-    ext.initOffsets();
+    VExt::Init();
     
     init();
 

@@ -152,8 +152,8 @@
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\GTAVManualTransmission\Gears\Memory\NativeMemory.cpp" />
-    <ClCompile Include="..\..\GTAVManualTransmission\Gears\Memory\VehicleExtensions.cpp" />
+    <ClCompile Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\NativeMemory.cpp" />
+    <ClCompile Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\VehicleExtensions.cpp" />
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menu.cpp" />
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menucontrols.cpp" />
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menukeyboard.cpp" />
@@ -175,13 +175,14 @@
     <ClCompile Include="Util\Util.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\NativeMemory.hpp" />
-    <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\Offsets.hpp" />
-    <ClInclude Include="..\..\GTAVManualTransmission\Gears\Memory\VehicleExtensions.hpp" />
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\enums.h" />
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\main.h" />
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\natives.h" />
-    <ClInclude Include="..\..\ScriptHookV_SDK\inc\types.h" />
+    <ClInclude Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\NativeMemory.hpp" />
+    <ClInclude Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\Offsets.hpp" />
+    <ClInclude Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\VehicleExtensions.hpp" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\enums.h" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\main.h" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\nativeCaller.h" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\natives.h" />
+    <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\types.h" />
     <ClInclude Include="..\thirdparty\simpleini\SimpleIni.h" />
     <ClInclude Include="..\thirdparty\tinyxml2\tinyxml2.h" />
     <ClInclude Include="keyboard.h" />

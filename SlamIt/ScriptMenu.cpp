@@ -4,7 +4,7 @@
 #include "Offsets.h"
 #include "Util/Util.hpp"
 #include "Util/Versions.h"
-#include "../../GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp"
+#include <GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp>
 #include "GTAVMenuBase/menu.h"
 
 extern NativeMenu::Menu menu;

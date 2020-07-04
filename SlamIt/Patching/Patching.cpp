@@ -2,7 +2,7 @@
 
 #include "Hooking.h"
 #include "../Util/Logger.hpp"
-#include "../../../GTAVManualTransmission/Gears/Memory/NativeMemory.hpp"
+#include <GTAVManualTransmission/Gears/Memory/NativeMemory.hpp>
 #include <inc/nativeCaller.h>
 
 // Instructions that access suspension members, 1.0.1032.1
