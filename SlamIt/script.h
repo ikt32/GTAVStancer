@@ -15,7 +15,7 @@
 const std::string modDir  = "\\VStancer";
 
 void ScriptMain();
-void unloadPatch();
+bool unloadPatch();
 
 void update_menu();
 void patchHeightReset();

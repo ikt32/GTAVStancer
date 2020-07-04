@@ -1,4 +1,4 @@
 #pragma once
 
 void patchHeightReset();
-void unloadPatch();
+bool unloadPatch();

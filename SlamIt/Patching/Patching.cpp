@@ -87,9 +87,9 @@ void patchHeightReset() {
     }
 }
 
-void unloadPatch() {
+bool unloadPatch() {
     if (!patched)
-        return;
+        return false;
 
     if (g_SetHeight)
     {
@@ -97,5 +97,7 @@ void unloadPatch() {
         g_SetHeight = nullptr;
         logger.Write(INFO, "Patch: Unloaded");
         patched = false;
+        return true;
     }
+    return false;
 }

@@ -10,6 +10,7 @@
 #include "Util/Logger.hpp"
 
 #include <GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp>
+#include <GTAVManualTransmission/Gears/Memory/VehicleFlags.h>
 #include <GTAVMenuBase/menu.h>
 #include <simpleini/SimpleIni.h>
 #include <sstream>
@@ -56,6 +57,10 @@ bool autoApplied = false;
 
 // Keep track of menu highlight for control disable while typing
 bool showOnlyCompatible = false;
+
+namespace VEHICLE {    
+    static void _SET_CAMBERED_WHEELS_DISABLED(Any p0, Any p1) { invoke<Void>(0x1201E8A3290A3B98, p0, p1); } // 0x1201E8A3290A3B98 b505
+}
 
 /*
  *  Update wheels info, not sure if I should move this into vehVExt::
@@ -332,8 +337,25 @@ void update_game() {
     }
 
     model = ENTITY::GET_ENTITY_MODEL(vehicle);
-    if (!VEHICLE::IS_THIS_MODEL_A_CAR(model) && !VEHICLE::IS_THIS_MODEL_A_QUADBIKE(model)) {
-        unloadPatch();
+
+    bool carOrQuad = VEHICLE::IS_THIS_MODEL_A_CAR(model) || VEHICLE::IS_THIS_MODEL_A_QUADBIKE(model);
+    bool flightMode = VExt::GetHoverTransformRatio(vehicle) > 0.0f; //deluxo
+
+    bool hydraulics = false;
+    if (settings.disableForHydraulics) {
+        auto flags = VExt::GetVehicleFlags(vehicle);
+        if (flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_HYDRAULICS ||
+            flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_DONK_HYDRAULICS)
+            hydraulics = true;
+    }
+
+    if (!carOrQuad ||
+        flightMode ||
+        hydraulics) {
+        if (unloadPatch()) {
+            getStats(vehicle);
+            ultraSlam(vehicle, g_frontCamber, g_rearCamber, g_frontTrackWidth, g_rearTrackWidth, g_frontHeight, g_rearHeight);
+        }
         return;
     }
 
