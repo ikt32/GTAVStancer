@@ -1,17 +1,18 @@
-#include "script.h"
+﻿#include "script.h"
+#include "Constants.hpp"
 
 #include "settings.h"
 #include "Offsets.h"
-#include "Util/Util.hpp"
+#include "Util/UI.hpp"
 #include "Util/Versions.h"
-#include <GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp>
+#include "Memory/VehicleExtensions.hpp"
+
 #include "GTAVMenuBase/menu.h"
 
 extern NativeMenu::Menu menu;
 extern Hash model;
 extern Vehicle vehicle;
 extern VehicleExtensions ext;
-extern int prevNotification;
 extern std::vector<Preset> presets;
 extern std::vector<Preset> saved;
 extern Settings settings;
@@ -54,27 +55,22 @@ void choosePresetMenu(std::string title, std::vector<Preset> whichPresets) {
         if (menu.OptionPlus(label, info, nullptr, std::bind(deletePreset, preset, whichPresets), nullptr, "Preset data")) {
             applyPreset(preset);
             getStats(vehicle);
-            showNotification("Applied preset!", &prevNotification);
+            UI::Notify("Applied preset!");
         }
     }
 }
 
 void update_mainmenu() {
     menu.Title("VStancer");
-    menu.Subtitle(DISPLAY_VERSION);
+    menu.Subtitle(Constants::DisplayVersion);
 
     if (getGameVersion() < G_VER_1_0_944_2_STEAM) {
         menu.Option("Unsupported game version!", NativeMenu::solidRed, { "You need v1.0.944.2 or newer." });
+        return;
     }
     
     if (menu.BoolOption("Enable mod", settings.enableMod, { "Enables or disables the entire mod." })) {
         settings.SaveSettings();
-        if (settings.enableMod && settings.enableHeight) {
-            patchHeightReset();
-        }
-        else {
-            unloadPatch();
-        }
     }
     if (menu.BoolOption("Auto-apply", settings.autoApply, { "Automatically apply the car-specific preset if "
                             "the licence plate and car model match." })) {
@@ -105,13 +101,13 @@ void update_suspensionmenu() {
     menu.FloatOption("Front Camber\t\t", g_frontCamber, -2.0f, 2.0f, 0.01f);
     menu.FloatOption("Front Track Width", g_frontTrackWidth, -2.0f, 2.0f, 0.01f);
     if (menu.FloatOption("Front Height\t\t", g_frontHeight, -2.0f, 2.0f, 0.01f)) {
-        ENTITY::APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(vehicle, 1, 0.0f, 0.1f, 0.0f, true, true, true, true);
+        ENTITY::APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(vehicle, 1, { .x=0.0f, .y=0.1f, .z=0.0f }, true, true, true, true);
     }
 
     menu.FloatOption("Rear Camber\t\t", g_rearCamber, -2.0f, 2.0f, 0.01f);
     menu.FloatOption("Rear Track Width", g_rearTrackWidth, -2.0f, 2.0f, 0.01f);
     if (menu.FloatOption("Rear Height\t\t", g_rearHeight, -2.0f, 2.0f, 0.01f)) {
-        ENTITY::APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(vehicle, 1, 0.0f, 0.1f, 0.0f, true, true, true, true);
+        ENTITY::APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(vehicle, 1, { .x = 0.0f, .y = 0.1f, .z = 0.0f }, true, true, true, true);
     }
 
     if (menu.FloatOption("Visual Lowering", g_visualHeight, -0.5f, 0.5f, 0.01f, { "This changes the same value tuning the suspension in mod shops does." })) {
@@ -124,17 +120,7 @@ void update_othermenu() {
     menu.Subtitle("");
     if (menu.IntOption("Slam", slamLevel, 0, 2, 1, { "This damages the suspension/wheel so the car drops. Effect is removed upon vehicle repair." })) {
         oldSlam(vehicle, slamLevel);
-        CONTROLS::_SET_CONTROL_NORMAL(0, ControlVehicleAccelerate, 0.3f);
-    }
-    if (menu.BoolOption("Enable Height tuning", settings.enableHeight, { "Enabling the car height setting is not compatible with lowriders "
-    "and cars that have moving/transforming wheels."})) {
-        settings.SaveSettings();
-        if (settings.enableMod && settings.enableHeight) {
-            patchHeightReset();
-        }
-        else {
-            unloadPatch();
-        }
+        PAD::_SET_CONTROL_NORMAL(0, ControlVehicleAccelerate, 0.3f);
     }
 }
 

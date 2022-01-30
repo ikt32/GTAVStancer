@@ -1,4 +1,5 @@
 #include "script.h"
+#include "Constants.hpp"
 
 #include "presets.h"
 #include "settings.h"
@@ -6,11 +7,11 @@
 #include "Offsets.h"
 
 #include "Util/Paths.h"
-#include "Util/Util.hpp"
+#include "Util/UI.hpp"
 #include "Util/Logger.hpp"
 
-#include <GTAVManualTransmission/Gears/Memory/VehicleExtensions.hpp>
-#include <GTAVManualTransmission/Gears/Memory/VehicleFlags.h>
+#include "Memory/VehicleExtensions.hpp"
+
 #include <GTAVMenuBase/menu.h>
 #include <simpleini/SimpleIni.h>
 #include <sstream>
@@ -31,8 +32,6 @@ Vehicle vehicle;
 Vehicle prevVehicle;
 Player player;
 Ped playerPed;
-
-int prevNotification;
 
 std::vector<Preset> presets;
 std::vector<Preset> saved;
@@ -57,10 +56,6 @@ bool autoApplied = false;
 
 // Keep track of menu highlight for control disable while typing
 bool showOnlyCompatible = false;
-
-namespace VEHICLE {    
-    static void _SET_CAMBERED_WHEELS_DISABLED(Any p0, Any p1) { invoke<Void>(0x1201E8A3290A3B98, p0, p1); } // 0x1201E8A3290A3B98 b505
-}
 
 /*
  *  Update wheels info, not sure if I should move this into vehVExt::
@@ -151,7 +146,7 @@ void init() {
         saved = settings.ReadPresets(savedCarsFile);
     }
     catch (...) {
-        showSubtitle("Unknown XML read error!");
+        UI::Notify("Unknown XML read error!");
         logger.Write(ERROR, "Unknown XML read error!");
     }
     logger.Write(INFO, "Initialization finished");
@@ -191,13 +186,13 @@ void savePreset(bool asPreset, std::string presetName) {
 
     if (asPreset) {
         WAIT(32);
-        GAMEPLAY::DISPLAY_ONSCREEN_KEYBOARD(true, "Preset Name", "", "", "", "", "", 127);
-        while (GAMEPLAY::UPDATE_ONSCREEN_KEYBOARD() == 0) WAIT(0);
-        if (!GAMEPLAY::GET_ONSCREEN_KEYBOARD_RESULT()) {
-            showNotification("Cancelled save");
+        MISC::DISPLAY_ONSCREEN_KEYBOARD(true, "Preset Name", "", "", "", "", "", 127);
+        while (MISC::UPDATE_ONSCREEN_KEYBOARD() == 0) WAIT(0);
+        if (!MISC::GET_ONSCREEN_KEYBOARD_RESULT()) {
+            UI::Notify("Cancelled save");
             return;
         }
-        presetName = GAMEPLAY::GET_ONSCREEN_KEYBOARD_RESULT();
+        presetName = MISC::GET_ONSCREEN_KEYBOARD_RESULT();
         
     }
 
@@ -224,20 +219,20 @@ void savePreset(bool asPreset, std::string presetName) {
         settings.OverwritePreset(
             Preset(front, rear, frontWheels, rearWheels, visualSize, g_visualHeight, name, plate),
             asPreset ? presetCarsFile : savedCarsFile);
-        showNotification(asPreset ? "Updated preset" : "Updated car", &prevNotification);
+        UI::Notify(asPreset ? "Updated preset" : "Updated car");
     }
     else {
         try {
             settings.AppendPreset(
                 Preset(front, rear, frontWheels, rearWheels, visualSize, g_visualHeight, name, plate),
                 asPreset ? presetCarsFile : savedCarsFile);
-            showNotification(asPreset ? "Saved new preset" : "Saved new car", &prevNotification);
+            UI::Notify(asPreset ? "Saved new preset" : "Saved new car");
         }
         catch (std::runtime_error& ex) {
             logger.Write(ERROR, ex.what());
             logger.Write(ERROR, "Saving of %s to %s failed!", 
                 plate.c_str(), (asPreset ? presetCarsFile : savedCarsFile).c_str());
-            showNotification("Saving to xml failed!");
+            UI::Notify("Saving to xml failed!");
         }
     }
     init();
@@ -258,7 +253,7 @@ void deletePreset(Preset preset, const std::vector<Preset> &fromWhich) {
     }
     if (fromFile.empty()) {
         message = "File empty?";
-        showNotification(message.c_str(), &prevNotification);
+        UI::Notify(message);
         return;
     }
 
@@ -266,7 +261,7 @@ void deletePreset(Preset preset, const std::vector<Preset> &fromWhich) {
         message = "Deleted preset " + preset.Name() + " " + preset.Plate();
         init();
     }
-    showNotification(message.c_str(), &prevNotification);
+    UI::Notify(message);
 }
 
 void applyPreset(const Preset& preset) {
@@ -314,7 +309,7 @@ void applyPreset(const Preset& preset) {
             *(float *)(CVeh_0x48_0x370 + offVisualWidth) = preset.VisualSize.WheelWidth;
         }
         else {
-            showNotification("Couldn't set visual sizes!");
+            UI::Notify("Couldn't set visual sizes!");
         }
     }
 }
@@ -324,7 +319,7 @@ void update_game() {
     playerPed = PLAYER::PLAYER_PED_ID();
 
     if (!ENTITY::DOES_ENTITY_EXIST(playerPed) || !PLAYER::IS_PLAYER_CONTROL_ON(player) ||
-        ENTITY::IS_ENTITY_DEAD(playerPed) || PLAYER::IS_PLAYER_BEING_ARRESTED(player, TRUE)) {
+        ENTITY::IS_ENTITY_DEAD(playerPed, false) || PLAYER::IS_PLAYER_BEING_ARRESTED(player, TRUE)) {
         return;
     }
 
@@ -341,23 +336,23 @@ void update_game() {
     bool carOrQuad = VEHICLE::IS_THIS_MODEL_A_CAR(model) || VEHICLE::IS_THIS_MODEL_A_QUADBIKE(model);
     bool flightMode = VExt::GetHoverTransformRatio(vehicle) > 0.0f; //deluxo
 
-    bool hydraulics = false;
-    if (settings.disableForHydraulics) {
-        auto flags = VExt::GetVehicleFlags(vehicle);
-        if (flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_HYDRAULICS ||
-            flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_DONK_HYDRAULICS)
-            hydraulics = true;
-    }
+    //bool hydraulics = false;
+    //if (settings.disableForHydraulics) {
+    //    auto flags = VExt::GetVehicleFlags(vehicle);
+    //    if (flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_HYDRAULICS ||
+    //        flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_DONK_HYDRAULICS)
+    //        hydraulics = true;
+    //}
 
-    if (!carOrQuad ||
-        flightMode ||
-        hydraulics) {
-        if (unloadPatch()) {
-            getStats(vehicle);
-            ultraSlam(vehicle, g_frontCamber, g_rearCamber, g_frontTrackWidth, g_rearTrackWidth, g_frontHeight, g_rearHeight);
-        }
-        return;
-    }
+    //if (!carOrQuad ||
+    //    flightMode ||
+    //    hydraulics) {
+    //    if (unloadPatch()) {
+    //        getStats(vehicle);
+    //        ultraSlam(vehicle, g_frontCamber, g_rearCamber, g_frontTrackWidth, g_rearTrackWidth, g_frontHeight, g_rearHeight);
+    //    }
+    //    return;
+    //}
 
     if (prevVehicle != vehicle) {
         if (!VExt::GetAddress(vehicle)) {
@@ -368,8 +363,6 @@ void update_game() {
         autoApplied = false;
         return;
     }
-
-    update_menu();
 
     if (!settings.enableMod) {
         return;
@@ -382,7 +375,7 @@ void update_game() {
                 applyPreset(preset);
 
                 getStats(vehicle);
-                showNotification("Applied preset automatically!", &prevNotification);
+                UI::Notify("Applied preset automatically!");
                 autoApplied = true;
             }
         }
@@ -391,37 +384,33 @@ void update_game() {
     ultraSlam(vehicle, g_frontCamber, g_rearCamber, g_frontTrackWidth, g_rearTrackWidth, g_frontHeight, g_rearHeight);
 }
 
-void main() {
+void ScriptMain() {
     logger.Write(INFO, "Script started");
 
-    settingsGeneralFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\settings_general.ini";
-    settingsMenuFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\settings_menu.ini";
-    savedCarsFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\car_preset.xml";
-    presetCarsFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + modDir + "\\car_saved.xml";
+    settingsGeneralFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + Constants::ModDir + "\\settings_general.ini";
+    settingsMenuFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + Constants::ModDir + "\\settings_menu.ini";
+    savedCarsFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + Constants::ModDir + "\\car_preset.xml";
+    presetCarsFile = Paths::GetModuleFolder(Paths::GetOurModuleHandle()) + Constants::ModDir + "\\car_saved.xml";
     settings.SetFiles(settingsGeneralFile);
     menu.SetFiles(settingsMenuFile);
     menu.RegisterOnMain([] { return init(); });
     menu.Initialize();
 
     VExt::Init();
-    
+
     init();
 
     if (getGameVersion() >= 46) {
         offVisualWidth = 0xBA0;
     }
 
-    if (settings.enableMod && settings.enableHeight) {
-        patchHeightReset();
-    }
+    //if (settings.enableMod && settings.enableHeight) {
+    //    patchHeightReset();
+    //}
 
     while (true) {
         update_game();
+        update_menu();
         WAIT(0);
     }
-}
-
-void ScriptMain() {
-    srand(GetTickCount());
-    main();
 }

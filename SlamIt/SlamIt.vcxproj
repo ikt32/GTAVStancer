@@ -28,27 +28,27 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>MultiByte</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
@@ -131,18 +131,15 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
-      <ExceptionHandling>Async</ExceptionHandling>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
-      <FloatingPointModel>Fast</FloatingPointModel>
       <WarningLevel>Level3</WarningLevel>
-      <PreprocessorDefinitions>NOGDI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\ScriptHookV_SDK;$(SolutionDir)thirdparty;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;NOGDI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\ScriptHookV_SDK;$(SolutionDir)thirdparty\fmt\include;$(SolutionDir)thirdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalOptions>..\thirdparty\ScriptHookV_SDK\lib\ScriptHookV.lib %(AdditionalOptions)</AdditionalOptions>
-      <GenerateDebugInformation>No</GenerateDebugInformation>
+      <GenerateDebugInformation>DebugFull</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -152,8 +149,8 @@
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\NativeMemory.cpp" />
-    <ClCompile Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\VehicleExtensions.cpp" />
+    <ClCompile Include="..\thirdparty\fmt\src\format.cc" />
+    <ClCompile Include="..\thirdparty\fmt\src\os.cc" />
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menu.cpp" />
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menucontrols.cpp" />
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menukeyboard.cpp" />
@@ -163,21 +160,18 @@
     <ClCompile Include="..\thirdparty\tinyxml2\tinyxml2.cpp" />
     <ClCompile Include="keyboard.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="Patching\Hooking.cpp" />
-    <ClCompile Include="Patching\Patching.cpp" />
+    <ClCompile Include="Memory\NativeMemory.cpp" />
+    <ClCompile Include="Memory\VehicleExtensions.cpp" />
     <ClCompile Include="presets.cpp" />
     <ClCompile Include="script.cpp" />
     <ClCompile Include="ScriptMenu.cpp" />
     <ClCompile Include="settings.cpp" />
+    <ClCompile Include="Util\FileVersion.cpp" />
     <ClCompile Include="Util\Logger.cpp" />
-    <ClCompile Include="Util\MathExt.cpp" />
     <ClCompile Include="Util\Paths.cpp" />
-    <ClCompile Include="Util\Util.cpp" />
+    <ClCompile Include="Util\UI.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\NativeMemory.hpp" />
-    <ClInclude Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\Offsets.hpp" />
-    <ClInclude Include="..\thirdparty\GTAVManualTransmission\Gears\Memory\VehicleExtensions.hpp" />
     <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\enums.h" />
     <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\main.h" />
     <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\nativeCaller.h" />
@@ -185,25 +179,23 @@
     <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\types.h" />
     <ClInclude Include="..\thirdparty\simpleini\SimpleIni.h" />
     <ClInclude Include="..\thirdparty\tinyxml2\tinyxml2.h" />
+    <ClInclude Include="Constants.hpp" />
     <ClInclude Include="keyboard.h" />
+    <ClInclude Include="Memory\NativeMemory.hpp" />
+    <ClInclude Include="Memory\Offsets.hpp" />
+    <ClInclude Include="Memory\VehicleExtensions.hpp" />
+    <ClInclude Include="Memory\Versions.hpp" />
     <ClInclude Include="Offsets.h" />
-    <ClInclude Include="Patching\Patching.h" />
-    <ClInclude Include="Patching\Hooking.h" />
-    <ClInclude Include="Patching\pattern.h" />
     <ClInclude Include="presets.h" />
     <ClInclude Include="script.h" />
     <ClInclude Include="settings.h" />
     <ClInclude Include="Types.h" />
+    <ClInclude Include="Util\FileVersion.hpp" />
     <ClInclude Include="Util\Logger.hpp" />
-    <ClInclude Include="Util\MathExt.h" />
+    <ClInclude Include="Util\Math.hpp" />
     <ClInclude Include="Util\Paths.h" />
-    <ClInclude Include="Util\Util.hpp" />
+    <ClInclude Include="Util\UI.hpp" />
     <ClInclude Include="Util\Versions.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="Patching\compareHeight1604.asm" />
-    <MASM Include="Patching\original_thing.asm" />
-    <MASM Include="Patching\compareHeight.asm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
