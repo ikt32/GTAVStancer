@@ -134,8 +134,8 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>WIN32_LEAN_AND_MEAN;NOMINMAX;NOGDI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <LanguageStandard>stdcpplatest</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\ScriptHookV_SDK;$(SolutionDir)thirdparty\fmt\include;$(SolutionDir)thirdparty;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)thirdparty\ScriptHookV_SDK;$(SolutionDir)thirdparty\fmt\include;$(SolutionDir)thirdparty;$(SolutionDir)thirdparty\GTAVMenuBase;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalOptions>..\thirdparty\ScriptHookV_SDK\lib\ScriptHookV.lib %(AdditionalOptions)</AdditionalOptions>
@@ -149,26 +149,28 @@
     </BuildLog>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\thirdparty\fmt\src\format.cc" />
-    <ClCompile Include="..\thirdparty\fmt\src\os.cc" />
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menu.cpp" />
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menucontrols.cpp" />
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menukeyboard.cpp" />
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menumemutils.cpp" />
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menusettings.cpp" />
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menuutils.cpp" />
-    <ClCompile Include="..\thirdparty\tinyxml2\tinyxml2.cpp" />
-    <ClCompile Include="keyboard.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="Memory\NativeMemory.cpp" />
     <ClCompile Include="Memory\VehicleExtensions.cpp" />
-    <ClCompile Include="presets.cpp" />
-    <ClCompile Include="script.cpp" />
-    <ClCompile Include="ScriptMenu.cpp" />
-    <ClCompile Include="settings.cpp" />
+    <ClCompile Include="Config.cpp" />
+    <ClCompile Include="StanceMenuUtils.cpp" />
+    <ClCompile Include="Script.cpp" />
+    <ClCompile Include="StanceMenu.cpp" />
+    <ClCompile Include="ScriptSettings.cpp" />
+    <ClCompile Include="SettingsCommon.cpp" />
+    <ClCompile Include="StanceScript.cpp" />
+    <ClCompile Include="Util\AddonSpawnerCache.cpp" />
     <ClCompile Include="Util\FileVersion.cpp" />
     <ClCompile Include="Util\Logger.cpp" />
+    <ClCompile Include="Util\ModTypeName.cpp" />
     <ClCompile Include="Util\Paths.cpp" />
+    <ClCompile Include="Util\String.cpp" />
     <ClCompile Include="Util\UI.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -178,24 +180,30 @@
     <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\natives.h" />
     <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\types.h" />
     <ClInclude Include="..\thirdparty\simpleini\SimpleIni.h" />
-    <ClInclude Include="..\thirdparty\tinyxml2\tinyxml2.h" />
     <ClInclude Include="Constants.hpp" />
-    <ClInclude Include="keyboard.h" />
     <ClInclude Include="Memory\NativeMemory.hpp" />
     <ClInclude Include="Memory\Offsets.hpp" />
+    <ClInclude Include="Memory\SuspensionOffsets.hpp" />
+    <ClInclude Include="Memory\SuspensionTypes.hpp" />
     <ClInclude Include="Memory\VehicleExtensions.hpp" />
+    <ClInclude Include="Memory\VehicleFlags.hpp" />
     <ClInclude Include="Memory\Versions.hpp" />
-    <ClInclude Include="Offsets.h" />
-    <ClInclude Include="presets.h" />
-    <ClInclude Include="script.h" />
-    <ClInclude Include="settings.h" />
-    <ClInclude Include="Types.h" />
+    <ClInclude Include="Config.hpp" />
+    <ClInclude Include="StanceMenuUtils.hpp" />
+    <ClInclude Include="Script.hpp" />
+    <ClInclude Include="ScriptMenu.hpp" />
+    <ClInclude Include="ScriptSettings.hpp" />
+    <ClInclude Include="SettingsCommon.hpp" />
+    <ClInclude Include="StanceScript.hpp" />
+    <ClInclude Include="Util\AddonSpawnerCache.hpp" />
+    <ClInclude Include="Util\ModTypeName.hpp" />
     <ClInclude Include="Util\FileVersion.hpp" />
+    <ClInclude Include="Util\Game.hpp" />
     <ClInclude Include="Util\Logger.hpp" />
     <ClInclude Include="Util\Math.hpp" />
-    <ClInclude Include="Util\Paths.h" />
+    <ClInclude Include="Util\Paths.hpp" />
+    <ClInclude Include="Util\String.hpp" />
     <ClInclude Include="Util\UI.hpp" />
-    <ClInclude Include="Util\Versions.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

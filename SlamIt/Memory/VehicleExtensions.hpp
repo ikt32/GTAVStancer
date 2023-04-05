@@ -11,7 +11,7 @@ struct WheelDimensions {
 
 class VehicleExtensions {
 public:
-    static void ChangeVersion(int version);
+    static void SetVersion(int version);
 
     static void Init();
 
@@ -39,7 +39,11 @@ public:
     static float GetFuelLevel(Vehicle handle);
     static void SetFuelLevel(Vehicle handle, float value);
 
-    // TODO: CVeh + 0x84c (1604 - 1868) (Lights damaged)
+    static uint32_t GetLightsBroken(Vehicle handle);
+    static void SetLightsBroken(Vehicle handle, uint32_t value);
+
+    static uint32_t GetLightsBrokenVisual(Vehicle handle);
+    static void SetLightsBrokenVisual(Vehicle handle, uint32_t value);
 
     static uint16_t GetGearNext(Vehicle handle);
     static void SetGearNext(Vehicle handle, uint16_t value);
@@ -86,6 +90,11 @@ public:
     static uint32_t GetLightStates(Vehicle handle);
     static void SetLightStates(Vehicle handle, uint32_t value);
 
+    static float GetGravity(Vehicle handle);
+    static void SetGravity(Vehicle handle, float value);
+
+    static bool GetIndicatorHigh(Vehicle handle, int gameTime);
+
     // Steering input angle, steering lock independent
     static float GetSteeringInputAngle(Vehicle handle);
     static void SetSteeringInputAngle(Vehicle handle, float value);
@@ -112,9 +121,22 @@ public:
     static float GetDashSpeed(Vehicle handle);
     // No set impl.
 
-    // 0 = car, 1 = plane, 2 = trailer, 3 = quad,
-    // 6 = amphibious car, 7 = amphibious quad,
-    // 8 = heli, 11 = motorcycle, 12 = bicycle, 13 = boat, 14 = train
+    //  0: car
+    //  1: plane
+    //  2: trailer
+    //  3: quad
+    //  4: ?
+    //  5: stromberg/sub
+    //  6: amphibious car
+    //  7: amphibious quad
+    //  8: heli
+    //  9: ?
+    // 10: ?
+    // 11: motorcycle
+    // 12: bicycle
+    // 13: boat
+    // 14: train
+    // 15: submarine
     static int GetModelType(Vehicle handle);
 
     static uint64_t GetWheelsPtr(Vehicle handle);
@@ -144,16 +166,20 @@ public:
     /*
      * Wheel struct
      */
+    static uint8_t GetWheelIdMem(Vehicle handle, uint8_t index);
+
+    static std::vector<Vector3> GetWheelBoneVelocity(Vehicle handle);
+    static std::vector<Vector3> GetWheelTractionVector(Vehicle handle);
+
     static std::vector<float> GetWheelHealths(Vehicle handle);
     static void SetWheelsHealth(Vehicle handle, float health);
 
-    static float GetSteeringMultiplier(Vehicle handle);
-    static void SetSteeringMultiplier(Vehicle handle, float value);
+    static std::vector<float> GetWheelSteeringMultipliers(Vehicle handle);
+    static void SetWheelSteeringMultipliers(Vehicle handle, const std::vector<float>& values);
 
     static std::vector<Vector3> GetWheelOffsets(Vehicle handle);
     static std::vector<Vector3> GetWheelLastContactCoords(Vehicle handle);
     static std::vector<float> GetWheelCompressions(Vehicle handle);
-    static void SetWheelCompression(Vehicle handle, uint8_t index, float value);
     static std::vector<float> GetWheelSteeringAngles(Vehicle handle);
     static std::vector<bool> GetWheelsOnGround(Vehicle handle);
 
@@ -166,17 +192,21 @@ public:
     static std::vector<float> GetWheelRotationSpeeds(Vehicle handle);
     // For forward, use negative speed.
     static void SetWheelRotationSpeed(Vehicle handle, uint8_t index, float value);
-
-    // Unit: rad
-    static std::vector<float> GetWheelRotations(Vehicle handle);
-    static void SetWheelRotation(Vehicle handle, uint8_t index, float value);
-
     // Unit: m/s, at the tyres. This probably doesn't work well for popped tyres.
     static std::vector<float> GetTyreSpeeds(Vehicle handle);
 
-    // How much smoke and skidmarks the wheels/tires are generating.
     static std::vector<float> GetWheelTractionVectorLength(Vehicle handle);
+    static std::vector<float> GetWheelTractionVectorY(Vehicle handle);
+    static std::vector<float> GetWheelTractionVectorX(Vehicle handle);
+
     static void SetWheelTractionVectorLength(Vehicle handle, uint8_t index, float value);
+
+    // materials.meta stuff
+    static std::vector<float> GetTyreGrips(Vehicle handle);
+    static std::vector<float> GetWetGrips(Vehicle handle);
+    static std::vector<float> GetTyreDrags(Vehicle handle);
+    static std::vector<float> GetTopSpeedMults(Vehicle handle);
+    static std::vector<uint16_t> GetTireContactMaterial(Vehicle handle);
 
     // Needs patching the decreasing thing
     static std::vector<float> GetWheelPower(Vehicle handle);
@@ -189,15 +219,29 @@ public:
     static std::vector<float> GetWheelBrakePressure(Vehicle handle);
     static void SetWheelBrakePressure(Vehicle handle, uint8_t index, float value);
 
+    static bool IsWheelSteered(Vehicle handle, uint8_t index);
     static bool IsWheelPowered(Vehicle handle, uint8_t index);
-    static std::vector<uint16_t> GetWheelFlags(Vehicle handle);
+    static std::vector<uint32_t> GetWheelFlags(Vehicle handle);
+
+    static std::vector<float> GetWheelLoads(Vehicle handle);
 
     static std::vector<float> GetWheelDownforces(Vehicle handle);
+
+    // 0 to 59 (= pop)
+    static std::vector<float> GetWheelOverheats(Vehicle handle);
 
     static uint64_t GetWheelHandlingPtr(Vehicle handle, uint8_t index);
     static void SetWheelHandlingPtr(Vehicle handle, uint8_t index, uint64_t value);
 
     static std::vector<uint32_t> GetVehicleFlags(Vehicle handle);
+    // In degrees. Defaults to 109?
+    static float GetMaxSteeringWheelAngle(Vehicle handle);
+
+    static float GetVehicleWheelWidth(Vehicle handle);
+    static void SetVehicleWheelWidth(Vehicle handle, float value);
+    static float GetVehicleWheelSize(Vehicle handle);
+    static void SetVehicleWheelSize(Vehicle handle, float value);
+
 private:
     VehicleExtensions() = default;
 };

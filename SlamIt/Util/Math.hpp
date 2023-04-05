@@ -15,9 +15,9 @@ struct V3D {
     V3D() = default;
     Vector3 to_v3f() {
         Vector3 v{
-            static_cast<float>(x), 0,
-            static_cast<float>(y), 0,
-            static_cast<float>(z), 0
+            static_cast<float>(x),
+            static_cast<float>(y),
+            static_cast<float>(z),
         };
         return v;
     }
@@ -83,9 +83,9 @@ T lerp(T a, T b, T2 f, T2 min, T2 max) {
 
 inline Vector3 lerp(Vector3 a, Vector3 b, float f, float min, float max) {
     return Vector3{
-        lerp(a.x, b.x, f, min, max), 0,
-        lerp(a.y, b.y, f, min, max), 0,
-        lerp(a.z, b.z, f, min, max), 0,
+        lerp(a.x, b.x, f, min, max),
+        lerp(a.y, b.y, f, min, max),
+        lerp(a.z, b.z, f, min, max),
     };
 }
 

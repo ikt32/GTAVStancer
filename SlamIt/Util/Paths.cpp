@@ -1,77 +1,100 @@
-#include "Paths.h"
+#include "Paths.hpp"
 
-static HMODULE ourModule;
+#include <ShlObj.h>
 
-const std::string Paths::GetRunningExecutableFolder() {
-
-	char fileName[MAX_PATH];
-	GetModuleFileNameA(NULL, fileName, MAX_PATH);
-
-	std::string currentPath = fileName;
-	return currentPath.substr(0, currentPath.find_last_of("\\"));
+namespace {
+    HMODULE ourModule;
+    std::filesystem::path modPath;
+    std::filesystem::path initialModPath;
+    bool modPathChangedThisRun = false;
 }
 
-const std::string Paths::GetRunningExecutableName() {
+std::filesystem::path Paths::GetLocalAppDataPath() {
+    std::filesystem::path fsPath;
+    PWSTR path = NULL;
+    HRESULT result = SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &path);
 
-	char fileName[MAX_PATH];
-	GetModuleFileNameA(NULL, fileName, MAX_PATH);
+    if (path != NULL) {
+        fsPath = std::filesystem::path(path);
+    }
 
-	std::string fullPath = fileName;
+    CoTaskMemFree(path);
 
-	size_t lastIndex = fullPath.find_last_of("\\") + 1;
-	return fullPath.substr(lastIndex, fullPath.length() - lastIndex);
+    return fsPath;
 }
 
-const std::string Paths::GetRunningExecutableNameWithoutExtension() {
-	const std::string fileNameWithExtension = GetRunningExecutableName();
-
-	size_t lastIndex = fileNameWithExtension.find_last_of(".");
-	if (lastIndex == -1) {
-		return fileNameWithExtension;
-	}
-
-	return fileNameWithExtension.substr(0, lastIndex);
+void Paths::SetModPath(std::filesystem::path path) {
+    if (initialModPath.empty()) {
+        initialModPath = path;
+    }
+    modPath = path;
 }
 
-const std::string Paths::GetModuleFolder(const HMODULE module) {
-
-	char fileName[MAX_PATH];
-	GetModuleFileNameA(module, fileName, MAX_PATH);
-
-	std::string currentPath = fileName;
-	return currentPath.substr(0, currentPath.find_last_of("\\"));
+std::filesystem::path Paths::GetModPath() {
+    return modPath;
 }
 
-const std::string Paths::GetModuleName(const HMODULE module) {
-
-	char fileName[MAX_PATH];
-	GetModuleFileNameA(module, fileName, MAX_PATH);
-
-	std::string fullPath = fileName;
-
-	size_t lastIndex = fullPath.find_last_of("\\") + 1;
-	return fullPath.substr(lastIndex, fullPath.length() - lastIndex);
+std::filesystem::path Paths::GetInitialModPath() {
+    return initialModPath;
 }
 
-const std::string Paths::GetModuleNameWithoutExtension(const HMODULE module) {
+void Paths::SetModPathChanged() {
+    modPathChangedThisRun = true;
+}
 
-	const std::string fileNameWithExtension = GetModuleName(module);
+bool Paths::GetModPathChanged() {
+    return modPathChangedThisRun;
+}
 
-	size_t lastIndex = fileNameWithExtension.find_last_of(".");
-	if (lastIndex == -1) {
-		return fileNameWithExtension;
-	}
+std::filesystem::path Paths::GetRunningExecutablePath() {
+    char fileName[MAX_PATH];
+    GetModuleFileNameA(nullptr, fileName, MAX_PATH);
+    return fileName;
+}
 
-	return fileNameWithExtension.substr(0, lastIndex);
+std::filesystem::path Paths::GetModuleFolder(const HMODULE module) {
+    char fileName[MAX_PATH];
+    GetModuleFileNameA(module, fileName, MAX_PATH);
+
+    std::string currentPath = fileName;
+    return currentPath.substr(0, currentPath.find_last_of("\\"));
+}
+
+std::string Paths::GetModuleName(const HMODULE module) {
+    char fileName[MAX_PATH];
+    GetModuleFileNameA(module, fileName, MAX_PATH);
+
+    std::string fullPath = fileName;
+
+    size_t lastIndex = fullPath.find_last_of("\\") + 1;
+    return fullPath.substr(lastIndex, fullPath.length() - lastIndex);
+}
+
+std::string Paths::GetModuleNameWithoutExtension(const HMODULE module) {
+    const std::string fileNameWithExtension = GetModuleName(module);
+
+    size_t lastIndex = fileNameWithExtension.find_last_of(".");
+    if (lastIndex == -1) {
+        return fileNameWithExtension;
+    }
+
+    return fileNameWithExtension.substr(0, lastIndex);
 }
 
 
 void Paths::SetOurModuleHandle(const HMODULE module) {
-
-	ourModule = module;
+    ourModule = module;
 }
 
-const HMODULE Paths::GetOurModuleHandle() {
+HMODULE Paths::GetOurModuleHandle() {
+    return ourModule;
+}
 
-	return ourModule;
+std::wstring Paths::GetDocumentsFolder() {
+    PWSTR path;
+    SHGetKnownFolderPath(FOLDERID_Documents, KF_FLAG_DEFAULT, NULL, &path);
+    std::wstring strPath(path);
+    CoTaskMemFree(path);
+
+    return strPath;
 }

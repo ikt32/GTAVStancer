@@ -4,7 +4,8 @@
 
 #include <inc/enums.h>
 #include <inc/natives.h>
-#include <fmt/format.h>
+
+#include <format>
 #include <vector>
 
 namespace {
@@ -12,11 +13,11 @@ namespace {
     int notificationId = 0;
 
     float GetStringWidth(const std::string& text, float scale, int font) {
-        HUD::_BEGIN_TEXT_COMMAND_GET_WIDTH("STRING");
+        HUD::BEGIN_TEXT_COMMAND_GET_SCREEN_WIDTH_OF_DISPLAY_TEXT("STRING");
         HUD::ADD_TEXT_COMPONENT_SUBSTRING_PLAYER_NAME(text.c_str());
         HUD::SET_TEXT_FONT(font);
         HUD::SET_TEXT_SCALE(scale, scale);
-        return HUD::_END_TEXT_COMMAND_GET_WIDTH(true);
+        return HUD::END_TEXT_COMMAND_GET_SCREEN_WIDTH_OF_DISPLAY_TEXT(true);
     }
 }
 
@@ -43,7 +44,7 @@ void UI::Notify(const std::string& message, bool removePrevious) {
     if (removePrevious) {
         notifHandleAddr = &notificationId;
     }
-    showNotification(fmt::format("{}\n{}", Constants::NotificationPrefix, message), notifHandleAddr);
+    showNotification(std::format("{}\n{}", Constants::NotificationPrefix, message), notifHandleAddr);
 }
 
 void UI::ShowText(float x, float y, float scale, const std::string& text, int font, bool outline) {

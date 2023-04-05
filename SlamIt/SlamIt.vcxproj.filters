@@ -1,38 +1,34 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="script.cpp" />
-    <ClCompile Include="main.cpp" />
-    <ClCompile Include="keyboard.cpp" />
-    <ClCompile Include="settings.cpp" />
-    <ClCompile Include="presets.cpp" />
+    <ClCompile Include="Script.cpp" />
+    <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="ScriptSettings.cpp" />
+    <ClCompile Include="Config.cpp" />
     <ClCompile Include="Util\Paths.cpp">
       <Filter>Util</Filter>
     </ClCompile>
     <ClCompile Include="Util\Logger.cpp">
       <Filter>Util</Filter>
     </ClCompile>
-    <ClCompile Include="..\thirdparty\tinyxml2\tinyxml2.cpp">
-      <Filter>Thirdparty</Filter>
-    </ClCompile>
-    <ClCompile Include="ScriptMenu.cpp" />
+    <ClCompile Include="StanceMenu.cpp" />
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menu.cpp">
-      <Filter>Menu</Filter>
+      <Filter>thirdparty\Menu</Filter>
     </ClCompile>
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menucontrols.cpp">
-      <Filter>Menu</Filter>
+      <Filter>thirdparty\Menu</Filter>
     </ClCompile>
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menukeyboard.cpp">
-      <Filter>Menu</Filter>
+      <Filter>thirdparty\Menu</Filter>
     </ClCompile>
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menumemutils.cpp">
-      <Filter>Menu</Filter>
+      <Filter>thirdparty\Menu</Filter>
     </ClCompile>
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menusettings.cpp">
-      <Filter>Menu</Filter>
+      <Filter>thirdparty\Menu</Filter>
     </ClCompile>
     <ClCompile Include="..\thirdparty\GTAVMenuBase\menuutils.cpp">
-      <Filter>Menu</Filter>
+      <Filter>thirdparty\Menu</Filter>
     </ClCompile>
     <ClCompile Include="Util\UI.cpp">
       <Filter>Util</Filter>
@@ -46,49 +42,46 @@
     <ClCompile Include="Util\FileVersion.cpp">
       <Filter>Util</Filter>
     </ClCompile>
-    <ClCompile Include="..\thirdparty\fmt\src\format.cc">
-      <Filter>Thirdparty\fmt</Filter>
+    <ClCompile Include="StanceScript.cpp" />
+    <ClCompile Include="SettingsCommon.cpp" />
+    <ClCompile Include="Util\AddonSpawnerCache.cpp">
+      <Filter>Util</Filter>
     </ClCompile>
-    <ClCompile Include="..\thirdparty\fmt\src\os.cc">
-      <Filter>Thirdparty\fmt</Filter>
+    <ClCompile Include="Util\String.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
+    <ClCompile Include="StanceMenuUtils.cpp" />
+    <ClCompile Include="Util\ModTypeName.cpp">
+      <Filter>Util</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="script.h" />
-    <ClInclude Include="keyboard.h" />
-    <ClInclude Include="settings.h" />
-    <ClInclude Include="presets.h" />
-    <ClInclude Include="Util\Paths.h">
-      <Filter>Util</Filter>
-    </ClInclude>
-    <ClInclude Include="Util\Versions.h">
+    <ClInclude Include="Script.hpp" />
+    <ClInclude Include="ScriptSettings.hpp" />
+    <ClInclude Include="Config.hpp" />
+    <ClInclude Include="Util\Paths.hpp">
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="Util\Logger.hpp">
       <Filter>Util</Filter>
     </ClInclude>
-    <ClInclude Include="..\thirdparty\tinyxml2\tinyxml2.h">
-      <Filter>Thirdparty</Filter>
-    </ClInclude>
     <ClInclude Include="..\thirdparty\simpleini\SimpleIni.h">
-      <Filter>Thirdparty</Filter>
+      <Filter>thirdparty</Filter>
     </ClInclude>
-    <ClInclude Include="Types.h" />
-    <ClInclude Include="Offsets.h" />
     <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\enums.h">
-      <Filter>SDK</Filter>
+      <Filter>thirdparty\ScriptHookV</Filter>
     </ClInclude>
     <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\main.h">
-      <Filter>SDK</Filter>
+      <Filter>thirdparty\ScriptHookV</Filter>
     </ClInclude>
     <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\nativeCaller.h">
-      <Filter>SDK</Filter>
+      <Filter>thirdparty\ScriptHookV</Filter>
     </ClInclude>
     <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\natives.h">
-      <Filter>SDK</Filter>
+      <Filter>thirdparty\ScriptHookV</Filter>
     </ClInclude>
     <ClInclude Include="..\thirdparty\ScriptHookV_SDK\inc\types.h">
-      <Filter>SDK</Filter>
+      <Filter>thirdparty\ScriptHookV</Filter>
     </ClInclude>
     <ClInclude Include="Util\UI.hpp">
       <Filter>Util</Filter>
@@ -112,25 +105,47 @@
       <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="Constants.hpp" />
+    <ClInclude Include="StanceScript.hpp" />
+    <ClInclude Include="ScriptMenu.hpp" />
+    <ClInclude Include="Memory\SuspensionOffsets.hpp">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory\SuspensionTypes.hpp">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="SettingsCommon.hpp" />
+    <ClInclude Include="Util\AddonSpawnerCache.hpp">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\String.hpp">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Memory\VehicleFlags.hpp">
+      <Filter>Memory</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Game.hpp">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="StanceMenuUtils.hpp" />
+    <ClInclude Include="Util\ModTypeName.hpp">
+      <Filter>Util</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <Filter Include="Menu">
-      <UniqueIdentifier>{26d64db9-1573-4132-9638-76079dc911c5}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Util">
       <UniqueIdentifier>{2d981cd8-6f7d-42dd-bf15-44aebcda936b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="SDK">
-      <UniqueIdentifier>{01012e73-37b7-4874-b66a-9390e9a83264}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Thirdparty">
-      <UniqueIdentifier>{dc7b1612-ca12-4e55-a2fb-b3c530c8647c}</UniqueIdentifier>
     </Filter>
     <Filter Include="Memory">
       <UniqueIdentifier>{63f5a275-c61b-49ce-b973-cc7398ab6768}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Thirdparty\fmt">
-      <UniqueIdentifier>{93876555-a1db-4148-b016-53214ce93bc3}</UniqueIdentifier>
+    <Filter Include="thirdparty">
+      <UniqueIdentifier>{dc7b1612-ca12-4e55-a2fb-b3c530c8647c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\ScriptHookV">
+      <UniqueIdentifier>{01012e73-37b7-4874-b66a-9390e9a83264}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thirdparty\Menu">
+      <UniqueIdentifier>{26d64db9-1573-4132-9638-76079dc911c5}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -1036,8 +1036,17 @@ enum eVehicleMod
     VehicleModHorns = 14,
     VehicleModSuspension = 15,
     VehicleModArmor = 16,
+    VehicleModNitrous = 17, // Toggle
+    VehicleModTurbo = 18, // Toggle
+    VehicleModSubwoofer = 19, // Toggle
+    VehicleModTireSmoke = 20, // Toggle
+    VehicleModHydraulics = 21, // Toggle
+    VehicleModXenonLights = 22, // Toggle
     VehicleModFrontWheels = 23,
-    VehicleModBackWheels = 24 // only for motocycles
+    VehicleModBackWheels = 24, // only for motocycles
+    VehicleModPlateholder = 25, // Benny's?
+    VehicleModWindows = 46,
+    VehicleModLivery = 48
 };
 
 enum eVehicleNeonLight
