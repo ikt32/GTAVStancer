@@ -16,7 +16,7 @@ public:
     }
 
     void UpdateActiveConfig();
-    void ApplyConfig(const CConfig& config, bool applyWheelMods, bool applyVisualHeight);
+    void ApplyConfig(const CConfig& config, bool applyWheelMods, bool applyVisualHeight, bool replaceConfig);
 
     Vehicle GetVehicle() {
         return mVehicle;

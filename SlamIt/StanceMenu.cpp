@@ -102,7 +102,7 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
                 }
 
                 if (triggered) {
-                    context->ApplyConfig(config, true, true);
+                    context->ApplyConfig(config, true, true, true);
                     UI::Notify(std::format("Applied config {}.", config.Name), true);
                 }
             }
@@ -137,7 +137,7 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
             triggered |= mbCtx.FloatOptionCb("Visual height adjustment", config->Suspension.VisualHeight, -0.5f, 0.5f, 0.01f, GetKbEntryFloat);
 
             if (triggered) {
-                context->ApplyConfig(*config, true, true);
+                context->ApplyConfig(*config, true, true, false);
             }
         });
 
@@ -186,7 +186,7 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
             triggered |= mbCtx.FloatOptionCb("Visual width", config->Wheels.Visual.WheelWidth, 0.0f, 5.0f, 0.01f, GetKbEntryFloat);
 
             if (triggered) {
-                context->ApplyConfig(*config, true, true);
+                context->ApplyConfig(*config, true, true, false);
             }
         });
 
@@ -220,7 +220,7 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
             triggered |= mbCtx.FloatOptionCb(std::format("Rear rim radius"), config->Wheels.Rear.RimRadius, 0.0f, 10.0f, 0.01f, GetKbEntryFloat, { dimsFmt });
 
             if (triggered) {
-                context->ApplyConfig(*config, true, true);
+                context->ApplyConfig(*config, true, true, false);
             }
         });
 
@@ -241,7 +241,7 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
                 { "Damages the suspension, causing the vehicle to drop.",
                   "Effect is automatically applied if set to 0, 1 or 2.",
                   "-1 disables it." })) {
-                context->ApplyConfig(*config, true, true);
+                context->ApplyConfig(*config, true, true, false);
                 PAD::SET_CONTROL_VALUE_NEXT_FRAME(0, ControlVehicleAccelerate, 0.3f);
             }
         });

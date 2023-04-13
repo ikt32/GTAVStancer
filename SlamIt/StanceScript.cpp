@@ -56,13 +56,13 @@ void CStanceScript::UpdateActiveConfig() {
     else {
         mActiveConfig = &*foundConfig;
         updateMods();
-        ApplyConfig(*mActiveConfig, true, true);
+        ApplyConfig(*mActiveConfig, true, true, false);
     }
 
     initializeMods();
 }
 
-void CStanceScript::ApplyConfig(const CConfig& config, bool applyWheelMods, bool applyVisualHeight) {
+void CStanceScript::ApplyConfig(const CConfig& config, bool applyWheelMods, bool applyVisualHeight, bool replaceConfig) {
     auto wheels = VehicleExtensions::GetWheelPtrs(mVehicle);
     auto wheelOffsets = VehicleExtensions::GetWheelOffsets(mVehicle);
 
@@ -130,6 +130,14 @@ void CStanceScript::ApplyConfig(const CConfig& config, bool applyWheelMods, bool
         VExt::SetVehicleWheelSize(mVehicle, config.Wheels.Visual.WheelSize);
         VExt::SetVehicleWheelWidth(mVehicle, config.Wheels.Visual.WheelWidth);
     }
+
+    if (replaceConfig) {
+        // Copy config into current
+        mActiveConfig->Suspension = config.Suspension;
+        mActiveConfig->Wheels = config.Wheels;
+        mActiveConfig->Misc = config.Misc;
+        mActiveConfig->ModAdjustments = config.ModAdjustments;
+    }
 }
 
 void CStanceScript::initializeDefaultConfig() {
@@ -159,10 +167,11 @@ void CStanceScript::initializeMods() {
 }
 
 void CStanceScript::update() {
-    if (mActiveConfig/* && mActiveConfig != &mDefaultConfig*/) {
-        updateMods();
-        ApplyConfig(*mActiveConfig, false, false);
-    }
+    if (!mActiveConfig)
+        return;
+
+    updateMods();
+    ApplyConfig(*mActiveConfig, false, false, false);
 }
 
 void CStanceScript::updateMods() {
