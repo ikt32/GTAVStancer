@@ -54,6 +54,12 @@
     <ClCompile Include="Util\ModTypeName.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="Patching\SuspensionPatch.cpp">
+      <Filter>Suspension Patch</Filter>
+    </ClCompile>
+    <ClCompile Include="Patching\Hooking.cpp">
+      <Filter>Suspension Patch</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Script.hpp" />
@@ -130,6 +136,15 @@
     <ClInclude Include="Util\ModTypeName.hpp">
       <Filter>Util</Filter>
     </ClInclude>
+    <ClInclude Include="Patching\Pattern.hpp">
+      <Filter>Suspension Patch</Filter>
+    </ClInclude>
+    <ClInclude Include="Patching\SuspensionPatch.hpp">
+      <Filter>Suspension Patch</Filter>
+    </ClInclude>
+    <ClInclude Include="Patching\Hooking.hpp">
+      <Filter>Suspension Patch</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Util">
@@ -147,5 +162,13 @@
     <Filter Include="thirdparty\Menu">
       <UniqueIdentifier>{26d64db9-1573-4132-9638-76079dc911c5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Suspension Patch">
+      <UniqueIdentifier>{52ac4d4e-86c8-4452-b365-88b616cfe066}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="Patching\CompareHeight.asm">
+      <Filter>Suspension Patch</Filter>
+    </MASM>
   </ItemGroup>
 </Project>

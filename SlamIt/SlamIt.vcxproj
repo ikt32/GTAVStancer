@@ -159,6 +159,8 @@
     <ClCompile Include="Memory\NativeMemory.cpp" />
     <ClCompile Include="Memory\VehicleExtensions.cpp" />
     <ClCompile Include="Config.cpp" />
+    <ClCompile Include="Patching\Hooking.cpp" />
+    <ClCompile Include="Patching\SuspensionPatch.cpp" />
     <ClCompile Include="StanceMenuUtils.cpp" />
     <ClCompile Include="Script.cpp" />
     <ClCompile Include="StanceMenu.cpp" />
@@ -189,6 +191,9 @@
     <ClInclude Include="Memory\VehicleFlags.hpp" />
     <ClInclude Include="Memory\Versions.hpp" />
     <ClInclude Include="Config.hpp" />
+    <ClInclude Include="Patching\Hooking.hpp" />
+    <ClInclude Include="Patching\Pattern.hpp" />
+    <ClInclude Include="Patching\SuspensionPatch.hpp" />
     <ClInclude Include="StanceMenuUtils.hpp" />
     <ClInclude Include="Script.hpp" />
     <ClInclude Include="ScriptMenu.hpp" />
@@ -204,6 +209,9 @@
     <ClInclude Include="Util\Paths.hpp" />
     <ClInclude Include="Util\String.hpp" />
     <ClInclude Include="Util\UI.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="Patching\CompareHeight.asm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,6 +5,7 @@
 #include "ScriptSettings.hpp"
 #include "StanceScript.hpp"
 
+#include "Patching/SuspensionPatch.hpp"
 #include "Util/Game.hpp"
 #include "Util/Logger.hpp"
 #include "Util/Paths.hpp"
@@ -42,6 +43,7 @@ void VStancer::ScriptMain() {
         LOG(INFO, "Script started");
         scriptInit();
         initialized = true;
+        VStancer::PatchHeightReset();
     }
     else {
         LOG(INFO, "Script restarted");

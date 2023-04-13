@@ -4,6 +4,7 @@
 #include "Util/FileVersion.hpp"
 #include "Util/Logger.hpp"
 #include "Util/Paths.hpp"
+#include "Patching/SuspensionPatch.hpp"
 #include "Memory/Versions.hpp"
 #include "Memory/VehicleExtensions.hpp"
 
@@ -146,6 +147,7 @@ BOOL APIENTRY DllMain(HMODULE hInstance, DWORD reason, LPVOID lpReserved) {
             break;
         }
         case DLL_PROCESS_DETACH: {
+            VStancer::UnpatchHeightReset();
             scriptUnregister(hInstance);
             break;
         }
