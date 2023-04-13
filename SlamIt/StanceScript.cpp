@@ -133,6 +133,14 @@ void CStanceScript::ApplyConfig(const CConfig& config, bool applyWheelMods, bool
             auto customtyres = VEHICLE::GET_VEHICLE_MOD_VARIATION(mVehicle, eVehicleMod::VehicleModFrontWheels);
             VEHICLE::SET_VEHICLE_WHEEL_TYPE(mVehicle, config.Wheels.Visual.WheelType);
             VEHICLE::SET_VEHICLE_MOD(mVehicle, VehicleModFrontWheels, config.Wheels.Visual.ModIndex, customtyres);
+        
+            for (auto wheelIndex : frontWheelIdxs) {
+                applyWheel(config.Wheels.Front, wheelPtr, wheelIndex);
+            }
+
+            for (auto wheelIndex : rearWheelIdxs) {
+                applyWheel(config.Wheels.Rear, wheelPtr, wheelIndex);
+            }
         }
 
         VExt::SetVehicleWheelSize(mVehicle, config.Wheels.Visual.WheelSize);
