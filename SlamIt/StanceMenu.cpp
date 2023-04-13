@@ -62,8 +62,6 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
                     { "Display how modifications change suspension geometry." });
             }
 
-            mbCtx.MenuOption("NPC options", "npcmenu");
-
             mbCtx.MenuOption("Developer options", "developermenu");
         });
 
@@ -282,23 +280,6 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
                     mbCtx.OptionPlusPlus(FormatModAdjust(*context, adjustment), modName);
                 }
             }
-        });
-
-    /* mainmenu -> npcmenu */
-    submenus.emplace_back("npcmenu",
-        [](NativeMenu::Menu& mbCtx, std::shared_ptr<CStanceScript> context) {
-            mbCtx.Title("NPC settings");
-
-            CConfig* config = context ? context->ActiveConfig() : nullptr;
-            mbCtx.Subtitle(std::format("Current: {}", config ? config->Name : "None"));
-
-            if (config == nullptr) {
-                mbCtx.Option("No active vehicle/configuration");
-                return;
-            }
-
-            mbCtx.Option("Placeholder");
-
         });
 
     /* mainmenu -> developermenu */

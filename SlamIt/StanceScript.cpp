@@ -19,9 +19,17 @@ CStanceScript::CStanceScript(Vehicle vehicle, std::vector<CConfig>& configs)
 CStanceScript::~CStanceScript() = default;
 
 void CStanceScript::Tick() {
-    if (mActiveConfig) {
-        update();
+    if (!ENTITY::DOES_ENTITY_EXIST(mVehicle) || !mActiveConfig) {
+        mActiveConfig = nullptr;
+        return;
     }
+
+    bool flightMode = VExt::GetHoverTransformRatio(mVehicle) > 0.0f; //deluxo
+
+    if (flightMode)
+        return;
+
+    update();
 }
 
 void CStanceScript::UpdateActiveConfig() {
@@ -161,6 +169,9 @@ void CStanceScript::initializeDefaultConfig() {
 }
 
 void CStanceScript::initializeMods() {
+    if (!mActiveConfig)
+        return;
+
     mCurrentMods.clear();
     for (auto& adjustment : mActiveConfig->ModAdjustments)
         mCurrentMods[adjustment.ModSlot] = VEHICLE::GET_VEHICLE_MOD(mVehicle, adjustment.ModSlot);
@@ -175,6 +186,9 @@ void CStanceScript::update() {
 }
 
 void CStanceScript::updateMods() {
+    if (!mActiveConfig)
+        return;
+
     bool updateActiveAdjustments = false;
     for (auto& [modSlot, modIndex] : mCurrentMods) {
         auto newModIndex = VEHICLE::GET_VEHICLE_MOD(mVehicle, modSlot);

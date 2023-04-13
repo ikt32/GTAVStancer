@@ -5,17 +5,20 @@
 #include "ScriptSettings.hpp"
 #include "StanceScript.hpp"
 
+#include "Memory/VehicleExtensions.hpp"
+#include "Memory/VehicleFlags.hpp"
 #include "Patching/SuspensionPatch.hpp"
 #include "Util/Game.hpp"
 #include "Util/Logger.hpp"
 #include "Util/Paths.hpp"
 #include "Util/String.hpp"
-#include "Memory/VehicleExtensions.hpp"
 
 #include <inc/main.h>
 #include <inc/natives.h>
 #include <memory>
 #include <filesystem>
+
+using VExt = VehicleExtensions;
 
 namespace {
     std::shared_ptr<CScriptSettings> settings;
@@ -32,10 +35,9 @@ namespace VStancer {
     void scriptTick();
 
     std::shared_ptr<CStanceScript> updateScripts();
-    std::shared_ptr<CStanceScript> updateScriptPlayer();
-    std::shared_ptr<CStanceScript> updateScriptsNPC();
 
     void updateActiveConfigs();
+    bool isSupportedModel(Vehicle vehicle);
 }
 
 void VStancer::ScriptMain() {
@@ -96,82 +98,6 @@ void VStancer::scriptTick() {
 
 // Returns player script, if player was in any vehicle.
 std::shared_ptr<CStanceScript> VStancer::updateScripts() {
-    if (settings->Main.EnableNPC) {
-        return updateScriptsNPC();
-    }
-    else {
-        return updateScriptPlayer();
-    }
-}
-
-std::shared_ptr<CStanceScript> VStancer::updateScriptPlayer() {
-    std::shared_ptr<CStanceScript> playerScript = nullptr;
-    Vehicle playerVehicle = PED::GET_VEHICLE_PED_IS_IN(PLAYER::PLAYER_PED_ID(), false);
-    bool vehicleExists = ENTITY::DOES_ENTITY_EXIST(playerVehicle);
-    bool listChanged = false;
-
-    if (vehicleExists) {
-        // We have a vehicle!
-        if (vehicleScripts.empty()) {
-            // Nothing to check, just create player instance.
-            vehicleScripts.push_back(std::make_shared<CStanceScript>(playerVehicle, configs));
-            vehicleScripts.back()->UpdateActiveConfig();
-            playerScript = vehicleScripts.back();
-            listChanged = true;
-        }
-        else if (vehicleScripts.size() == 1) {
-            if (vehicleScripts[0]->GetVehicle() == playerVehicle) {
-                // If it's our vehicle, do nothing.
-                playerScript = vehicleScripts[0];
-            }
-            else {
-                // If it's not our vehicle, replace
-                vehicleScripts.clear();
-                vehicleScripts.push_back(std::make_shared<CStanceScript>(playerVehicle, configs));
-                vehicleScripts.back()->UpdateActiveConfig();
-                playerScript = vehicleScripts.back();
-                listChanged = true;
-            }
-        }
-        else {
-            // Somehow we've got more than 1 vehicle. Nuke and start over.
-            vehicleScripts.clear();
-            vehicleScripts.push_back(std::make_shared<CStanceScript>(playerVehicle, configs));
-            vehicleScripts.back()->UpdateActiveConfig();
-            playerScript = vehicleScripts.back();
-            listChanged = true;
-        }
-    }
-    else {
-        // We have no vehicle :(
-        if (vehicleScripts.size() == 1) {
-            if (ENTITY::DOES_ENTITY_EXIST(vehicleScripts[0]->GetVehicle())) {
-                // This was probably the vehicle the player just left.
-                playerScript = vehicleScripts[0];
-            }
-            else {
-                // It no more be.
-                vehicleScripts.clear();
-                listChanged = true;
-            }
-        }
-        else if (vehicleScripts.size() > 1) {
-            vehicleScripts.erase(vehicleScripts.begin(), vehicleScripts.end() - 1);
-            listChanged = true;
-        }
-    }
-
-    if (listChanged) {
-        // TODO: Handle refresh or something idk
-    }
-
-    if (playerScript)
-        playerScript->Tick();
-
-    return playerScript;
-}
-
-std::shared_ptr<CStanceScript> VStancer::updateScriptsNPC() {
     std::shared_ptr<CStanceScript> playerScript = nullptr;
     std::vector<std::shared_ptr<CStanceScript>> instsToDelete;
 
@@ -180,6 +106,9 @@ std::shared_ptr<CStanceScript> VStancer::updateScriptsNPC() {
     allVehicles.resize(actualSize);
 
     for (const auto& vehicle : allVehicles) {
+        if (!isSupportedModel(vehicle))
+            continue;
+
         auto it = std::find_if(vehicleScripts.begin(), vehicleScripts.end(), [vehicle](const auto& inst) {
             return inst->GetVehicle() == vehicle;
             });
@@ -200,7 +129,10 @@ std::shared_ptr<CStanceScript> VStancer::updateScriptsNPC() {
             instsToDelete.push_back(inst);
         }
         else {
-            inst->Tick();
+            if (settings->Main.EnableNPC ||
+                inst == playerScript) {
+                inst->Tick();
+            }
         }
     }
 
@@ -277,4 +209,21 @@ void VStancer::SaveConfigs() {
             config.Write(saveType);
         }
     }
+}
+
+bool VStancer::isSupportedModel(Vehicle vehicle) {
+    bool hydraulics = false;
+    auto flags = VExt::GetVehicleFlags(vehicle);
+    if (flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_HYDRAULICS ||
+        flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_DONK_HYDRAULICS) {
+        hydraulics = true;
+    }
+    
+
+    auto model = ENTITY::GET_ENTITY_MODEL(vehicle);
+    bool isSupportedClass =
+        VEHICLE::IS_THIS_MODEL_A_CAR(model) ||
+        VEHICLE::IS_THIS_MODEL_A_QUADBIKE(model);
+    
+    return isSupportedClass && !hydraulics;
 }
