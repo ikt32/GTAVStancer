@@ -60,7 +60,7 @@ void VStancer::PatchHeightReset() {
         g_SetHeight = HookManager::SetCallRaw<SetHeight_t>(address, SetHeight_Stub, 5);
         LOG(INFO, "[Patch] SetCall success     @ 0x{:X}", address);
 
-        LOG(INFO, "[Patch] g_SetHeight address @ 0x{:X}", reinterpret_cast<char*>(g_SetHeight->fn));
+        LOG(INFO, "[Patch] g_SetHeight address @ 0x{:X}", reinterpret_cast<uintptr_t>(g_SetHeight->fn));
         patched = true;
     }
     else {
