@@ -28,7 +28,7 @@ void CScriptSettings::Load() {
     SI_Error result = ini.LoadFile(mSettingsFile.c_str());
     CHECK_LOG_SI_ERROR(result, "load");
 
-    LOAD_VAL("Main", "EnableNPC", Main.EnableNPC);
+    LOAD_VAL("Main", "UpdateIntervalMs", Main.UpdateIntervalMs);
 }
 
 void CScriptSettings::Save() {
@@ -37,7 +37,7 @@ void CScriptSettings::Save() {
     SI_Error result = ini.LoadFile(mSettingsFile.c_str());
     CHECK_LOG_SI_ERROR(result, "load");
 
-    SAVE_VAL("Main", "EnableNPC", Main.EnableNPC);
+    SAVE_VAL("Main", "UpdateIntervalMs", Main.UpdateIntervalMs);
 
     result = ini.SaveFile(mSettingsFile.c_str());
     CHECK_LOG_SI_ERROR(result, "save");

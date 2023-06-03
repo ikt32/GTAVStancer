@@ -286,16 +286,17 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
     submenus.emplace_back("developermenu",
         [](NativeMenu::Menu& mbCtx, std::shared_ptr<CStanceScript> context) {
             mbCtx.Title("Developer settings");
+            mbCtx.Subtitle("");
 
-            CConfig* config = context ? context->ActiveConfig() : nullptr;
-            mbCtx.Subtitle(std::format("Current: {}", config ? config->Name : "None"));
-
-            if (config == nullptr) {
-                mbCtx.Option("No active vehicle/configuration");
+            if (!VStancer::GetSettings()) {
+                mbCtx.Option("Invalid script state");
                 return;
             }
-
-            mbCtx.Option("Placeholder");
+            mbCtx.IntOptionCb("Update interval", VStancer::GetSettings()->Main.UpdateIntervalMs,
+                0, 60000, 500, VStancer::GetKbEntryInt,
+                { "The interval (in milliseconds) used to update vehicles considered for VStancer.",
+                  "Lower it to update more often: Changes apply to newly spawned vehicles sooner, or:",
+                  "Increase to refresh the list less often to reduce system load." });
 
         });
     return submenus;

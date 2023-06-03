@@ -11,7 +11,7 @@ public:
     void Save();
 
     struct {
-        bool EnableNPC = false;
+        int UpdateIntervalMs = 5000;
     } Main;
 
 private:

@@ -60,6 +60,9 @@
     <ClCompile Include="Patching\Hooking.cpp">
       <Filter>Suspension Patch</Filter>
     </ClCompile>
+    <ClCompile Include="Util\Timer.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Script.hpp" />
@@ -144,6 +147,9 @@
     </ClInclude>
     <ClInclude Include="Patching\Hooking.hpp">
       <Filter>Suspension Patch</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\Timer.hpp">
+      <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

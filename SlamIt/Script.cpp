@@ -12,11 +12,13 @@
 #include "Util/Logger.hpp"
 #include "Util/Paths.hpp"
 #include "Util/String.hpp"
+#include "Util/Timer.hpp"
 
 #include <inc/main.h>
 #include <inc/natives.h>
 #include <memory>
 #include <filesystem>
+#include "Util/UI.hpp"
 
 using VExt = VehicleExtensions;
 
@@ -28,12 +30,14 @@ namespace {
     std::vector<CConfig> configs;
 
     bool initialized = false;
+    CTimer collectionUpdateTimer(5000);
 }
 
 namespace VStancer {
     void scriptInit();
     void scriptTick();
 
+    void updateScriptCollection();
     std::shared_ptr<CStanceScript> updateScripts();
 
     void updateActiveConfigs();
@@ -89,18 +93,20 @@ void VStancer::scriptInit() {
 }
 
 void VStancer::scriptTick() {
+    collectionUpdateTimer.Reset(settings->Main.UpdateIntervalMs);
     while (true) {
+        if (collectionUpdateTimer.Expired()) {
+            updateScriptCollection();
+            collectionUpdateTimer.Reset();
+        }
+
         std::shared_ptr<CStanceScript> playerScriptInst = updateScripts();
         scriptMenu->Tick(playerScriptInst);
         WAIT(0);
     }
 }
 
-// Returns player script, if player was in any vehicle.
-std::shared_ptr<CStanceScript> VStancer::updateScripts() {
-    std::shared_ptr<CStanceScript> playerScript = nullptr;
-    std::vector<std::shared_ptr<CStanceScript>> instsToDelete;
-
+void VStancer::updateScriptCollection() {
     std::vector<Vehicle> allVehicles(1024);
     int actualSize = worldGetAllVehicles(allVehicles.data(), 1024);
     allVehicles.resize(actualSize);
@@ -118,30 +124,28 @@ std::shared_ptr<CStanceScript> VStancer::updateScripts() {
             vehicleScripts.back()->UpdateActiveConfig();
         }
     }
+}
+
+// Returns player script, if player was in any vehicle.
+// Also cleans up the stale vehicles.
+std::shared_ptr<CStanceScript> VStancer::updateScripts() {
+    std::shared_ptr<CStanceScript> playerScript = nullptr;
+    std::vector<std::shared_ptr<CStanceScript>> instsToDelete;
 
     for (const auto& inst : vehicleScripts) {
+        if (!ENTITY::DOES_ENTITY_EXIST(inst->GetVehicle())) {
+            instsToDelete.push_back(inst);
+            continue;
+        }
         if (!playerScript &&
             Util::VehicleAvailable(inst->GetVehicle(), PLAYER::PLAYER_PED_ID(), false)) {
             playerScript = inst;
         }
-
-        if (!ENTITY::DOES_ENTITY_EXIST(inst->GetVehicle())) {
-            instsToDelete.push_back(inst);
-        }
-        else {
-            if (settings->Main.EnableNPC ||
-                inst == playerScript) {
-                inst->Tick();
-            }
-        }
+        inst->Tick();
     }
 
     for (const auto& inst : instsToDelete) {
         vehicleScripts.erase(std::remove(vehicleScripts.begin(), vehicleScripts.end(), inst), vehicleScripts.end());
-    }
-
-    if (instsToDelete.size() > 0) {
-        // TODO: Cleanup
     }
 
     return playerScript;
@@ -151,6 +155,10 @@ void VStancer::updateActiveConfigs() {
     for (const auto& inst : vehicleScripts) {
         inst->UpdateActiveConfig();
     }
+}
+
+CScriptSettings* VStancer::GetSettings() {
+    return settings == nullptr ? nullptr : settings.get();
 }
 
 const std::vector<CConfig>& VStancer::GetConfigs() {
