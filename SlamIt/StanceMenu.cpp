@@ -6,6 +6,7 @@
 #include "Util/UI.hpp"
 #include "Memory/SuspensionOffsets.hpp"
 #include "Memory/VehicleExtensions.hpp"
+#include "Patching/SuspensionPatch.hpp"
 #include "StanceMenuUtils.hpp"
 
 #include <GTAVMenuBase/menu.h>
@@ -15,7 +16,7 @@
 using VExt = VehicleExtensions;
 
 namespace VStancer {
-    std::vector<std::string> FormatConfig(CStanceScript& context, const CConfig& config);
+    std::vector<std::string> FormatConfig(const CConfig& config);
     std::vector<std::string> FormatModAdjust(CStanceScript& context, const CConfig::SModAdjustment& adjust);
     bool PromptSave(CStanceScript& context, Hash model, std::string plate);
 
@@ -24,6 +25,20 @@ namespace VStancer {
         return std::format("{:.0f}/{:.0f}R{:.0f}", wheelCol.TyreWidth * 1000.0f,
             100.0f * ((wheelCol.TyreRadius - wheelCol.RimRadius) / wheelCol.TyreWidth),
             2.0f * wheelCol.RimRadius * 39.3701f);
+    };
+
+    const std::vector<std::string> PatchModes {
+        "Never",
+        "Always",
+        "Compat. (Player)",
+        "Compat. (Area)"
+    };
+
+    const std::vector<std::string> PatchModeDescriptors {
+        "Never: Don't patch at all.",
+        "Always: Always patch.",
+        "Compat. (Player): Undo patch when player uses incompatible vehicle.",
+        "Compat. (Area): Undo patch when any incompatible vehicle found near player."
     };
 }
 
@@ -62,7 +77,7 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
                     { "Display how modifications change suspension geometry." });
             }
 
-            mbCtx.MenuOption("Developer options", "developermenu");
+            mbCtx.MenuOption("Advanced settings", "advancedmenu");
         });
 
     /* mainmenu -> configsmenu */
@@ -74,17 +89,19 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
             mbCtx.Subtitle(std::format("Current: {}", config ? config->Name : "None"));
 
             if (!context) {
-                mbCtx.Option("No script instance");
-                return;
+                mbCtx.Option("~c~Create configuration",
+                    { "No or incompatible vehicle.",
+                      "Enter a compatible vehicle to create a new configuration." });
             }
-
-            if (mbCtx.Option("Create configuration",
-                { "Create a new configuration file from the current settings.",
-                  "Changes made within a configuration are saved to that configuration only.",
-                  "The submenu subtitles indicate which configuration is being edited." })) {
-                VStancer::PromptSave(*context,
-                    ENTITY::GET_ENTITY_MODEL(context->GetVehicle()),
-                    VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(context->GetVehicle()));
+            else {
+                if (mbCtx.Option("Create configuration",
+                    { "Create a new configuration file from the current settings.",
+                      "Changes made within a configuration are saved to that configuration only.",
+                      "The submenu subtitles indicate which configuration is being edited." })) {
+                    VStancer::PromptSave(*context,
+                        ENTITY::GET_ENTITY_MODEL(context->GetVehicle()),
+                        VEHICLE::GET_VEHICLE_NUMBER_PLATE_TEXT(context->GetVehicle()));
+                }
             }
 
             if (VStancer::GetConfigs().empty()) {
@@ -96,10 +113,10 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
                 bool triggered = mbCtx.OptionPlus(config.Name, {}, &selected);
 
                 if (selected) {
-                    mbCtx.OptionPlusPlus(FormatConfig(*context, config), config.Name);
+                    mbCtx.OptionPlusPlus(FormatConfig(config), config.Name);
                 }
 
-                if (triggered) {
+                if (triggered && context) {
                     context->ApplyConfig(config, true, true, true);
                     UI::Notify(std::format("Applied config {}.", config.Name), true);
                 }
@@ -282,27 +299,65 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
             }
         });
 
-    /* mainmenu -> developermenu */
-    submenus.emplace_back("developermenu",
+    /* mainmenu -> advancedmenu */
+    submenus.emplace_back("advancedmenu",
         [](NativeMenu::Menu& mbCtx, std::shared_ptr<CStanceScript> context) {
-            mbCtx.Title("Developer settings");
+            mbCtx.Title("Advanced settings");
             mbCtx.Subtitle("");
 
             if (!VStancer::GetSettings()) {
                 mbCtx.Option("Invalid script state");
                 return;
             }
+
             mbCtx.IntOptionCb("Update interval", VStancer::GetSettings()->Main.UpdateIntervalMs,
                 0, 60000, 500, VStancer::GetKbEntryInt,
                 { "The interval (in milliseconds) used to update vehicles considered for VStancer.",
                   "Lower it to update more often: Changes apply to newly spawned vehicles sooner, or:",
                   "Increase to refresh the list less often to reduce system load." });
 
+            int patchModeIt = VStancer::GetSettings()->Patch.PatchMode + 1;
+            if (patchModeIt < 0 || patchModeIt > 3) {
+                VStancer::GetSettings()->Patch.PatchMode = 0;
+                mbCtx.Option("Invalid patch mode, resetting...");
+            }
+            else {
+                auto stratDescriptor = PatchModeDescriptors[patchModeIt];
+                auto triggered = mbCtx.StringArray("Patch mode", PatchModes, patchModeIt,
+                    { "When to apply or undo the suspension override patch.",
+                      "This patch partially fixes glitching wheels, but "
+                        "may break lowriders and transforming vehicles.",
+                      stratDescriptor });
+                if (triggered) {
+                    VStancer::GetSettings()->Patch.PatchMode = patchModeIt - 1;
+                }
+            }
+
+            if (VStancer::GetSettings()->Patch.PatchMode == 2) {
+                mbCtx.FloatOptionCb("Undo patch distance", VStancer::GetSettings()->Patch.UnpatchDistance,
+                    0.0f, 1000.0f, 1.0f, GetKbEntryFloat,
+                    { "Compatibility check distance, in meters.",
+                      "Patch is reverted when incompatible vehicles are closer to the player than this." });
+            }
+
+            std::string patchStatus;
+            if (!VStancer::GetPatchFailed()) {
+                if (VStancer::GetPatchStatus()) {
+                    patchStatus = "Patch status: Patched";
+                }
+                else {
+                    patchStatus = "Patch status: Not patched";
+                }
+            }
+            else {
+                patchStatus = "~r~Patch status: Failed";
+            }
+            mbCtx.Option(patchStatus);
         });
     return submenus;
 }
 
-std::vector<std::string> VStancer::FormatConfig(CStanceScript& context, const CConfig& config) {
+std::vector<std::string> VStancer::FormatConfig(const CConfig& config) {
     std::vector<std::string> extras{
         std::format("Name: {}", config.Name),
         std::format("Model: {}", config.ModelName.empty() ? "None (Generic)" : config.ModelName),

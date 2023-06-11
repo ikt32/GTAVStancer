@@ -15,6 +15,4 @@ namespace VStancer {
 
     uint32_t LoadConfigs();
     void SaveConfigs();
-
-    void SwitchMode(bool playerOnly);
 }

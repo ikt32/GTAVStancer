@@ -63,6 +63,9 @@
     <ClCompile Include="Util\Timer.cpp">
       <Filter>Util</Filter>
     </ClCompile>
+    <ClCompile Include="Util\ScriptUtils.cpp">
+      <Filter>Util</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Script.hpp" />
@@ -149,6 +152,9 @@
       <Filter>Suspension Patch</Filter>
     </ClInclude>
     <ClInclude Include="Util\Timer.hpp">
+      <Filter>Util</Filter>
+    </ClInclude>
+    <ClInclude Include="Util\ScriptUtils.hpp">
       <Filter>Util</Filter>
     </ClInclude>
   </ItemGroup>

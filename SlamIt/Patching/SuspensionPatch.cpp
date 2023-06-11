@@ -22,61 +22,86 @@
 // FiveM... + F01EAB - F3 0F11 4B 30	- movss[rbx + 30], xmm1		; track width
 // FiveM... + F01EB0 - F3 0F11 5B 34	- movss[rbx + 34], xmm6		; ???
 // FiveM... + F01EB5 - F3 0F11 63 38	- movss[rbx + 38], xmm4		; height
-bool patched = false;
-
-typedef void(*SetHeight_t)();
-
-CallHookRaw<SetHeight_t>* g_SetHeight;
 
 extern "C" void compare_height();
-//extern "C" void original_thing();
 
 void SetHeight_Stub() {
     compare_height();
-    //original_thing();
 }
 
-const char* patt1604 = "\xF3\x0F\x11\x43\x28\xF3\x44\x0F\x11\x4B\x24\xF3\x44\x0F\x11\x63\x30\xF3\x44\x0F\x11\x73\x34\xF3\x0F\x11\x5B\x38";
-const char* mask1604 = "xxx?x" "xxxx?x" "xxxx?x" "xxxx?x" "xxx?x";
+namespace {
+    typedef void(*SetHeight_t)();
 
+    std::unique_ptr<CallHookRaw<SetHeight_t>> SetHeightHook;
+
+    const char* Patt1604 = "\xF3\x0F\x11\x43\x28" "\xF3\x44\x0F\x11\x4B\x24"
+                           "\xF3\x44\x0F\x11\x63\x30" "\xF3\x44\x0F\x11\x73\x34" "\xF3\x0F\x11\x5B\x38";
+    const char* Mask1604 = "xxx?x" "xxxx?x"
+                           "xxxx?x" "xxxx?x" "xxx?x";
+
+    uintptr_t SuspensionPatchAddr = 0;
+    bool Patched = false;
+    bool PatchFailed = false;
+    bool LoggedPatch = false;
+    bool LoggedUnpatch = false;
+}
+
+// Always expect this to be called
 void VStancer::PatchHeightReset() {
-    if (getGameVersion() < 46) {
+    if (getGameVersion() < 46 && !LoggedPatch) {
         LOG(ERROR, "[Patch] Incompatible game version, require >= b1604");
     }
 
-    if (patched)
+    if (Patched)
         return;
 
-    LOG(INFO, "[Patch] Patching height reset");
-
-    uintptr_t result = mem::FindPattern(patt1604, mask1604);
-    uintptr_t offset = 23;
-
-    if (result) {
-        uintptr_t address = result + offset;
-
-        LOG(INFO, "[Patch] Patching            @ 0x{:X}", address);
-
-        g_SetHeight = HookManager::SetCallRaw<SetHeight_t>(address, SetHeight_Stub, 5);
-        LOG(INFO, "[Patch] SetCall success     @ 0x{:X}", address);
-
-        LOG(INFO, "[Patch] g_SetHeight address @ 0x{:X}", reinterpret_cast<uintptr_t>(g_SetHeight->fn));
-        patched = true;
+    if (SuspensionPatchAddr == 0 && !PatchFailed) {
+        LOG(INFO, "[Patch] Patching Height Reset");
+        auto address = mem::FindPattern(Patt1604, Mask1604);
+        if (address) {
+            SuspensionPatchAddr = address + 23;
+            LOG(INFO, "[Patch] Height Reset found    @ 0x{:X}", SuspensionPatchAddr);
+        }
+        else {
+            LOG(ERROR, "[Patch] Height Reset not found");
+            PatchFailed = true;
+        }
     }
-    else {
-        LOG(ERROR, "[Patch] No pattern found, aborting");
-        patched = false;
+
+    if (SuspensionPatchAddr != 0) {
+        SetHeightHook = std::unique_ptr<CallHookRaw<SetHeight_t>>(HookManager::SetCallRaw<SetHeight_t>(
+            SuspensionPatchAddr,
+            SetHeight_Stub,
+            5
+        ));
+
+        if (!LoggedPatch) {
+            LOG(INFO, "[Patch] SetCall success       @ 0x{:X}", SuspensionPatchAddr);
+            LOG(INFO, "[Patch] SetHeightHook address @ 0x{:X}", reinterpret_cast<uintptr_t>(SetHeightHook->fn));
+        }
+        Patched = true;
     }
+    LoggedPatch = true;
 }
 
 void VStancer::UnpatchHeightReset() {
-    if (!patched)
+    if (!Patched)
         return;
 
-    if (g_SetHeight) {
-        delete g_SetHeight;
-        g_SetHeight = nullptr;
-        LOG(INFO, "[Patch] Unloaded");
-        patched = false;
+    if (SetHeightHook) {
+        SetHeightHook.reset();
+        if (!LoggedUnpatch) {
+            LOG(INFO, "[Patch] Unloaded");
+            LoggedUnpatch = true;
+        }
+        Patched = false;
     }
+}
+
+bool VStancer::GetPatchStatus() {
+    return Patched;
+}
+
+bool VStancer::GetPatchFailed() {
+    return PatchFailed;
 }

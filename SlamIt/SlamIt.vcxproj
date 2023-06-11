@@ -172,6 +172,7 @@
     <ClCompile Include="Util\Logger.cpp" />
     <ClCompile Include="Util\ModTypeName.cpp" />
     <ClCompile Include="Util\Paths.cpp" />
+    <ClCompile Include="Util\ScriptUtils.cpp" />
     <ClCompile Include="Util\String.cpp" />
     <ClCompile Include="Util\Timer.cpp" />
     <ClCompile Include="Util\UI.cpp" />
@@ -208,6 +209,7 @@
     <ClInclude Include="Util\Logger.hpp" />
     <ClInclude Include="Util\Math.hpp" />
     <ClInclude Include="Util\Paths.hpp" />
+    <ClInclude Include="Util\ScriptUtils.hpp" />
     <ClInclude Include="Util\String.hpp" />
     <ClInclude Include="Util\Timer.hpp" />
     <ClInclude Include="Util\UI.hpp" />

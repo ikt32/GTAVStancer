@@ -29,6 +29,9 @@ void CScriptSettings::Load() {
     CHECK_LOG_SI_ERROR(result, "load");
 
     LOAD_VAL("Main", "UpdateIntervalMs", Main.UpdateIntervalMs);
+
+    LOAD_VAL("Patch", "PatchMode", Patch.PatchMode);
+    LOAD_VAL("Patch", "UnpatchDistance", Patch.UnpatchDistance);
 }
 
 void CScriptSettings::Save() {
@@ -38,6 +41,9 @@ void CScriptSettings::Save() {
     CHECK_LOG_SI_ERROR(result, "load");
 
     SAVE_VAL("Main", "UpdateIntervalMs", Main.UpdateIntervalMs);
+
+    SAVE_VAL("Patch", "PatchMode", Patch.PatchMode);
+    SAVE_VAL("Patch", "UnpatchDistance", Patch.UnpatchDistance);
 
     result = ini.SaveFile(mSettingsFile.c_str());
     CHECK_LOG_SI_ERROR(result, "save");

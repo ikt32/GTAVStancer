@@ -4,6 +4,7 @@
 #include "Memory/VehicleExtensions.hpp"
 
 #include "Util/AddonSpawnerCache.hpp"
+#include "Util/ScriptUtils.hpp"
 #include "Util/String.hpp"
 #include <inc/enums.h>
 #include <inc/natives.h>
@@ -24,9 +25,8 @@ void CStanceScript::Tick() {
         return;
     }
 
-    bool flightMode = VExt::GetHoverTransformRatio(mVehicle) > 0.0f; //deluxo
-
-    if (flightMode)
+    // Incompatible class instances aren't made
+    if (VStancer::IsIncompatible(mVehicle))
         return;
 
     update();

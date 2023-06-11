@@ -10,7 +10,9 @@
 #include "Patching/SuspensionPatch.hpp"
 #include "Util/Game.hpp"
 #include "Util/Logger.hpp"
+#include "Util/Math.hpp"
 #include "Util/Paths.hpp"
+#include "Util/ScriptUtils.hpp"
 #include "Util/String.hpp"
 #include "Util/Timer.hpp"
 
@@ -18,7 +20,6 @@
 #include <inc/natives.h>
 #include <memory>
 #include <filesystem>
-#include "Util/UI.hpp"
 
 using VExt = VehicleExtensions;
 
@@ -41,7 +42,6 @@ namespace VStancer {
     std::shared_ptr<CStanceScript> updateScripts();
 
     void updateActiveConfigs();
-    bool isSupportedModel(Vehicle vehicle);
 }
 
 void VStancer::ScriptMain() {
@@ -106,13 +106,31 @@ void VStancer::scriptTick() {
     }
 }
 
+// Updates the list of script-supported vehicles.
+// Also manages patching/unpatching for incompatible vehicles.
 void VStancer::updateScriptCollection() {
     std::vector<Vehicle> allVehicles(1024);
     int actualSize = worldGetAllVehicles(allVehicles.data(), 1024);
     allVehicles.resize(actualSize);
 
+    bool unpatch = false;
+    bool anyIncompatibleVehicleFound = false;
+    Vector3 playerCoords{};
+    if (settings->Patch.PatchMode == 2) {
+        playerCoords = ENTITY::GET_ENTITY_COORDS(PLAYER::PLAYER_PED_ID(), false);
+    }
+
     for (const auto& vehicle : allVehicles) {
-        if (!isSupportedModel(vehicle))
+        if (settings->Patch.PatchMode == 2 && !anyIncompatibleVehicleFound) {
+            float dstSq = settings->Patch.UnpatchDistance * settings->Patch.UnpatchDistance;
+            Vector3 vehCoords = ENTITY::GET_ENTITY_COORDS(vehicle, false);
+            if (IsIncompatible(vehicle) &&
+                DistanceSq(playerCoords, vehCoords) < dstSq) {
+                anyIncompatibleVehicleFound = true;
+            }
+        }
+
+        if (!IsSupportedClass(vehicle))
             continue;
 
         auto it = std::find_if(vehicleScripts.begin(), vehicleScripts.end(), [vehicle](const auto& inst) {
@@ -124,6 +142,30 @@ void VStancer::updateScriptCollection() {
             vehicleScripts.back()->UpdateActiveConfig();
         }
     }
+
+    // PatchMode -1 always unpatches
+    if (settings->Patch.PatchMode == -1) {
+        unpatch = true;
+    }
+    // PatchMode 0 always patches
+    else if (settings->Patch.PatchMode == 0) {
+        unpatch = false;
+    }
+    // PatchMode 1: Only disable if player actively is in incompat veh
+    else if (settings->Patch.PatchMode == 1) {
+        auto playerVehicle = PED::GET_VEHICLE_PED_IS_IN(PLAYER::PLAYER_PED_ID(), true);
+        if (ENTITY::DOES_ENTITY_EXIST(playerVehicle) && IsIncompatible(playerVehicle))
+            unpatch = true;
+    }
+    // PatchMode 2: Disable if vehicles in the vicinity are incompatible
+    else if (settings->Patch.PatchMode == 2 && anyIncompatibleVehicleFound) {
+        unpatch = true;
+    }
+
+    if (unpatch)
+        VStancer::UnpatchHeightReset();
+    else
+        VStancer::PatchHeightReset();
 }
 
 // Returns player script, if player was in any vehicle.
@@ -217,21 +259,4 @@ void VStancer::SaveConfigs() {
             config.Write(saveType);
         }
     }
-}
-
-bool VStancer::isSupportedModel(Vehicle vehicle) {
-    bool hydraulics = false;
-    auto flags = VExt::GetVehicleFlags(vehicle);
-    if (flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_HYDRAULICS ||
-        flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_DONK_HYDRAULICS) {
-        hydraulics = true;
-    }
-    
-
-    auto model = ENTITY::GET_ENTITY_MODEL(vehicle);
-    bool isSupportedClass =
-        VEHICLE::IS_THIS_MODEL_A_CAR(model) ||
-        VEHICLE::IS_THIS_MODEL_A_QUADBIKE(model);
-    
-    return isSupportedClass && !hydraulics;
 }
