@@ -22,7 +22,7 @@ public:
         //    a lowrider or a special vehicle.
         // 2: World compatibility: Unpatch when any vehicle within x meters of the
         //    player is a lowrider or a special vehicle.
-        int PatchMode = 0;
+        int PatchMode = 1;
         float UnpatchDistance = 50.0f;
     } Patch;
 
