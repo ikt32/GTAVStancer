@@ -69,7 +69,21 @@ CConfig CConfig::Read(const std::string & configFile) {
         }
     }
 
-    config.Plate = ini.GetValue("ID", "Plate", "");
+    std::string plate = ini.GetValue("ID", "Plate", "");
+    const std::string plateFormatError = "Incorrect plate format, expect 8 chars in brackets: '[........]'";
+    if (plate.size() == 10) {
+        if (plate[0] == '[' &&
+            plate[9] == ']') {
+            config.Plate = plate.substr(1, 8);
+        }
+        else {
+            LOG(ERROR, "[Config] {} {}, got '{}'", configFile, plateFormatError, plate);
+        }
+    }
+    else if (!plate.empty()) {
+        LOG(ERROR, "[Config] {} {}, got '{}'", configFile, plateFormatError, plate);
+    }
+    // Else: Empty plate is fine
 
     // [Suspension]
     LOAD_VAL("Suspension", "FrontCamber", config.Suspension.Front.Camber);
@@ -178,7 +192,7 @@ bool CConfig::Write(const std::string& newName, Hash model, std::string plate, E
 
         if (saveType == ESaveType::Specific) {
             Plate = plate;
-            ini.SetValue("ID", "Plate", plate.c_str());
+            ini.SetValue("ID", "Plate", std::format("[{}]", plate).c_str());
         }
     }
 
