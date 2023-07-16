@@ -54,7 +54,7 @@ public:
     CConfig() = default;
     static CConfig Read(const std::string& configFile);
 
-    void Write(ESaveType saveType);
+    void Write();
     bool Write(const std::string& newName, Hash model, std::string plate, ESaveType saveType);
 
     std::string Name;

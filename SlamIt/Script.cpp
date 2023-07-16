@@ -253,10 +253,7 @@ void VStancer::SaveConfigs() {
 
     for (auto& config : configs) {
         if (!config.ModelName.empty()) {
-            auto saveType = config.Plate.empty() ?
-                CConfig::ESaveType::GenericModel :
-                CConfig::ESaveType::Specific;
-            config.Write(saveType);
+            config.Write();
         }
     }
 }

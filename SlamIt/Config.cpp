@@ -137,8 +137,11 @@ CConfig CConfig::Read(const std::string & configFile) {
     return config;
 }
 
-void CConfig::Write(ESaveType saveType) {
-    Write(Name, 0, std::string(), saveType);
+void CConfig::Write() {
+    auto saveType = Plate.empty() ?
+        CConfig::ESaveType::GenericModel :
+        CConfig::ESaveType::Specific;
+    Write(Name, 0, Plate, saveType);
 }
 
 bool CConfig::Write(const std::string& newName, Hash model, std::string plate, ESaveType saveType) {
