@@ -78,7 +78,8 @@ bool VStancer::IsIncompatible(Vehicle vehicle) {
     // Hydraulics
     auto flags = VExt::GetVehicleFlags(vehicle);
     if (flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_HYDRAULICS ||
-        flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_DONK_HYDRAULICS) {
+        flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_DONK_HYDRAULICS ||
+        flags[4] & eVehicleFlag5::FLAG_DROP_SUSPENSION_WHEN_STOPPED) {
         return true;
     }
 
