@@ -130,6 +130,9 @@ void VStancer::updateScriptCollection() {
             }
         }
 
+        if (IsIncompatible(vehicle))
+            continue;
+
         if (!IsSupportedClass(vehicle))
             continue;
 

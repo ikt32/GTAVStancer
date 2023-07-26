@@ -85,8 +85,8 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
         [](NativeMenu::Menu& mbCtx, std::shared_ptr<CStanceScript> context) {
             mbCtx.Title("Manage configurations");
 
-            CConfig* config = context ? context->ActiveConfig() : nullptr;
-            mbCtx.Subtitle(std::format("Current: {}", config ? config->Name : "None"));
+            CConfig* activeConfig = context ? context->ActiveConfig() : nullptr;
+            mbCtx.Subtitle(std::format("Current: {}", activeConfig ? activeConfig->Name : "None"));
 
             if (!context) {
                 mbCtx.Option("~c~Create configuration",
@@ -116,7 +116,7 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
                     mbCtx.OptionPlusPlus(FormatConfig(config), config.Name);
                 }
 
-                if (triggered && context) {
+                if (triggered && context && activeConfig != nullptr) {
                     context->ApplyConfig(config, true, true, true);
                     UI::Notify(std::format("Applied config {}.", config.Name), true);
                 }
