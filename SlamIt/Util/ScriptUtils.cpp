@@ -67,24 +67,31 @@ bool VStancer::IsSupportedClass(Vehicle vehicle) {
     return isSupportedClass;
 }
 
-bool VStancer::IsIncompatible(Vehicle vehicle) {
+bool VStancer::IsCompatible(Vehicle vehicle) {
     if (!IsSupportedClass(vehicle))
-        return true;
-
-    // Flight mode, Deluxo
-    if (VExt::GetHoverTransformRatio(vehicle) > 0.0f)
-        return true;
+        return false;
 
     // Hydraulics
     auto flags = VExt::GetVehicleFlags(vehicle);
     if (flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_HYDRAULICS ||
         flags[3] & eVehicleFlag4::FLAG_HAS_LOWRIDER_DONK_HYDRAULICS ||
         flags[4] & eVehicleFlag5::FLAG_DROP_SUSPENSION_WHEN_STOPPED) {
-        return true;
+        return false;
     }
 
     if (specialFlightCheck(vehicle))
-        return true;
+        return false;
 
-    return false;
+    return true;
+}
+
+bool VStancer::IsCompatibleNow(Vehicle vehicle) {
+    if (!IsCompatibleNow(vehicle))
+        return false;
+
+    // Flight mode, Deluxo
+    if (VExt::GetHoverTransformRatio(vehicle) > 0.0f)
+        return false;
+
+    return true;
 }

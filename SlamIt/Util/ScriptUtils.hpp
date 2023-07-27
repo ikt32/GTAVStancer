@@ -3,5 +3,6 @@
 
 namespace VStancer {
     bool IsSupportedClass(Vehicle vehicle);
-    bool IsIncompatible(Vehicle vehicle);
+    bool IsCompatible(Vehicle vehicle);
+    bool IsCompatibleNow(Vehicle vehicle);
 }

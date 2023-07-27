@@ -124,16 +124,16 @@ void VStancer::updateScriptCollection() {
         if (settings->Patch.PatchMode == 2 && !anyIncompatibleVehicleFound) {
             float dstSq = settings->Patch.UnpatchDistance * settings->Patch.UnpatchDistance;
             Vector3 vehCoords = ENTITY::GET_ENTITY_COORDS(vehicle, false);
-            if (IsIncompatible(vehicle) &&
+            if (!IsCompatibleNow(vehicle) &&
                 DistanceSq(playerCoords, vehCoords) < dstSq) {
                 anyIncompatibleVehicleFound = true;
             }
         }
 
-        if (IsIncompatible(vehicle))
+        if (!IsSupportedClass(vehicle))
             continue;
 
-        if (!IsSupportedClass(vehicle))
+        if (!IsCompatible(vehicle))
             continue;
 
         auto it = std::find_if(vehicleScripts.begin(), vehicleScripts.end(), [vehicle](const auto& inst) {
@@ -157,7 +157,7 @@ void VStancer::updateScriptCollection() {
     // PatchMode 1: Only disable if player actively is in incompat veh
     else if (settings->Patch.PatchMode == 1) {
         auto playerVehicle = PED::GET_VEHICLE_PED_IS_IN(PLAYER::PLAYER_PED_ID(), true);
-        if (ENTITY::DOES_ENTITY_EXIST(playerVehicle) && IsIncompatible(playerVehicle))
+        if (ENTITY::DOES_ENTITY_EXIST(playerVehicle) && !IsCompatibleNow(playerVehicle))
             unpatch = true;
     }
     // PatchMode 2: Disable if vehicles in the vicinity are incompatible

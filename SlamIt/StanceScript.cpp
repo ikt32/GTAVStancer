@@ -25,8 +25,7 @@ void CStanceScript::Tick() {
         return;
     }
 
-    // Incompatible class instances aren't made
-    if (VStancer::IsIncompatible(mVehicle))
+    if (!VStancer::IsCompatibleNow(mVehicle))
         return;
 
     update();
