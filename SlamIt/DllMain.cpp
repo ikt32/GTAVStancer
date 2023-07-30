@@ -147,8 +147,10 @@ BOOL APIENTRY DllMain(HMODULE hInstance, DWORD reason, LPVOID lpReserved) {
             break;
         }
         case DLL_PROCESS_DETACH: {
+            LOG(INFO, "Cleaning up... (exit)");
             VStancer::UnpatchHeightReset();
             scriptUnregister(hInstance);
+            LOG(INFO, "Exit cleanup done");
             break;
         }
         default: {

@@ -49,7 +49,6 @@ void VStancer::ScriptMain() {
         LOG(INFO, "Script started");
         scriptInit();
         initialized = true;
-        VStancer::PatchHeightReset();
     }
     else {
         LOG(INFO, "Script restarted");

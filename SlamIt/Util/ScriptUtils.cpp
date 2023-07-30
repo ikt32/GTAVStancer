@@ -86,7 +86,7 @@ bool VStancer::IsCompatible(Vehicle vehicle) {
 }
 
 bool VStancer::IsCompatibleNow(Vehicle vehicle) {
-    if (!IsCompatibleNow(vehicle))
+    if (!IsCompatible(vehicle))
         return false;
 
     // Flight mode, Deluxo

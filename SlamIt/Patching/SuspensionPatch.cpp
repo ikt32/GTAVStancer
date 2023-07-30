@@ -42,13 +42,11 @@ namespace {
     uintptr_t SuspensionPatchAddr = 0;
     bool Patched = false;
     bool PatchFailed = false;
-    bool LoggedPatch = false;
-    bool LoggedUnpatch = false;
 }
 
 // Always expect this to be called
 void VStancer::PatchHeightReset() {
-    if (getGameVersion() < 46 && !LoggedPatch) {
+    if (getGameVersion() < 46) {
         LOG(ERROR, "[Patch] Incompatible game version, require >= b1604");
     }
 
@@ -56,7 +54,7 @@ void VStancer::PatchHeightReset() {
         return;
 
     if (SuspensionPatchAddr == 0 && !PatchFailed) {
-        LOG(INFO, "[Patch] Patching Height Reset");
+        LOG(INFO, "[Patch] Searching Height Reset to patch...");
         auto address = mem::FindPattern(Patt1604, Mask1604);
         if (address) {
             SuspensionPatchAddr = address + 23;
@@ -69,19 +67,18 @@ void VStancer::PatchHeightReset() {
     }
 
     if (SuspensionPatchAddr != 0) {
+        LOG(INFO, "[Patch] Patching Height Reset");
+
         SetHeightHook = std::unique_ptr<CallHookRaw<SetHeight_t>>(HookManager::SetCallRaw<SetHeight_t>(
             SuspensionPatchAddr,
             SetHeight_Stub,
             5
         ));
 
-        if (!LoggedPatch) {
-            LOG(INFO, "[Patch] SetCall success       @ 0x{:X}", SuspensionPatchAddr);
-            LOG(INFO, "[Patch] SetHeightHook address @ 0x{:X}", reinterpret_cast<uintptr_t>(SetHeightHook->fn));
-        }
+        LOG(DEBUG, "[Patch] SetCall success       @ 0x{:X}", SuspensionPatchAddr);
+        LOG(DEBUG, "[Patch] SetHeightHook address @ 0x{:X}", reinterpret_cast<uintptr_t>(SetHeightHook->fn));
         Patched = true;
     }
-    LoggedPatch = true;
 }
 
 void VStancer::UnpatchHeightReset() {
@@ -89,11 +86,9 @@ void VStancer::UnpatchHeightReset() {
         return;
 
     if (SetHeightHook) {
+        LOG(INFO, "[Patch] Unloading...");
         SetHeightHook.reset();
-        if (!LoggedUnpatch) {
-            LOG(INFO, "[Patch] Unloaded");
-            LoggedUnpatch = true;
-        }
+        LOG(INFO, "[Patch] Unloaded");
         Patched = false;
     }
 }
