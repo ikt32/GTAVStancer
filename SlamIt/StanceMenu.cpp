@@ -2,6 +2,7 @@
 #include "Script.hpp"
 #include "Constants.hpp"
 
+#include "Util/Logger.hpp"
 #include "Util/ModTypeName.hpp"
 #include "Util/UI.hpp"
 #include "Memory/SuspensionOffsets.hpp"
@@ -19,6 +20,7 @@ namespace VStancer {
     std::vector<std::string> FormatConfig(const CConfig& config);
     std::vector<std::string> FormatModAdjust(CStanceScript& context, const CConfig::SModAdjustment& adjust);
     bool PromptSave(CStanceScript& context, Hash model, std::string plate);
+    void DeleteConfig(const CConfig& config);
 
     std::string FormatTyreDims(const CConfig::SWheelColliderParams& wheelCol) {
     // {width_mm}/{aspect_ratio}R{rim_diameter_inch}
@@ -108,9 +110,47 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
                 mbCtx.Option("No saved configs");
             }
 
-            for (const auto& config : VStancer::GetConfigs()) {
+            for (auto& config : VStancer::GetConfigs()) {
+                std::string deleteCol = config.MarkedForDeletion ? "~r~" : "";
+
+                std::vector<std::string> description{
+                    "Press select to apply selected config.",
+                };
+
+                if (!config.MarkedForDeletion) {
+                    description.emplace_back("Press Left to delete.");
+                }
+                else {
+                    description.emplace_back("Press Right to unmark deletion.");
+                    description.emplace_back("~r~Press Left to confirm deletion.");
+                    description.emplace_back("~r~~h~THIS IS PERMANENT");
+                }
+
+                auto clearDeleteFlag = [&]() {
+                    if (config.MarkedForDeletion) {
+                        config.MarkedForDeletion = false;
+                    }
+                };
+
+                bool triggerBreak = false;
+                auto deleteFlag = [&]() {
+                    if (config.MarkedForDeletion) {
+                        VStancer::DeleteConfig(config);
+                        triggerBreak = true;
+                    }
+                    else {
+                        config.MarkedForDeletion = true;
+                    }
+                };
+
                 bool selected;
-                bool triggered = mbCtx.OptionPlus(config.Name, {}, &selected);
+                bool triggered = mbCtx.OptionPlus(config.Name,
+                                                  {},
+                                                  &selected,
+                                                  clearDeleteFlag,
+                                                  deleteFlag,
+                                                  "Info",
+                                                  description);
 
                 if (selected) {
                     mbCtx.OptionPlusPlus(FormatConfig(config), config.Name);
@@ -120,6 +160,9 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
                     context->ApplyConfig(config, true, true, true);
                     UI::Notify(std::format("Applied config {}.", config.Name), true);
                 }
+
+                if (triggerBreak)
+                    break;
             }
         });
 
@@ -429,12 +472,50 @@ bool VStancer::PromptSave(CStanceScript& context, Hash model, std::string plate)
         return false;
     }
 
-    if (context.ActiveConfig()->Write(newName, model, plate, saveType))
+    if (auto res = context.ActiveConfig()->Write(newName, model, plate, saveType, true);
+        res == CConfig::ESaveResult::Success) {
         UI::Notify("New configuration saved.", true);
-    else
-        UI::Notify("~r~An error occurred~s~, failed to save new configuration.\n"
-            "Check the log file for further details.", true);
+    }
+    else {
+        std::string failStr = "~r~Failed to save new configuration~s~\n";
+        if (res == CConfig::ESaveResult::FailExists) {
+            failStr += "A file with the same name already exists.";
+        }
+        else {
+            failStr += "An error occurred, check the log file for more details.";
+        }
+        UI::Notify(failStr, true);
+    }
     VStancer::LoadConfigs();
 
     return true;
+}
+
+void VStancer::DeleteConfig(const CConfig& config) {
+    if (!config.MarkedForDeletion) {
+        LOG(ERROR, "[Config] '{}' not marked for deletion, but delete attempted", config.Path.string());
+        UI::Notify("~r~Failed to delete configuration~s~\n"
+            "File not marked for deletion?", true);
+        return;
+    }
+    VStancer::SaveConfigs();
+
+    std::error_code ec;
+    if (std::filesystem::remove(config.Path, ec)) {
+        LOG(INFO, "[Config] '{}' deleted successfully", config.Path.string());
+    }
+    else {
+        if (ec) {
+            LOG(ERROR, "[Config] '{}' could not be deleted: [{}] {}", config.Path.string(), ec.value(), ec.message());
+            UI::Notify(std::format("~r~Failed to delete configuration~s~\n"
+                "Error: [{}] {}", ec.value(), ec.message()), true);
+        }
+        else {
+            LOG(ERROR, "[Config] '{}' could not be deleted: File doesn't exist?", config.Path.string());
+            UI::Notify("~r~Failed to delete configuration~s~\n"
+                "File does not exist", true);
+        }
+    }
+
+    VStancer::LoadConfigs();
 }

@@ -9,9 +9,8 @@ namespace VStancer {
     std::vector<CScriptMenu<CStanceScript>::CSubmenu> BuildMenu();
 
     CScriptSettings* GetSettings();
-    const std::vector<std::shared_ptr<CStanceScript>>& GetScripts();
 
-    const std::vector<CConfig>& GetConfigs();
+    std::vector<CConfig>& GetConfigs();
 
     uint32_t LoadConfigs();
     void SaveConfigs();

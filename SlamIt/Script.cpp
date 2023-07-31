@@ -205,7 +205,7 @@ CScriptSettings* VStancer::GetSettings() {
     return settings == nullptr ? nullptr : settings.get();
 }
 
-const std::vector<CConfig>& VStancer::GetConfigs() {
+std::vector<CConfig>& VStancer::GetConfigs() {
     return configs;
 }
 

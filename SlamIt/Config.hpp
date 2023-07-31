@@ -1,5 +1,6 @@
 #pragma once
 #include <inc/types.h>
+#include <filesystem>
 #include <optional>
 #include <string>
 #include <vector>
@@ -50,12 +51,21 @@ public:
         SSuspensionParams FrontAdjust;
         SSuspensionParams RearAdjust;
     };
+
+    enum class ESaveResult {
+        Success,
+        FailExists,
+        FailOther
+    };
     
     CConfig() = default;
     static CConfig Read(const std::string& configFile);
 
     void Write();
-    bool Write(const std::string& newName, Hash model, std::string plate, ESaveType saveType);
+    ESaveResult Write(const std::string& newName, Hash model, std::string plate, ESaveType saveType, bool newFile);
+
+    std::filesystem::path Path;
+    bool MarkedForDeletion = false;
 
     std::string Name;
 

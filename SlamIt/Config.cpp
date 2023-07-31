@@ -30,6 +30,7 @@
 
 CConfig CConfig::Read(const std::string & configFile) {
     CConfig config{};
+    config.Path = configFile;
 
     CSimpleIniA ini;
     ini.SetUnicode();
@@ -155,12 +156,16 @@ void CConfig::Write() {
     auto saveType = Plate.empty() ?
         CConfig::ESaveType::GenericModel :
         CConfig::ESaveType::Specific;
-    Write(Name, 0, Plate, saveType);
+    Write(Name, 0, Plate, saveType, false);
 }
 
-bool CConfig::Write(const std::string& newName, Hash model, std::string plate, ESaveType saveType) {
+CConfig::ESaveResult CConfig::Write(const std::string& newName, Hash model, std::string plate, ESaveType saveType, bool newFile) {
     const auto configsPath = Paths::GetModPath() / "Configs";
     const auto configFile = configsPath / std::format("{}.ini", newName);
+    if (newFile && std::filesystem::exists(configFile)) {
+        LOG(ERROR, "[Config] Failed to write new config '{}': already exists", configFile.string());
+        return ESaveResult::FailExists;
+    }
 
     CSimpleIniA ini;
     ini.SetUnicode();
@@ -227,8 +232,8 @@ bool CConfig::Write(const std::string& newName, Hash model, std::string plate, E
     result = ini.SaveFile(configFile.c_str());
     CHECK_LOG_SI_ERROR(result, "save", configFile.string());
     if (result < 0)
-        return false;
-    return true;
+        return ESaveResult::FailOther;
+    return ESaveResult::Success;
 }
 
 CConfig::SSuspensionParams operator+(const CConfig::SSuspensionParams& a, const CConfig::SSuspensionParams& b) {
