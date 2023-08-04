@@ -257,8 +257,8 @@ CConfig::SSuspensionTuning CStanceScript::readSuspensionData() {
     }
 
     if (!rearWheelIdxs.empty()) {
-        float flip = rearWheelIdxs.back() % 2 ? 1.0f : -1.0f;
-        auto wheelAddr = *reinterpret_cast<uint64_t*>(wheelPtr + 0x008 * rearWheelIdxs.back());
+        float flip = rearWheelIdxs[0] % 2 ? 1.0f : -1.0f;
+        auto wheelAddr = *reinterpret_cast<uint64_t*>(wheelPtr + 0x008 * rearWheelIdxs[0]);
         suspensionData.Rear.Camber = *reinterpret_cast<float*>(wheelAddr + SuspensionOffsets::Camber);
         suspensionData.Rear.TrackWidth = flip * *reinterpret_cast<float*>(wheelAddr + SuspensionOffsets::TrackWidth);
         suspensionData.Rear.Height = *reinterpret_cast<float*>(wheelAddr + SuspensionOffsets::Height);
