@@ -111,7 +111,8 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
             }
 
             for (auto& config : VStancer::GetConfigs()) {
-                std::string deleteCol = config.MarkedForDeletion ? "~r~" : "";
+                const std::string selectedMark = &config == activeConfig ? "> " : "";
+                const std::string deleteCol = config.MarkedForDeletion ? "~r~" : "";
 
                 std::vector<std::string> description{
                     "Press select to apply selected config.",
@@ -144,7 +145,7 @@ std::vector<CScriptMenu<CStanceScript>::CSubmenu> VStancer::BuildMenu() {
                 };
 
                 bool selected;
-                bool triggered = mbCtx.OptionPlus(config.Name,
+                bool triggered = mbCtx.OptionPlus(std::format("{}{}{}", selectedMark, deleteCol, config.Name),
                                                   {},
                                                   &selected,
                                                   clearDeleteFlag,
